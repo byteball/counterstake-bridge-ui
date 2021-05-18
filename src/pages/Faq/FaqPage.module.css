@@ -1,0 +1,60 @@
+.title {
+  text-transform: uppercase;
+  font-size: 30px;
+  font-weight: bold;
+  margin-bottom: 12px;
+  color: #333333;
+}
+
+.collapse {
+  background-color: #ffffff;
+}
+
+.panel {
+  background-color: #fafafa !important;
+  border-radius: 15px !important;
+  margin-bottom: 20px !important;
+  border-bottom: none !important;
+  color: #333333 !important;
+}
+
+.panel ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.panel a {
+  color: #333333 !important;
+  text-decoration: underline;
+}
+
+:global(.faq .ant-collapse-header) {
+  font-size: 18px !important;
+  line-height: 25px !important;
+  font-weight: bold !important;
+  padding-top: 20px !important;
+  padding-bottom: 20px !important;
+  color: #333333 !important;
+}
+
+:global(.faq .ant-collapse-content-box) {
+  font-size: 16px;
+  line-height: 25px;
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.icon {
+  color: #0037ff !important;
+  font-size: 18px !important;
+}
+
+.action {
+  text-align: center;
+  padding-top: 50px;
+  padding-bottom: 50px;
+  font-size: 18px;
+  color: #333333;
+}
+.action a {
+  color: #0037ff;
+}

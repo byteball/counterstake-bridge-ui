@@ -1,0 +1,32 @@
+.navLink {
+  color: #333333;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+}
+
+.navLink:hover {
+  color: #333333;
+}
+
+.logo {
+  height: 40px;
+}
+
+.iconWallet {
+  font-size: 24px;
+  color: rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+  padding: 10px;
+  margin-right: 10px;
+}
+
+@media (max-width: 1200px) {
+  .content {
+    padding: 15px 10px;
+  }
+}
+
+.ant-menu .ant-menu-horizontal>.ant-menu-item a::before {
+  bottom: 0 !important;
+}

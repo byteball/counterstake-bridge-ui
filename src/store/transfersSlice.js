@@ -1,0 +1,31 @@
+import { createSlice } from '@reduxjs/toolkit';
+
+export const transfersSlice = createSlice({
+  name: 'transfers',
+  initialState: [],
+  reducers: {
+    setTransfers: (state, action) => {
+		  return action.payload;
+    },
+    addTransfer: (state, action) => {
+      state.push(action.payload);
+    },
+    updateTransferStatus: (state, action) => {
+      console.log('updateTransferStatus', state, action);
+      const transfer = state.find(t => t.txid === action.payload.txid);
+      if (!transfer)
+        throw Error(`transfer not found in updateTransferStatus ${action.payload.txid}`);
+      transfer.status = action.payload.status;
+    },
+  },
+});
+
+export const { setTransfers, addTransfer, updateTransferStatus } = transfersSlice.actions;
+
+
+// The function below is called a selector and allows us to select a value from
+// the state. Selectors can also be defined inline where they're used instead of
+// in the slice file. For example: `useSelector((state) => state.auth.value)`
+export const selectTransfers = state => state.transfers;
+
+export default transfersSlice.reducer;

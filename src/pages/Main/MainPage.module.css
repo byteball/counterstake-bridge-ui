@@ -1,0 +1,27 @@
+.container {
+  width: 1440px;
+  margin: 0 auto;
+  font-family: "Open Sans", sans-serif;
+}
+
+@media (max-width: 1440px) {
+  .container {
+    margin: 0;
+    width: 100%;
+    padding-left: 40px;
+    padding-right: 40px;
+    box-sizing: border-box;
+  }
+}
+
+@media (max-width: 780px) {
+  .container {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
+.addWallet {
+  color: #0137FF;
+  cursor: pointer;
+}
