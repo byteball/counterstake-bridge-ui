@@ -41,11 +41,41 @@
 
 .image {
   text-align: center;
+  width: 50%;
 }
 
-.image img {
-  max-width: 500px;
-  width: 90%;
+.image svg {
+  max-width: 660px;
+  width: 95%;
+  padding: 10px;
+}
+
+.imageSmall {
+  text-align: center;
+  width: 50%;
+}
+
+.imageSmall svg {
+  max-width: 200px;
+  width: 95%;
+  padding: 10px;
+}
+
+.icons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.icons a {
+  margin: 0 30px;
+}
+
+.icons svg {
+  width: 100px;
+  box-sizing: border-box;
 }
 
 .action {
@@ -76,18 +106,6 @@
 }
 
 @media (max-width: 990px) {
-  .item {
-    font-size: 18px;
-  }
-  .subTitle {
-    font-size: 22px;
-  }
-  .title {
-    font-size: 28px;
-  }
-}
-
-@media (max-width: 880px) {
   .howItWorks img {
     max-width: calc(100% - 10px);
     text-align: center;
@@ -106,10 +124,24 @@
   .image {
     width: 100%;
     padding: 0;
-    margin-bottom: 50px;
+    margin-bottom: 30px;
     order: 1;
   }
   .image img {
     max-width: 350px;
+  }
+  .icons {
+    order: 1;
+    margin-bottom: 30px;
+  }
+  .imageSmall {
+    margin-bottom: 30px;
+  }
+  .icons a {
+    margin: 0 20px;
+  }
+  .icons svg {
+    width: 70px;
+    box-sizing: border-box;
   }
 }
