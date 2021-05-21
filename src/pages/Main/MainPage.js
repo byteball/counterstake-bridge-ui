@@ -56,6 +56,10 @@ const environment = process.env.REACT_APP_ENVIRONMENT;
 const MAX_UINT256 = ethers.BigNumber.from(2).pow(256).sub(1);
 
 
+function wait(ms) {
+	return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 const tokensEqual = (t1, t2) => t1.asset === t2.asset && t1.network === t2.network;
 
 function getOrInsertInput(inputs, token) {
@@ -232,6 +236,7 @@ export const MainPage = () => {
           console.log('requesting approval');
           const approval_res = await tokenContract.approve(selectedInput.token.bridge_aa, MAX_UINT256);
           console.log('approval_res', approval_res);
+          await wait(2000); // wait for the provider to update our nonce
         }
       }
       const contract = new ethers.Contract(selectedInput.token.bridge_aa, exportAbi, signer);
