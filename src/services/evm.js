@@ -35,13 +35,13 @@ const onNewClaim = (claim_num, author_address, sender_address, recipient_address
 // to avoid duplicate event handlers, track the contracts that we are already watching for claims
 let watchedContracts = {};
 
-export const startWatchingContractForClaims = (dst_token) => {
-  if (watchedContracts[dst_token.bridge_aa])
-    return console.log(`already watching ${dst_token.bridge_aa}`);
+export const startWatchingContractForClaims = (dst_network, dst_bridge_aa) => {
+  if (watchedContracts[dst_bridge_aa])
+    return console.log(`already watching ${dst_bridge_aa}`);
   // we use our own providers, not the ones provided by metamask as they can change when the user switches networks
-  const contract = new ethers.Contract(dst_token.bridge_aa, counterstakeAbi, providers[dst_token.network]);
+  const contract = new ethers.Contract(dst_bridge_aa, counterstakeAbi, providers[dst_network]);
   contract.on('NewClaim', onNewClaim);
-  watchedContracts[dst_token.bridge_aa] = true;
+  watchedContracts[dst_bridge_aa] = true;
 }
 
 

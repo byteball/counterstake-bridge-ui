@@ -42,7 +42,7 @@ const handleEvent = async (err, result) => {
     const direction = directions[aa_address];
     if (!direction)
       throw Error(`unknown direction of transfer received in ${unit} to ${aa_address}`);
-    const { src_token, dst_token } = direction;
+    const { src_token, dst_token, dst_bridge_aa } = direction;
     const payload = getAAPayload(messages);
     const amount_in_pennies = getAAPayment(messages, [aa_address], src_token.asset);
     if (!amount_in_pennies)
@@ -60,7 +60,7 @@ const handleEvent = async (err, result) => {
       status: 'sent',
       ts: Date.now(),
     };
-    startWatchingDestinationBridge(dst_token);
+    startWatchingDestinationBridge(dst_token.network, dst_bridge_aa);
     sendTransferToGA(src_token, dst_token);
     return transfer;
   };

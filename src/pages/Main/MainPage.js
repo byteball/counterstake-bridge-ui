@@ -97,24 +97,44 @@ export const MainPage = () => {
       let directions = {};
       let inputs = [];
       for (let { bridge_id, home_network, home_asset, home_asset_decimals, home_symbol, export_aa, foreign_network, foreign_asset, foreign_asset_decimals, foreign_symbol, import_aa, min_expatriation_reward, min_repatriation_reward, count_expatriation_claimants, count_repatriation_claimants } of bridges) {
-        const home_token = { network: home_network, asset: home_asset, decimals: home_asset_decimals, symbol: home_symbol, bridge_aa: export_aa };
-        const foreign_token = { network: foreign_network, asset: foreign_asset, decimals: foreign_asset_decimals, symbol: foreign_symbol, bridge_aa: import_aa };
+        const home_token = { network: home_network, asset: home_asset, decimals: home_asset_decimals, symbol: home_symbol };
+        const foreign_token = { network: foreign_network, asset: foreign_asset, decimals: foreign_asset_decimals, symbol: foreign_symbol };
         directions[export_aa] = {
           bridge_id,
           type: 'expatriation',
+          src_bridge_aa: export_aa,
+          dst_bridge_aa: import_aa,
           src_token: home_token,
           dst_token: foreign_token,
         };
         directions[import_aa] = {
           bridge_id,
           type: 'repatriation',
+          src_bridge_aa: import_aa,
+          dst_bridge_aa: export_aa,
           src_token: foreign_token,
           dst_token: home_token,
         };
         const home_input = getOrInsertInput(inputs, home_token);
-        home_input.destinations.push({ bridge_id, type: 'expatriation', min_reward: min_expatriation_reward, count_claimants: count_expatriation_claimants, token: foreign_token });
+        home_input.destinations.push({
+          bridge_id,
+          type: 'expatriation',
+          src_bridge_aa: export_aa,
+          dst_bridge_aa: import_aa,
+          min_reward: min_expatriation_reward,
+          count_claimants: count_expatriation_claimants,
+          token: foreign_token
+        });
         const foreign_input = getOrInsertInput(inputs, foreign_token);
-        foreign_input.destinations.push({ bridge_id, type: 'repatriation', min_reward: min_repatriation_reward, count_claimants: count_repatriation_claimants, token: home_token });
+        foreign_input.destinations.push({
+          bridge_id,
+          type: 'repatriation',
+          src_bridge_aa: import_aa,
+          dst_bridge_aa: export_aa,
+          min_reward: min_repatriation_reward,
+          count_claimants: count_repatriation_claimants,
+          token: home_token
+        });
       }
       console.log('inputs', inputs)
       setInputs(inputs);
@@ -199,8 +219,8 @@ export const MainPage = () => {
     setAmountOut(amount_out);
     setReward(reward);
     if (selectedDestination && selectedInput.token.network === 'Obyte') {
-      // start watching selectedInput.token.bridge_aa (if not already watching) to learn when a new transfer from Obyte is sent
-      startWatchingSourceBridge(selectedInput.token);
+      // start watching src_bridge_aa (if not already watching) to learn when a new transfer from Obyte is sent
+      startWatchingSourceBridge(selectedInput.token.network, selectedDestination.src_bridge_aa);
     }
   }, [selectedDestination, amountIn]);
 
@@ -230,20 +250,20 @@ export const MainPage = () => {
       const isETH = selectedInput.token.asset === ethers.constants.AddressZero;
       if (!isETH) { // check allowance
         const tokenContract = new ethers.Contract(selectedInput.token.asset, erc20Abi, signer);
-        const allowance = await tokenContract.allowance(sender_address, selectedInput.token.bridge_aa);
+        const allowance = await tokenContract.allowance(sender_address, selectedDestination.src_bridge_aa);
         console.log('allowance', allowance.toString());
         if (allowance.lt(bnAmount)) {
           console.log('requesting approval');
-          const approval_res = await tokenContract.approve(selectedInput.token.bridge_aa, MAX_UINT256);
+          const approval_res = await tokenContract.approve(selectedDestination.src_bridge_aa, MAX_UINT256);
           console.log('approval_res', approval_res);
           await wait(2000); // wait for the provider to update our nonce
         }
       }
-      const contract = new ethers.Contract(selectedInput.token.bridge_aa, exportAbi, signer);
+      const contract = new ethers.Contract(selectedDestination.src_bridge_aa, exportAbi, signer);
       res = await contract.transferToForeignChain(dest_address, '', bnAmount, bnReward, {value: isETH ? bnAmount : 0});
     }
     else { // repatriation
-      const contract = new ethers.Contract(selectedInput.token.bridge_aa, importAbi, signer);
+      const contract = new ethers.Contract(selectedDestination.src_bridge_aa, importAbi, signer);
       res = await contract.transferToHomeChain(dest_address, '', bnAmount, bnReward);
     }
     console.log('res', res);
@@ -261,8 +281,8 @@ export const MainPage = () => {
     };
     dispatch(addTransfer(transfer));
 
-    // start watching selectedDestination.token.bridge_aa on Obyte side
-    startWatchingDestinationBridge(selectedDestination.token);
+    // start watching dst_bridge_aa on Obyte side
+    startWatchingDestinationBridge(selectedDestination.token.network, selectedDestination.dst_bridge_aa);
 
     // wait until mined
     const receipt = await res.wait();
@@ -364,7 +384,10 @@ export const MainPage = () => {
               showSearch
               optionFilterProp="children"
               placeholder="Token to receive"
-              onChange={index => setSelectedDestination(selectedInput.destinations[index])}
+              onChange={index => {
+                console.log('dest index', index);
+                setSelectedDestination(selectedInput.destinations[index])
+              }}
               value={selectedInput && selectedDestination && selectedInput.destinations.indexOf(selectedDestination)}
             >
               {selectedInput && selectedInput.destinations.map((destination, index) => (
@@ -439,7 +462,7 @@ export const MainPage = () => {
           }
           href={generateLink({
             amount: amountIn * 10 ** selectedInput.token.decimals,
-            aa: selectedInput.token.bridge_aa,
+            aa: selectedDestination.src_bridge_aa,
             asset: selectedInput.token.asset,
             data: {
               reward: Math.round(reward * 10 ** selectedInput.token.decimals),
