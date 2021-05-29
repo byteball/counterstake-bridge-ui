@@ -92,22 +92,35 @@ export const FaqPage = () => {
         </Panel>
 
         <Panel
+          header="Can I be an assistant myself?"
+          key="4.6"
+          className={styles.panel}
+        >
+          <p>
+            Yes, you can be an assistant and make money from assistant rewards. Assistants are bots, you need to run it 24/7 and supply it with some capital that it'll use to claim transfers and challenge fraudulent transfers. See this github repo [link] about setting up an assistant bot.
+          </p>
+          <p>
+            Alternatively, if you are not technical enough to run a bot yourself, you can contribute capital to <i>pooled assistants</i> operated by a manager, and share their profits.
+          </p>
+        </Panel>
+
+        <Panel
           header="What chains are supported?"
           key="5"
           className={styles.panel}
         >
           <p>
-            Counterstake protocol can connect any two chains that support some form of on-chain <i>programmable agents</i>: Autonomous Agents on Obyte, Smart Contracts on Ethereum, Chaincode on Hyperledger Fabric, etc. It is currently implemented for Obyte, Ethereum, and Binance Smart Chain.
+            Counterstake protocol can connect any two chains that support some form of on-chain <i>programmable agents</i>: Autonomous Agents on Obyte, Smart Contracts on Ethereum, Chaincode on Hyperledger Fabric, etc. It is currently implemented for Obyte, Ethereum, and Binance Smart Chain. Launching Counterstake on any other Obyte-based or EVM-compatible chain is as easy as deploying the relevant code [link] on these chains.
           </p>
         </Panel>
 
         <Panel
-          header="Is counterstake protocol decentralized?"
+          header="Is Counterstake protocol decentralized?"
           key="6"
           className={styles.panel}
         >
           <p>
-            Yes, by design. Some other cross-chain bridge protocols rely on central custodians, operators, storemen, multisig signers, MPC signers, federated signers, etc. There is nothing like that in counterstake. Participation is open, anybody can become an assistant or even claim their transfers themselves without the help of assistants.
+            Yes, by design. Some other cross-chain bridge protocols rely on central custodians, operators, storemen, multisig signers, MPC signers, federated signers, etc. There is nothing like that in Counterstake. Participation is open, anybody can become an assistant or even claim their transfers themselves without the help of assistants.
           </p>
         </Panel>
 
@@ -122,12 +135,43 @@ export const FaqPage = () => {
         </Panel>
 
         <Panel
+          header="How does Counterstake compare against other cross-chain bridges?"
+          key="7.5"
+          className={styles.panel}
+        >
+          <p>
+            See below.
+            [https://www.canva.com/design/DAEfz3FIV20/V6k4bigh5W2cEqUSEibuSg/view add icons of the mentioned protocols]
+            Counterstake is absolutely decentralized and more universal than most other bridges.
+          </p>
+          <p>
+            Note that centralized vs decentralized is not a black-or-white choice, there are varying degrees of decentralization offered by other protocols. For example, a group of custodians bound by a multisignature scheme (including similar technologies such as threshold signatures and MPC) would be more decentralized than a single custodian. A larger group would be more decentralized than a smaller group. A group that is free to join would be more decentralized than a closed group. Absence of any groups at all is the gold standard of decentralization, which Counterstake meets.
+          </p>
+          <p>
+            The same goes about universality. Different protocols make different requirements to the chains they support, and some are more restrictive than others. Some protocols require custom implementations for each <i>direction</i> of transfer, thus making it N<sup>2</sup> amount of work to support N chains. Other protocols, including Counterstake, require a one-time implementation on each supported chain.
+          </p>
+        </Panel>
+
+        <Panel
+          header="Can I call code/dapps on the remote chain?"
+          key="7.6"
+          className={styles.panel}
+        >
+          <p>
+            Yes. If the recipient address is a programmable agent (autonomous agent, smart contract, etc), it will be called and receive the transferred money. You can also send data that would guide its execution. With some additional wiring, the receiving agent can be instructed to call back to the source chain and transfer some other token back. This way, the sending user doesn't even need to have an account on the destination chain.
+          </p>
+          <p>
+            However, this website supports only sending fungible tokens, without data. Custom interfaces can be built for specific tasks, such as using <a href="https://oswap.io" target="_blank" rel="noopener">Oswap</a> from Ethereum without setting up an Obyte account, or vice versa using Uniswap from Obyte without an Ethereum account.
+          </p>
+        </Panel>
+
+        <Panel
           header="Do I need to use Counterstake token?"
           key="8"
           className={styles.panel}
         >
           <p>
-            No, the protocol does not require any new tokens. However note that by using the protocol you are making CS holders richer. You might consider becoming one as well.
+            No, the protocol does not require any new tokens. However note that by using the protocol you are making CS holders richer, as more use deflates their token faster. You might consider becoming one as well.
           </p>
         </Panel>
 
