@@ -1,0 +1,24 @@
+{
+	"version": "1.0",
+	"description": "Counterstake Bridge Import Factory AA.",
+	"homepage_url": "https://counterstake.org",
+	"source_url": "https://github.com/byteball/counterstake-bridge",
+	"field_descriptions": {
+		"asset_decimals": "Decimals of the imported asset.",
+		"stake_asset": "Asset used for staking and counterstaking.",
+		"stake_asset_decimals": "Decimals of the staking asset.",
+		"home_network": "Name of the home network.",
+		"home_asset": "ID of the imported asset on its home chain.",
+		"ratio": "Ratio of the initial stake to the amount claimed.",
+		"counterstake_coef": "The counterstake must be that larger than the current stake.",
+		"challenging_periods": "Challenging periods (in hours) for regular amounts.",
+		"large_challenging_periods": "Challenging periods (in hours) for large amounts.",
+		"min_stake": "Minimum stake amount.",
+		"min_tx_age": "Minimum tx age before it can be claimed.",
+		"large_threshold": "Threshold that defines what amount is treated as large.",
+		"min_price": "Minimum price of the imported asset in terms of the stake asset.",
+		"oracles": "Oracles that define the price of the imported asset.",
+		"governance_challenging_period": "Challenging period for governance decisions.",
+		"freeze_period": "Freeze period for governance decisions."
+	}
+}

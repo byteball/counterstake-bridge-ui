@@ -1,0 +1,13 @@
+{
+	"version": "1.0",
+	"description": "Counterstake Bridge Pooled Assistant Governance AA.",
+	"homepage_url": "https://counterstake.org",
+	"source_url": "https://github.com/byteball/counterstake-bridge",
+	"field_descriptions": {
+		"name": "Name of the parameter to vote for.",
+		"value": "Value of the parameter to vote for.",
+		"commit": "Commit a new value after voting has ended.",
+		"withdraw": "Withdraw a stake used for voting. Set to 1.",
+		"amount": "Amount to withdraw."
+	}
+}

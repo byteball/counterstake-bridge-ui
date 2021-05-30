@@ -1,0 +1,19 @@
+{
+	"version": "1.0",
+	"description": "Counterstake Bridge Export AA.",
+	"homepage_url": "https://counterstake.org",
+	"source_url": "https://github.com/byteball/counterstake-bridge",
+	"field_descriptions": {
+		"address": "Address to send coins to.",
+		"txid": "ID of the repatriation transaction on the foreign chain.",
+		"amount": "Amount of transfer.",
+		"reward": "Reward offered to assistants.",
+		"txts": "Timestamp of the repatriation transaction on the foreign chain.",
+		"sender_address": "Sender address on the foreign chain.",
+		"data": "Data to be forwarded to the recipient.",
+		"stake_on": "The outcome to add a stake on, 'yes' or 'no'.",
+		"claim_num": "Claim number.",
+		"withdraw": "Withdraw from a claim, set to 1.",
+		"foreign_address": "Foreign address to transfer the coins to."
+	}
+}

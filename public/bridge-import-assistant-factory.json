@@ -1,0 +1,17 @@
+{
+	"version": "1.0",
+	"description": "Counterstake Bridge Import Pooled Assistant Factory AA.",
+	"homepage_url": "https://counterstake.org",
+	"source_url": "https://github.com/byteball/counterstake-bridge",
+	"field_descriptions": {
+		"bridge_aa": "Bridge AA to run an assistant on.",
+		"manager": "Manager address.",
+		"management_fee": "Management fee, set 0.01 for 1%.",
+		"success_fee": "Success fee, set 0.1 for 10%.",
+		"exponent": "Exponent for the issue of the pool's shares.",
+		"stake_share": "Share of the stake asset in the swap pool, set 0.5 for 50%.",
+		"swap_fee": "Swap fee, set 0.001 for 0.1%.",
+		"governance_challenging_period": "Challenging period for governance decisions.",
+		"governance_freeze_period": "Freeze period for governance decisions."
+	}
+}

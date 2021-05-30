@@ -1,0 +1,21 @@
+{
+	"version": "1.0",
+	"description": "Counterstake Bridge Export Factory AA.",
+	"homepage_url": "https://counterstake.org",
+	"source_url": "https://github.com/byteball/counterstake-bridge",
+	"field_descriptions": {
+		"asset": "Asset to export.",
+		"asset_decimals": "Decimals of the exported asset.",
+		"foreign_network": "Name of the foreign network.",
+		"foreign_asset": "ID of the imported asset on the foreign chain.",
+		"ratio": "Ratio of the initial stake to the amount claimed.",
+		"counterstake_coef": "The counterstake must be that larger than the current stake.",
+		"challenging_periods": "Challenging periods (in hours) for regular amounts.",
+		"large_challenging_periods": "Challenging periods (in hours) for large amounts.",
+		"min_stake": "Minimum stake amount.",
+		"min_tx_age": "Minimum tx age before it can be claimed.",
+		"large_threshold": "Threshold that defines what amount is treated as large.",
+		"governance_challenging_period": "Challenging period for governance decisions.",
+		"freeze_period": "Freeze period for governance decisions."
+	}
+}
