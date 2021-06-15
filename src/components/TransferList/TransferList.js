@@ -36,7 +36,7 @@ export const TransferList = () => {
     )}
 
     {actualTransfers.length !== 0 ? actualTransfers.map(t => {
-      if ((t.src_token.network === "Obyte" && t.status === "claimed") || ((t.src_token.network === "Ethereum" || t.src_token.network === "BSC") && t.status === "claim_confirmed")) {
+      if (t.status === "claimed" || t.status === "claim_confirmed") {
         return <Badge.Ribbon key={'list-item' + t.txid} placement="start" style={{ top: 0 }} text="Already completed"> <Transfer key={t.txid} {...t} /> </Badge.Ribbon>
       } else {
         return <Transfer key={'list-item' + t.txid} {...t} />
@@ -44,7 +44,7 @@ export const TransferList = () => {
     }) : (laterTransfers.length > 0 ? <Card style={{ marginBottom: 24 }}>Actual transfers not found</Card> : null)}
 
     {visibleLater && laterTransfers.map(t => {
-      if ((t.src_token.network === "Obyte" && t.status === "claimed") || ((t.src_token.network === "Ethereum" || t.src_token.network === "BSC") && t.status === "claim_confirmed")) {
+      if (t.status === "claimed" || t.status === "claim_confirmed") {
         return <Badge.Ribbon key={'list-item' + t.txid} placement="start" style={{ top: 0 }} text="Already completed"> <Transfer key={t.txid} {...t} /> </Badge.Ribbon>
       } else {
         return <Transfer key={'list-item' + t.txid} {...t} />
@@ -84,7 +84,7 @@ const Transfer = ({ src_token, amount, dst_token, status, dest_address, reward, 
         xs={{ span: 24 }}
         style={{ fontSize: 16, paddingBottom: width < 990 ? 20 : 0, paddingTop: width < 990 ? 5 : 0 }}
       >
-        <span>{amount} {src_token.symbol}: ({src_token.network})</span> <ArrowRightOutlined /> {dst_token.network}
+        <span>{amount} {src_token.symbol}: {src_token.network}</span> <ArrowRightOutlined /> {dst_token.network}
       </Col>
       <Col
         lg={{ span: 16 }}
