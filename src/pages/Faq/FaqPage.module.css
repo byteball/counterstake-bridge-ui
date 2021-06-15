@@ -7,6 +7,7 @@
 
 .collapse {
   background-color: #141414;
+  max-width: 990px;
 }
 
 .panel {
@@ -39,7 +40,7 @@
 }
 
 .icon {
-  color: #0037ff !important;
+  color: #1e90ff !important;
   font-size: 18px !important;
 }
 
@@ -50,5 +51,5 @@
   font-size: 18px;
 }
 .action a {
-  color: #0037ff;
+  color: #1e90ff;
 }
