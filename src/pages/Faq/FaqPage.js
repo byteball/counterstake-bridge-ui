@@ -13,7 +13,9 @@ export const FaqPage = () => {
   return (
     <div className="faq">
       <Helmet title="Counterstake Bridge - F.A.Q." />
-      <Title level={1}>F.A.Q.</Title>
+      <div className={styles.titleWrap}>
+        <Title level={1}>F.A.Q.</Title>
+      </div>
       <Collapse
         accordion
         expandIconPosition="right"

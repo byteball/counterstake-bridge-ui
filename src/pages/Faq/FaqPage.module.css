@@ -4,10 +4,15 @@
   font-weight: bold;
   margin-bottom: 12px;
 }
+.titleWrap{
+  max-width: 990px;
+  margin: 0 auto;
+}
 
 .collapse {
   background-color: #141414;
   max-width: 990px;
+  margin: 0 auto;
 }
 
 .panel {
