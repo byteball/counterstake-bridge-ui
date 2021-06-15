@@ -1,8 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Typography, Tabs } from "antd";
+import { Typography } from "antd";
 import { Helmet } from "react-helmet-async";
-import { Link, useHistory, useParams } from "react-router-dom";
-import ReactGA from "react-ga";
 
 import styles from "./HowItWorksPage.module.css";
 

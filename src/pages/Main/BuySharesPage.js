@@ -48,10 +48,8 @@ export const MainPage = () => {
           const assistantContract = new ethers.Contract(assistantAddress, assistantAbi, signer);
           //const tokenContract = new ethers.Contract(tokenAddress, erc20Abi, signer);
           //const approval_res = await tokenContract.approve(assistantAddress, MAX_UINT256);
-          //console.log('approval_res', approval_res);
           const amount = ethers.utils.parseEther('30');
           const res = await assistantContract.buyShares(amount, { value: 0 });
-          console.log('buy shares res', res);
         }}
       >
         Buy DAI EA shares
@@ -70,11 +68,9 @@ export const MainPage = () => {
           const assistantContract = new ethers.Contract(assistantAddress, assistantAbi, signer);
           const tokenContract = new ethers.Contract(tokenAddress, erc20Abi, signer);
           const approval_res = await tokenContract.approve(assistantAddress, MAX_UINT256);
-          console.log('approval_res', approval_res);
           const stake_amount = ethers.utils.parseEther('1');
           const image_amount = ethers.utils.parseEther('50');
           const res = await assistantContract.buyShares(stake_amount, image_amount, { value: stake_amount });
-          console.log('buy shares res', res);
         }}
       >
         Buy GBYTE IA shares

@@ -13,18 +13,22 @@ import storage from "redux-persist/lib/storage";
 import transfersReducer from './transfersSlice';
 import destAddressReducer from './destAddressSlice';
 import directionsReducer from './directionsSlice';
+import connectionSlice from './connectionSlice';
+import governanceSlice from './governanceSlice';
 
 const rootReducer = combineReducers({
   transfers: transfersReducer,
   destAddress: destAddressReducer,
   directions: directionsReducer,
+  connection: connectionSlice,
+  governance: governanceSlice
 });
 
 const persistConfig = {
   key: 'root',
   version: 1,
   storage,
-  whitelist: ['transfers'],
+  whitelist: ['transfers', 'destAddress'],
 }
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -45,6 +49,8 @@ const getStore = () => {
 }
 
 export default getStore;
+
+export const getPersist = (state) => state._persist;
 
 /*
 export default configureStore({

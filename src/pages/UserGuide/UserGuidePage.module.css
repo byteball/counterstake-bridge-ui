@@ -6,7 +6,7 @@
 .userGuide img {
   max-width: calc(70% - 80px);
   text-align: center;
-  box-shadow: 0px 0px 30px 10px #938C93;
+  box-shadow: 0px 0px 30px 2px #0037ff;
   margin: 30px;
 }
 
@@ -91,7 +91,7 @@
   .userGuide img {
     max-width: calc(100% - 10px);
     text-align: center;
-    box-shadow: 0px 0px 10px 0px #938C93;
+    box-shadow: 0px 0px 5px 0px #938C93;
     margin: 0;
     margin-bottom: 1em;
   }

@@ -1,4 +1,3 @@
-
 const URL = process.env.REACT_APP_BACKEND_URL;
 
 const request = async (endpoint, options) => {
@@ -24,4 +23,9 @@ const request = async (endpoint, options) => {
 export async function getBridges() {
   const resp_body = await request(`/bridges`);
   return resp_body;
+}
+
+export async function getTransferStatus(txid) {
+  const resp_body = await request(`/transfer/${txid}`);
+  return resp_body?.data?.status;
 }

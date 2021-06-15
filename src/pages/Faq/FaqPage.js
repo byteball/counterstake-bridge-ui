@@ -2,6 +2,7 @@ import React from "react";
 import { Collapse, Typography } from "antd";
 import { DownOutlined } from "@ant-design/icons";
 import { Helmet } from "react-helmet-async";
+import { ReactComponent as Protocols } from "./img/protocols.svg";
 
 import styles from "./FaqPage.module.css";
 
@@ -48,7 +49,7 @@ export const FaqPage = () => {
           className={styles.panel}
         >
           <p>
-            They are bots that help you receive your transfer on the destination network. They monitor both the source and destination networks 24/7 and claim your transfer for you. When claiming, an assistant who picked your transfer also pays the transfer amount to you, less the reward. Claiming requires that they lock their money both to pay to you and to put a stake that they risk to lose if the claim proves to be mistaken or fraudulent. If all goes well, they get back both the stake and the full transfer amount several days later. They risk their capital and lock it for some time, and for that, they expect a reward. 
+            They are bots that help you receive your transfer on the destination network. They monitor both the source and destination networks 24/7 and claim your transfer for you. When claiming, an assistant who picked your transfer also pays the transfer amount to you, less the reward. Claiming requires that they lock their money both to pay to you and to put a stake that they risk to lose if the claim proves to be mistaken or fraudulent. If all goes well, they get back both the stake and the full transfer amount several days later. They risk their capital and lock it for some time, and for that, they expect a reward.
           </p>
           <p>
             There can be many assistants monitoring the same transfer direction and they compete to be the first to pick your transfer and earn the reward, if the reward justifies the risk and time value of money.
@@ -141,7 +142,9 @@ export const FaqPage = () => {
         >
           <p>
             See below.
-            [https://www.canva.com/design/DAEfz3FIV20/V6k4bigh5W2cEqUSEibuSg/view add icons of the mentioned protocols]
+            <div>
+              <Protocols style={{ maxWidth: 560 }} />
+            </div>
             Counterstake is absolutely decentralized and more universal than most other bridges.
           </p>
           <p>

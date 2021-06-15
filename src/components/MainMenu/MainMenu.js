@@ -16,7 +16,7 @@ export const MainMenu = ({ mode, pathname, onClose, width }) => {
       breakpoint="lg"
       overflowedIndicator=". . ."
       collapsedWidth="0"
-      style={{ border: "none", float: 'right' }}
+      style={{ border: "none" }}
       selectedKeys={pathname !== "/" ? [getPathnameForMenu()] : []}
       onOpenChange={() => {
         onClose && onClose();
@@ -32,6 +32,11 @@ export const MainMenu = ({ mode, pathname, onClose, width }) => {
           User guide
         </NavLink>
       </Menu.Item>
+      {/* <Menu.Item key="/governance">
+        <NavLink to="/governance" activeClassName="selected" style={{ verticalAlign: "middle" }}>
+          Governance
+        </NavLink>
+      </Menu.Item> */}
       <Menu.Item key="/faq">
         <NavLink to="/faq" activeClassName="selected" style={{ verticalAlign: "middle" }}>
           F.A.Q.

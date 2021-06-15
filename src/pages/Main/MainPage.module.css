@@ -1,11 +1,23 @@
 .container {
+  width: 900px;
+  margin: 0 auto;
+  font-family: 'Inter', sans-serif;
+}
+
+.container_big {
   width: 1440px;
   margin: 0 auto;
-  font-family: "Open Sans", sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 
 @media (max-width: 1440px) {
-  .container {
+  .container_big {
+    width: 900px;
+  }
+}
+
+@media (max-width: 900px) {
+  .container, .container_big {
     margin: 0;
     width: 100%;
     padding-left: 40px;
@@ -15,13 +27,21 @@
 }
 
 @media (max-width: 780px) {
-  .container {
-    padding-left: 20px;
-    padding-right: 20px;
+  .container, .container_big {
+    padding-left: 0;
+    padding-right: 0;
   }
 }
 
-.addWallet {
-  color: #0137FF;
-  cursor: pointer;
+.loader {
+  animation: loaderAnim ease-in-out 1s infinite;
+}
+
+@keyframes loaderAnim {
+  0% {
+    transform: rotate(0turn);
+  }
+  100% {
+    transform: rotate(1turn);
+  }
 }
