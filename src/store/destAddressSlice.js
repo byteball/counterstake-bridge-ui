@@ -3,9 +3,9 @@ import { createSlice } from '@reduxjs/toolkit';
 export const destAddressSlice = createSlice({
   name: 'destAddress',
   initialState: {
-    bsc: null,
-    ethereum: null,
-    obyte: null
+    Bsc: null,
+    Ethereum: null,
+    Obyte: null
   },
   reducers: {
     setDestAddress: (state, action) => {

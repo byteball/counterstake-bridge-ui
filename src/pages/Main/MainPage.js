@@ -209,7 +209,7 @@ export const MainPage = () => {
   };
 
   useEffect(() => {
-    const network = selectedDestination?.token?.network?.toLowerCase();
+    const network = selectedDestination?.token?.network;
     if (network) {
       const value = addresses[network];
       if (value) {
@@ -225,7 +225,7 @@ export const MainPage = () => {
 
   useEffect(() => {
     if (recipient.valid)
-      dispatch(setDestAddress({ address: recipient.value, network: String(selectedDestination.token.network).toLowerCase() }));
+      dispatch(setDestAddress({ address: recipient.value, network: selectedDestination.token.network }));
   }, [recipient])
 
   useEffect(() => {
@@ -420,7 +420,7 @@ export const MainPage = () => {
                   }}
                 >
                   <SwapOutlined
-                    rotate={width < 992 ? 90 : undefined}
+                    rotate={width < 768 ? 90 : undefined}
                     onClick={changeDirection}
                     style={{
                       fontSize: 28, padding: 5, display: "block", height: 40, cursor: "pointer",
@@ -508,7 +508,8 @@ export const MainPage = () => {
                 >
                   <Input
                     size="middle"
-                    style={{ height: 45 }}
+                    style={{ height: 45, paddingRight: 30 }}
+                    spellcheck="false"
                     value={recipient.value}
                     placeholder={`Your ${selectedDestination ? selectedDestination.token.network : 'receiving'} wallet address`}
                     prefix={selectedDestination && selectedDestination.token.network !== 'Obyte' &&

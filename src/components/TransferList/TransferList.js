@@ -21,7 +21,7 @@ export const TransferList = () => {
 
   transfers.forEach((tr) => {
     const diff = moment().diff(moment(tr.ts), 'days');
-    if (transfers.length >= 5 && ((tr.src_token.network === "Obyte" && tr.status === "claimed") || ((tr.src_token.network === "Ethereum" || tr.src_token.network === "BSC") && tr.status === "claim_confirmed")) && diff > numberOfDaysUntilHiding) {
+    if (transfers.length >= 5 && (tr.status === "claimed" || tr.status === "claim_confirmed") && diff > numberOfDaysUntilHiding) {
       laterTransfers.push(tr);
     } else {
       actualTransfers.push(tr);
@@ -117,7 +117,7 @@ const Transfer = ({ src_token, amount, dst_token, status, dest_address, reward, 
           xs={{ span: 24 }}
         >
           <div style={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 24, wordBreak: "break-all" }}>
-            <b>Recipient address</b>: {dest_address}
+            <b>Recipient address</b>: <div>{dest_address}</div>
           </div>
         </Col>
         <Col
@@ -125,15 +125,15 @@ const Transfer = ({ src_token, amount, dst_token, status, dest_address, reward, 
           sm={{ span: 24 }}
           xs={{ span: 24 }}>
           <div style={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 24, wordBreak: "break-all" }}>
-            <b>You get</b>: {amount - reward}
+            <b>You get</b>: <div>{amount - reward}</div>
           </div>
         </Col>
 
         <Col lg={6}
           sm={{ span: 24 }}
           xs={{ span: 24 }}>
-          <div style={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 24, wordBreak: "break-all" }}>
-            <b>Created</b>: {moment.unix(ts / 1000).format("LLL")}
+          <div style={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 24, wordBreak: "break-all"}}>
+            <b>Created</b>: <div>{moment.unix(ts / 1000).format("LLL")}</div>
           </div>
         </Col>
       </Row>
