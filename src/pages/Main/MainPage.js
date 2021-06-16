@@ -199,7 +199,7 @@ export const MainPage = () => {
 
   const insertRecipientAddress = async () => {
     if (!window.ethereum)
-      return console.log('metamask not found');
+      return setRecipient({})
     const accounts = await provider.listAccounts();
 
     if (accounts.length === 0)
@@ -346,8 +346,11 @@ export const MainPage = () => {
       setChainId(Number(newChainId));
     });
 
-    const { chainId } = await provider.getNetwork();
-    setChainId(chainId);
+    const network = await provider.getNetwork();
+
+    if (network && ("chainId" in network)){
+      setChainId(network.chainId);
+    }
   }, [isOpenConnection])
 
   return (

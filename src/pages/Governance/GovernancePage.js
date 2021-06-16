@@ -1,7 +1,6 @@
 import { Helmet } from "react-helmet-async"
 import { Select, Typography } from "antd";
 import { useState } from "react";
-import { useDispatch } from "react-redux";
 import { useEffect } from "react";
 import { ObyteGovernance } from "./components/ObyteGovernance";
 
