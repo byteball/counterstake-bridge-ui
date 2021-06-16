@@ -3,7 +3,7 @@ import { createSlice } from '@reduxjs/toolkit';
 export const destAddressSlice = createSlice({
   name: 'destAddress',
   initialState: {
-    Bsc: null,
+    BSC: null,
     Ethereum: null,
     Obyte: null
   },
