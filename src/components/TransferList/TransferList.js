@@ -11,47 +11,47 @@ import { ArrowRightOutlined } from "@ant-design/icons";
 const { Step } = Steps;
 const { Title } = Typography;
 
-const numberOfDaysUntilHiding = 1;
+const numberOfDaysBeforeHiding = 1;
 
 export const TransferList = () => {
   const transfers = useSelector(selectTransfers).slice().reverse();
-  const [visibleLater, setVisibleLater] = useState(false);
-  const actualTransfers = [];
-  const laterTransfers = [];
+  const [visibleOlder, setVisibleOlder] = useState(false);
+  const recentTransfers = [];
+  const olderTransfers = [];
 
   transfers.forEach((tr) => {
     const diff = moment().diff(moment(tr.ts), 'days');
-    if (transfers.length >= 5 && (tr.status === "claimed" || tr.status === "claim_confirmed") && diff > numberOfDaysUntilHiding) {
-      laterTransfers.push(tr);
+    if (transfers.length >= 5 && (tr.status === "claimed" || tr.status === "claim_confirmed") && diff > numberOfDaysBeforeHiding) {
+      olderTransfers.push(tr);
     } else {
-      actualTransfers.push(tr);
+      recentTransfers.push(tr);
     }
   })
 
   return (<div style={{ marginTop: 50 }}>
     {transfers.length > 0 && (
       <Title style={{ marginTop: 50, marginBottom: 20 }} level={2}>
-        List of transfers
+        Transfers
       </Title>
     )}
 
-    {actualTransfers.length !== 0 ? actualTransfers.map(t => {
+    {recentTransfers.length !== 0 ? recentTransfers.map(t => {
       if (t.status === "claimed" || t.status === "claim_confirmed") {
-        return <Badge.Ribbon key={'list-item' + t.txid} placement="start" style={{ top: 0 }} text="Already completed"> <Transfer key={t.txid} {...t} /> </Badge.Ribbon>
+        return <Badge.Ribbon key={'list-item' + t.txid} placement="start" style={{ top: 0 }} text="Finished"> <Transfer key={t.txid} {...t} /> </Badge.Ribbon>
       } else {
         return <Transfer key={'list-item' + t.txid} {...t} />
       }
-    }) : (laterTransfers.length > 0 ? <Card style={{ marginBottom: 24 }}>Actual transfers not found</Card> : null)}
+    }) : (olderTransfers.length > 0 ? <Card style={{ marginBottom: 24 }}>Actual transfers not found</Card> : null)}
 
-    {visibleLater && laterTransfers.map(t => {
+    {visibleOlder && olderTransfers.map(t => {
       if (t.status === "claimed" || t.status === "claim_confirmed") {
-        return <Badge.Ribbon key={'list-item' + t.txid} placement="start" style={{ top: 0 }} text="Already completed"> <Transfer key={t.txid} {...t} /> </Badge.Ribbon>
+        return <Badge.Ribbon key={'list-item' + t.txid} placement="start" style={{ top: 0 }} text="Finished"> <Transfer key={t.txid} {...t} /> </Badge.Ribbon>
       } else {
         return <Transfer key={'list-item' + t.txid} {...t} />
       }
     })}
 
-    {laterTransfers.length > 0 && <Button type="link" onClick={() => { setVisibleLater(v => !v); }}>{visibleLater ? "Hide" : "Show late transfers"}</Button>}
+    {olderTransfers.length > 0 && <Button type="link" onClick={() => { setVisibleOlder(v => !v); }}>{visibleOlder ? "Hide" : "Show older transfers"}</Button>}
   </div>)
 }
 
