@@ -21,7 +21,7 @@ export const TransferList = () => {
 
   transfers.forEach((tr) => {
     const diff = moment().diff(moment(tr.ts), 'days');
-    if (transfers.length >= 5 && (tr.status === "claimed" || tr.status === "claim_confirmed") && diff > numberOfDaysBeforeHiding) {
+    if (recentTransfers.length >= 5 && (tr.status === "claimed" || tr.status === "claim_confirmed") && diff > numberOfDaysBeforeHiding) {
       olderTransfers.push(tr);
     } else {
       recentTransfers.push(tr);
@@ -41,7 +41,7 @@ export const TransferList = () => {
       } else {
         return <Transfer key={'list-item' + t.txid} {...t} />
       }
-    }) : (olderTransfers.length > 0 ? <Card style={{ marginBottom: 24 }}>Actual transfers not found</Card> : null)}
+    }) : null}
 
     {visibleOlder && olderTransfers.map(t => {
       if (t.status === "claimed" || t.status === "claim_confirmed") {
