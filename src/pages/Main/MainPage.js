@@ -551,7 +551,7 @@ export const MainPage = () => {
                 }
                 onClick={() => {
                   const symbol = selectedDestination.token.symbol;
-                  if (["eth"].includes(String(symbol).toLowerCase()) || selectedDestination.type !== 'expatriation') return;
+                  if (selectedDestination.type !== 'expatriation') return;
                   window.ethereum.request({
                     method: 'wallet_watchAsset',
                     params: {
