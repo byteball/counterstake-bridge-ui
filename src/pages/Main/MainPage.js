@@ -608,7 +608,7 @@ export const MainPage = () => {
       </div>
 
       <div className={`${styles.container}`}>
-        <Paragraph style={{ fontSize: 13, marginTop: 20, paddingTop: 10, fontWeight: 200 }}>Counterstake is a fully decentralized cross-chain transfer protocol. There are no admins, no central operators, no owners, no custodians. Participation in the protocol is open, there are no designated multisig participants, federated signers, or threshold signatures. All transfers are direct, there are no central hubs. No token is required to use the protocol. There are no protocol fees. The code is immutable, not upgradable, unstoppable. There are no access controls, no gatekeepers, no KYC, no your customer.</Paragraph>
+        <Paragraph style={{ fontSize: 13, marginTop: 20, paddingTop: 10, fontWeight: 200 }}>Counterstake is a fully decentralized cross-chain transfer protocol. There are no admins, no central operators, no owners, no custodians. Participation in the protocol is open, there are no designated multisig participants, federated signers, or threshold signatures. All transfers are direct, there are no central hubs or relays. No token is required to use the protocol. There are no protocol fees. The code is immutable, not upgradable, unstoppable. There are no access controls, no gatekeepers, no KYC, no your customer.</Paragraph>
       </div>
     </>
   );
