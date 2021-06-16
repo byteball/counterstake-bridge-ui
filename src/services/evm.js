@@ -24,7 +24,7 @@ const onNewClaim = (claim_num, author_address, sender_address, recipient_address
   const dispatch = store.dispatch;
   const state = store.getState();
   const transfers = state.transfers;
-  const bridge_aa = event.address;
+  // const bridge_aa = event.address;
   const transfer = transfers.find(t => t.txid === txid);
   if (!transfer)
     return console.log(`claim of unrecognized transfer ${txid}`);

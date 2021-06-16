@@ -59,7 +59,7 @@ export const SocialIcons = ({size = "full", centered = false}) => { // type full
   return (<div style={{ textAlign: "center", fontSize: 14 }}>
     {size === "full" && <div style={{ marginBottom: 10 }}><Text type="secondary">Join the community, get help:</Text></div>}
     <div style={{ display: "flex", justifyContent: centered ? "center" : "flex-start", flexWrap: "wrap", alignItems: "center", fontSize: 18 }}>
-      {(size === "full" ? links : links.slice(0,5)).map((social) => <a style={{ margin: "5px 10px", color: "#0037ff" }} key={"link-" + social.name} target="_blank" rel="noopener" href={social.link} ><FontAwesomeIcon size="lg" icon={social.icon} /></a>)}
+      {(size === "full" ? links : links.slice(0, 5)).map((social) => <a style={{ margin: "5px 10px", color: "#1e90ff" }} key={"link-" + social.name} target="_blank" rel="noopener" href={social.link} ><FontAwesomeIcon size="lg" icon={social.icon} /></a>)}
     </div>
   </div>)
 }

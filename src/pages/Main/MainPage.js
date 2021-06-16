@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Helmet } from "react-helmet-async";
-import { Col, Row, Button, Select, Form, Input, Typography } from "antd";
-import { ArrowRightOutlined, ArrowDownOutlined } from "@ant-design/icons";
+import { Col, Row, Button, Select, Form, Input, Typography, message } from "antd";
+import { SwapOutlined } from "@ant-design/icons";
 import ReactGA from "react-ga";
 import obyte from "obyte";
 import { ethers } from "ethers";
@@ -9,9 +9,9 @@ import { ethers } from "ethers";
 import { useSelector, useDispatch } from 'react-redux';
 import QRButton from "obyte-qr-button";
 
-import { selectTransfers, addTransfer, updateTransferStatus } from "store/transfersSlice";
+import { addTransfer, updateTransferStatus } from "store/transfersSlice";
 import { selectDestAddress, setDestAddress } from "store/destAddressSlice";
-import { selectDirections, setDirections } from "store/directionsSlice";
+import { setDirections } from "store/directionsSlice";
 import styles from "./MainPage.module.css";
 import { getBridges } from "services/api";
 import { sendTransferToGA } from "services/transfer";
@@ -19,6 +19,12 @@ import { startWatchingSourceBridge, startWatchingDestinationBridge } from "servi
 import { useWindowSize } from "hooks/useWindowSize";
 import { generateLink } from "utils/generateLink";
 import { ReactComponent as MetamaskLogo } from "./metamask-fox.svg";
+import { TransferList } from "components/TransferList/TransferList";
+import { getPersist } from "store";
+import { updateTransfersStatus } from "store/thunks";
+import { isEqual } from "lodash";
+import { getCoinIcon } from "./getCoinIcon";
+import { selectConnectionStatus } from "store/connectionSlice";
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -52,12 +58,12 @@ const chainIds = {
 };
 const environment = process.env.REACT_APP_ENVIRONMENT;
 
-
 const MAX_UINT256 = ethers.BigNumber.from(2).pow(256).sub(1);
 
+const metamaskDownloadUrl = "https://metamask.io/download";
 
 function wait(ms) {
-	return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 const tokensEqual = (t1, t2) => t1.asset === t2.asset && t1.network === t2.network;
@@ -77,16 +83,26 @@ export const MainPage = () => {
   let [inputs, setInputs] = useState();
   let [selectedInput, setSelectedInput] = useState();
   let [selectedDestination, setSelectedDestination] = useState();
-  let [counter, setCounter] = useState(0);
-  const [amountIn, setAmountIn] = useState();
+  const [amountIn, setAmountIn] = useState(0.1);
   const [amountOut, setAmountOut] = useState();
   const [reward, setReward] = useState(0);
   const [countAssistants, setCountAssistants] = useState(0);
   const [recipient, setRecipient] = useState({});
   const [error, setError] = useState();
-
+  const [tokenIsInitialized, setTokenIsInitialized] = useState(false)
   const dispatch = useDispatch();
-  const transfers = useSelector(selectTransfers);
+  const { rehydrated } = useSelector(getPersist);
+  const addresses = useSelector(selectDestAddress);
+  const isOpenConnection = useSelector(selectConnectionStatus)
+  const searchInputInRef = useRef(null);
+  const searchInputOutRef = useRef(null);
+  const [chainId, setChainId] = useState();
+
+  useEffect(() => {
+    if (rehydrated && isOpenConnection) {
+      dispatch(updateTransfersStatus());
+    }
+  }, [rehydrated, isOpenConnection])
 
   useEffect(() => {
     const updateBridges = async () => {
@@ -136,12 +152,19 @@ export const MainPage = () => {
           token: home_token
         });
       }
-      console.log('inputs', inputs)
-      setInputs(inputs);
+      setInputs(inputs.map((i, index) => ({ index, ...i, destinations: i.destinations.map((d, id) => ({ ...d, index: id })) })));
       dispatch(setDirections(directions));
     };
-    updateBridges();
-  }, [counter]);
+
+    updateBridges()
+
+    const intervalId = setInterval(() => { updateBridges() }, 1000 * 60 * 5);
+
+    return () => {
+      clearInterval(intervalId)
+    }
+
+  }, []);
 
   const transferRef = useRef(null);
 
@@ -154,7 +177,6 @@ export const MainPage = () => {
   };
 
   const isValidRecipient = value => {
-    console.log(value, selectedDestination)
     if (!selectedDestination || !value)
       return undefined;
     switch (selectedDestination.token.network) {
@@ -179,7 +201,7 @@ export const MainPage = () => {
     if (!window.ethereum)
       return console.log('metamask not found');
     const accounts = await provider.listAccounts();
-    console.log('accounts', accounts);
+
     if (accounts.length === 0)
       return console.log('no accounts yet');
     const value = await signer.getAddress();
@@ -187,17 +209,23 @@ export const MainPage = () => {
   };
 
   useEffect(() => {
-    let value = recipient.value;
-    const valid = isValidRecipient(value);
-    setRecipient({ value, valid });
-    if (selectedDestination && selectedDestination.token.network !== 'Obyte' && !valid)
-      insertRecipientAddress();
+    const network = selectedDestination?.token?.network;
+    if (network) {
+      const value = addresses[network];
+      if (value) {
+        const valid = isValidRecipient(value);
+        setRecipient({ value, valid });
+      } else if (selectedDestination.token.network !== 'Obyte') {
+        insertRecipientAddress();
+      } else {
+        setRecipient({});
+      }
+    }
   }, [selectedDestination]);
 
   useEffect(() => {
-    console.log('setDestAddress', recipient)
     if (recipient.valid)
-      dispatch(setDestAddress(recipient.value));
+      dispatch(setDestAddress({ address: recipient.value, network: selectedDestination.token.network }));
   }, [recipient])
 
   useEffect(() => {
@@ -215,14 +243,13 @@ export const MainPage = () => {
     let amount_out = amountIn - reward;
     if (selectedDestination)
       amount_out = +amount_out.toFixed(selectedDestination.token.decimals);
-    console.log({amountIn, amount_out, reward})
     setAmountOut(amount_out);
     setReward(reward);
     if (selectedDestination && selectedInput.token.network === 'Obyte') {
       // start watching src_bridge_aa (if not already watching) to learn when a new transfer from Obyte is sent
       startWatchingSourceBridge(selectedInput.token.network, selectedDestination.src_bridge_aa);
     }
-  }, [selectedDestination, amountIn]);
+  }, [selectedDestination, amountIn, isOpenConnection]);
 
 
   const loginEthereum = async () => {
@@ -235,13 +262,9 @@ export const MainPage = () => {
       throw Error(`handleClickTransfer called for Obyte`);
     // Ethereum or BSC
     if (!window.ethereum)
-      return setError("MetaMask not found");
+      return setError(<>MetaMask not found. You can download it <a target="_blank" rel="noopener" href={metamaskDownloadUrl}>here</a>.</>);
     await loginEthereum();
-    console.log({ amountIn, reward, amountOut });
-    const network = await provider.getNetwork();
-    if (network.chainId !== chainIds[environment][selectedInput.token.network])
-      return setError(`Wrong network selected, please select ${selectedInput.token.network} in MetaMask`);
-    const bnAmount = ethers.utils.parseUnits(amountIn, selectedInput.token.decimals);
+    const bnAmount = ethers.utils.parseUnits(amountIn + '', selectedInput.token.decimals);
     const bnReward = ethers.utils.parseUnits(reward + '', selectedInput.token.decimals);
     const sender_address = await signer.getAddress();
     const dest_address = recipient.value;
@@ -251,22 +274,20 @@ export const MainPage = () => {
       if (!isETH) { // check allowance
         const tokenContract = new ethers.Contract(selectedInput.token.asset, erc20Abi, signer);
         const allowance = await tokenContract.allowance(sender_address, selectedDestination.src_bridge_aa);
-        console.log('allowance', allowance.toString());
+
         if (allowance.lt(bnAmount)) {
-          console.log('requesting approval');
-          const approval_res = await tokenContract.approve(selectedDestination.src_bridge_aa, MAX_UINT256);
-          console.log('approval_res', approval_res);
+          await tokenContract.approve(selectedDestination.src_bridge_aa, MAX_UINT256);
           await wait(2000); // wait for the provider to update our nonce
         }
       }
       const contract = new ethers.Contract(selectedDestination.src_bridge_aa, exportAbi, signer);
-      res = await contract.transferToForeignChain(dest_address, '', bnAmount, bnReward, {value: isETH ? bnAmount : 0});
+      res = await contract.transferToForeignChain(dest_address, '', bnAmount, bnReward, { value: isETH ? bnAmount : 0 });
     }
     else { // repatriation
       const contract = new ethers.Contract(selectedDestination.src_bridge_aa, importAbi, signer);
       res = await contract.transferToHomeChain(dest_address, '', bnAmount, bnReward);
     }
-    console.log('res', res);
+
     sendTransferToGA(selectedInput.token, selectedDestination.token);
     const transfer = {
       src_token: selectedInput.token,
@@ -280,228 +301,312 @@ export const MainPage = () => {
       ts: Date.now(),
     };
     dispatch(addTransfer(transfer));
-
+    message.success("The translation has been successfully created and added to the list below", 1000)
     // start watching dst_bridge_aa on Obyte side
     startWatchingDestinationBridge(selectedDestination.token.network, selectedDestination.dst_bridge_aa);
 
     // wait until mined
-    const receipt = await res.wait();
-    console.log('tx mined, receipt', receipt);
+    await res.wait();
     dispatch(updateTransferStatus({ txid: res.hash, status: 'mined' }));
   };
 
-  
+
+  const changeDirection = () => {
+    if (!selectedInput || !selectedDestination) return;
+
+    const currentSendToken = selectedInput.token;
+    const currentGetToken = selectedDestination.token;
+
+    const willSendInput = inputs.find((i) => isEqualExceptSymbol(i.token, currentGetToken));
+
+    if (willSendInput) {
+      const willGetToken = willSendInput.destinations.find((i) => isEqualExceptSymbol(i.token, currentSendToken))
+      if (willGetToken) {
+        setSelectedDestination(willGetToken);
+        setSelectedInput(willSendInput);
+        Number(amountOut) > 0 ? setAmountIn(amountOut) : setAmountIn(undefined);
+      }
+    }
+  }
+
+  const indexCurrentInput = selectedInput && inputs && (inputs.length > 0) && inputs.findIndex((f) => isEqual(f, selectedInput));
+
+  useEffect(() => {
+    if (!tokenIsInitialized && inputs && inputs.length > 0) {
+      setTokenIsInitialized(true);
+      setSelectedInput(inputs[0]);
+      setSelectedDestination(inputs[0].destinations[0])
+    }
+  }, [inputs, tokenIsInitialized])
+
+  useEffect(async () => {
+    window.ethereum?.on('chainChanged', (newChainId) => {
+      setChainId(Number(newChainId));
+    });
+
+    const { chainId } = await provider.getNetwork();
+    setChainId(chainId);
+  }, [isOpenConnection])
 
   return (
-    <div className={styles.container}>
-      <Helmet title="Counterstake Bridge" />
-      <Title level={1}>Counterstake Bridge :alpha:</Title>
-      <Paragraph>This is new, untested, unaudited software, use with care.</Paragraph>
+    <>
+      <div className={`${styles.header} main_page`}>
+        <div className={`${styles.container} `}>
+          <Helmet title="Counterstake Bridge" />
+          <Title level={1} style={{ fontWeight: "bold", fontSize: width < 768 ? (width < 500 ? 46 : 72) : 100, lineHeight: "79px", textAlign: "center", marginBottom: 0, letterSpacing: "-0.05em", marginTop: width < 768 ? 10 : 20 }}>Counterstake</Title>
+          <Title level={2} style={{ textAlign: "center", marginTop: 20 }}>A cross-chain bridge</Title>
 
-      
-      <Row style={{ marginTop: 20 }}>
-        <Col xs={{ span: 24, offset: 0 }} md={{ span: 11 }}>
-          
-          <div style={{ marginBottom: 5 }}>
-            <Text type="secondary">
-              You <b>send</b>
-            </Text>
-          </div>
+          <Paragraph style={{ fontSize: 20, textAlign: "center", fontStyle: "italic", fontWeight: 200 }}>This is new, untested, unaudited software, use with care.</Paragraph>
+          <div style={{ position: "relative" }}>
+            <Row style={{ marginTop: 70, opacity: inputs ? 1 : 0.35 }}>
+              <Col xs={{ span: 24, offset: 0 }} md={{ span: 11 }}>
 
-          <Input.Group compact>
-            <Input
-              style={{ width: "50%" }}
-              size="large"
-              placeholder="Amount"
-              onChange={handleAmountIn}
-              value={isNaN(amountIn) ? undefined : amountIn}
-              onKeyPress={(ev) => {
-                if (ev.key === "Enter") {
-                  transferRef.current.click();
-                }
-              }}
-            />
-            <Select
-              style={{ width: "50%" }}
-              size="large"
-              showSearch
-              placeholder="Input currency and network"
-              onChange={index => {
-                console.log({index})
-                setSelectedInput(inputs[index]);
-                setSelectedDestination(inputs[index].destinations[0])
-              }}
-              //value={selectedInput}
-            >
-              {inputs && inputs.map((input, index) => (
-                <Select.Option key={index} value={index}>
-                  {input.token.symbol} on {input.token.network}
-                </Select.Option>
-              ))}{" "}
-            </Select>
-          </Input.Group>
+                <div style={{ marginBottom: 5 }}>
+                  <Text type="secondary">
+                    You <b>send</b>
+                  </Text>
+                </div>
 
-        </Col>
+                <Form.Item extra={(Number(amountIn) > 0 && amountOut < 0) ? <span style={{ color: "#e74c3c", fontSize: 16 }}>Too small value to transfer</span> : <span />}>
+                  <Input.Group compact={width > 560}>
+                    <Input
+                      style={{ width: !width || width > 560 ? "35%" : "100%", fontSize: 18, lineHeight: '25px', marginBottom: width > 560 ? 0 : 15, }}
+                      size="large"
+                      autoFocus={true}
+                      placeholder="Amount"
+                      onChange={handleAmountIn}
+                      value={isNaN(amountIn) ? undefined : amountIn}
+                      onKeyPress={(ev) => {
+                        if (ev.key === "Enter") {
+                          transferRef.current.click();
+                        }
+                      }}
+                    />
+                    <Select
+                      style={{ width: !width || width > 560 ? "65%" : "100%", fontSize: 18 }}
+                      size="large"
+                      loading={!inputs}
+                      showSearch
+                      placeholder="Input currency and network"
+                      optionFilterProp="label"
+                      ref={searchInputInRef}
+                      onChange={index => {
+                        setSelectedInput(inputs[index]);
+                        setSelectedDestination(inputs[index].destinations[0])
+                        searchInputInRef?.current?.blur();
+                      }}
+                      value={indexCurrentInput >= 0 ? indexCurrentInput : undefined}
+                    >
+                      {inputs && inputs.map((input) => (
+                        <Select.Option key={input.index} value={input.index} label={`${input.token.symbol} on ${input.token.network}`}>
+                          <div style={{ display: "flex", alignItems: "center" }}>
+                            {getCoinIcon(input.token.network, input.token.symbol)}  <span>{input.token.symbol} on {input.token.network}</span>
+                          </div>
+                        </Select.Option>
+                      ))}{" "}
+                    </Select>
+                  </Input.Group>
+                </Form.Item>
+              </Col>
 
-        <Col xs={{ span: 24, offset: 0 }} md={{ span: 2, offset: 0 }}>
-          <div
-            style={{
-              marginTop: width < 768 ? 10 : 27,
-              textAlign: "center",
-              height: 38,
-              boxSizing: "border-box",
-              fontSize: "1.5em",
-            }}
-          >
-            {width < 768 ? <ArrowDownOutlined /> : <ArrowRightOutlined />}
-          </div>
-        </Col>
-
-        <Col xs={{ span: 24, offset: 0 }} md={{ span: 11, offset: 0 }}>
-          
-          <div style={{ marginBottom: 5 }}>
-            <Text type="secondary">
-              You <b>get</b>
-            </Text>
-          </div>
-
-          <Input.Group compact>
-            <Input
-              style={{ width: "50%" }}
-              size="large"
-              placeholder="Amount to receive"
-              value={isNaN(amountOut) ? undefined : amountOut}
-              disabled={true}
-              onKeyPress={(ev) => {
-                if (ev.key === "Enter") {
-                  transferRef.current.click();
-                }
-              }}
-            />
-            <Select
-              style={{ width: "50%" }}
-              size="large"
-              showSearch
-              optionFilterProp="children"
-              placeholder="Token to receive"
-              onChange={index => {
-                console.log('dest index', index);
-                setSelectedDestination(selectedInput.destinations[index])
-              }}
-              value={selectedInput && selectedDestination && selectedInput.destinations.indexOf(selectedDestination)}
-            >
-              {selectedInput && selectedInput.destinations.map((destination, index) => (
-                <Select.Option key={index} value={index}>
-                  {destination.token.symbol} on {destination.token.network}{" "}
-                </Select.Option>
-              ))}
-            </Select>
-          </Input.Group>
-          <span style={{ fontSize: 12 }}>Assistant reward: {reward ? +reward.toPrecision(4) : 0} {selectedDestination && selectedDestination.token.symbol}{selectedDestination && `. Active assistants: ${countAssistants}.`}</span>
-
-          <Form.Item
-            hasFeedback
-            style={{ width: "100%", marginTop: 20 }}
-            extra={selectedDestination && selectedDestination.token.network === 'Obyte' &&
-              <span>
-                <a
-                  href="https://obyte.org/#download"
-                  target="_blank"
-                  rel="noopener"
-                  onClick={
-                    () => {
-                      ReactGA.event({
-                        category: "Transfer",
-                        action: "Install wallet",
-                        label: selectedInput.token.symbol + ' ' + selectedInput.token.network
-                      })
-                    }
-                  }>Install Obyte wallet</a> if you don't have one yet, and copy/paste your address here.
-              </span>
-            }
-            validateStatus={
-              recipient.valid !== undefined
-                ? recipient.valid
-                  ? "success"
-                  : "error"
-                : undefined
-            }
-          >
-            <Input
-              size="large"
-              value={recipient.value}
-              placeholder={`Your ${selectedDestination ? selectedDestination.token.network : 'receiving'} wallet address`}
-              prefix={selectedDestination && selectedDestination.token.network !== 'Obyte' &&
-                <MetamaskLogo
-                  style={{cursor: "pointer", marginRight: 5}}
-                  onClick={async () => {
-                    if (!window.ethereum)
-                      return alert('Metamask not found');
-                    await loginEthereum();
-                    await insertRecipientAddress();
+              <Col xs={{ span: 24, offset: 0 }} md={{ span: 2, offset: 0 }}>
+                <div
+                  style={{
+                    marginTop: width < 768 ? -20 : 37,
+                    textAlign: "center",
+                    height: 38,
+                    boxSizing: "border-box",
+                    fontSize: "1.5em",
                   }}
-                />}
-              onChange={(ev) => handleRecipientChange(ev.target.value)}
-            />
-          </Form.Item>
-          
-        </Col>
-      </Row>
+                >
+                  <SwapOutlined
+                    rotate={width < 768 ? 90 : undefined}
+                    onClick={changeDirection}
+                    style={{
+                      fontSize: 28, padding: 5, display: "block", height: 40, cursor: "pointer",
+                      overflow: "hidden"
+                    }}
+                  />
+                </div>
+              </Col>
 
-      <Row justify="center">
-        {selectedInput && selectedInput.token.network === 'Obyte' ? <QRButton
-          type="primary"
-          size="large"
-          ref={transferRef}
-          loading={!inputs}
-          key="btn-transfer"
-          disabled={
-            !recipient.valid ||
-            !amountIn ||
-            !(amountOut > 0)
+              <Col xs={{ span: 24, offset: 0 }} md={{ span: 11, offset: 0 }}>
+                <div style={{ marginBottom: 5 }}>
+                  <Text type="secondary">
+                    You <b>get</b>
+                  </Text>
+                </div>
+
+                <Input.Group compact>
+                  <Input
+                    style={{ width: !width || width > 560 ? "35%" : "100%", marginBottom: width > 560 ? 0 : 15, fontSize: 18, lineHeight: '25px' }}
+                    size="large"
+                    placeholder="Amount to receive"
+                    value={isNaN(amountOut) ? undefined : amountOut}
+                    disabled={true}
+                    onKeyPress={(ev) => {
+                      if (ev.key === "Enter") {
+                        transferRef.current.click();
+                      }
+                    }}
+                  />
+                  <Select
+                    style={{ width: !width || width > 560 ? "65%" : "100%", fontSize: 18 }}
+                    size="large"
+                    loading={!inputs}
+                    placeholder="Token to receive"
+                    ref={searchInputOutRef}
+                    onChange={index => {
+                      setSelectedDestination(selectedInput.destinations[index])
+                      searchInputOutRef?.current?.blur();
+                    }}
+                    value={selectedInput && selectedDestination && selectedInput.destinations.indexOf(selectedDestination)}
+                    optionFilterProp="label"
+                    showSearch
+                  >
+                    {selectedInput && selectedInput.destinations.map((destination) => (
+                      <Select.Option key={destination.index} value={destination.index} label={`${destination.token.symbol} on ${destination.token.network}`}>
+                        <div style={{ display: "flex", alignItems: "center" }}>
+                          {getCoinIcon(destination.token.network, destination.token.symbol)} {destination.token.symbol} on {destination.token.network}{" "}
+                        </div>
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Input.Group>
+                <span style={{ fontSize: 12 }}>Assistant reward: {reward ? +reward.toPrecision(4) : 0} {selectedDestination && selectedDestination.token.symbol}{selectedDestination && `. Active assistants: ${countAssistants}.`}</span>
+
+                <Form.Item
+                  hasFeedback
+                  style={{ width: "100%", marginTop: 20 }}
+                  extra={selectedDestination && selectedDestination.token.network === 'Obyte' &&
+                    <span>
+                      <a
+                        href="https://obyte.org/#download"
+                        target="_blank"
+                        rel="noopener"
+                        onClick={
+                          () => {
+                            ReactGA.event({
+                              category: "Transfer",
+                              action: "Install wallet",
+                              label: selectedInput.token.symbol + ' ' + selectedInput.token.network
+                            })
+                          }
+                        }>
+                        Install Obyte wallet
+                      </a> {" "}
+                      if you don't have one yet, and copy/paste your address here.
+                    </span>
+                  }
+                  validateStatus={
+                    recipient.valid !== undefined
+                      ? recipient.valid
+                        ? "success"
+                        : "error"
+                      : undefined
+                  }
+                >
+                  <Input
+                    size="middle"
+                    style={{ height: 45, paddingRight: 30 }}
+                    spellcheck="false"
+                    value={recipient.value}
+                    placeholder={`Your ${selectedDestination ? selectedDestination.token.network : 'receiving'} wallet address`}
+                    prefix={selectedDestination && selectedDestination.token.network !== 'Obyte' &&
+                      <MetamaskLogo
+                        style={{ cursor: "pointer", marginRight: 5 }}
+                        onClick={async () => {
+                          if (!window.ethereum)
+                            return alert('Metamask not found');
+                          await loginEthereum();
+                          await insertRecipientAddress();
+                        }}
+                      />}
+                    onChange={(ev) => handleRecipientChange(ev.target.value)}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row justify="center">
+              {selectedInput && selectedInput.token.network === 'Obyte' ? <QRButton
+                type="primary"
+                size="large"
+                ref={transferRef}
+                loading={!inputs}
+                key="btn-transfer"
+                disabled={
+                  !recipient.valid ||
+                  !amountIn ||
+                  !(amountOut > 0)
+                }
+                onClick={() => {
+                  const symbol = selectedDestination.token.symbol;
+                  if (selectedDestination.type !== 'expatriation' || chainId !== chainIds[environment][selectedDestination.token.network]) return;
+                  window.ethereum.request({
+                    method: 'wallet_watchAsset',
+                    params: {
+                      type: 'ERC20',
+                      options: {
+                        address: selectedDestination.dst_bridge_aa,
+                        symbol,
+                        decimals: selectedDestination.token.decimals,
+                        image: `https://${process.env.REACT_APP_FRONTEND_URL}/coins/${String(symbol).toLowerCase().replace("/\d/", "")}.svg`
+                      },
+                    },
+                  });
+                }}
+                href={generateLink({
+                  amount: amountIn * 10 ** selectedInput.token.decimals,
+                  aa: selectedDestination.src_bridge_aa,
+                  asset: selectedInput.token.asset,
+                  data: {
+                    reward: Math.round(reward * 10 ** selectedInput.token.decimals),
+                    [selectedDestination.type === 'expatriation' ? 'foreign_address' : 'home_address']: recipient.value
+                  }
+                })}
+              >
+                Transfer
+              </QRButton> : <Button
+                type="primary"
+                size="large"
+                ref={transferRef}
+                loading={!inputs}
+                key="btn-transfer"
+                disabled={
+                  !recipient.valid ||
+                  !amountIn ||
+                  !(amountOut > 0)
+                }
+                onClick={() => handleClickTransfer().catch((reason) => { (reason.code === "INSUFFICIENT_FUNDS" || reason.code === "4001") ? message.error("An error occurred, please check your balance") : console.error(`An error occurred, please write and we will help. (${reason?.code || "NO_TY"})`); })}
+              >
+                Transfer
+              </Button>}
+            </Row>
+            {!inputs && <div style={{ position: "absolute", top: 0, right: 0, left: 0, bottom: 0, margin: "auto", opacity: 1, zIndex: 999 }}>
+              <div style={{ display: "flex", justifyContent: "center" }}>
+                <img className={styles.loader} alt="Loading..." src="/logo.svg" width={250} style={{ padding: 40, boxSizing: "border-box" }} />
+              </div>
+              <div style={{ textAlign: "center", fontWeight: "bold", fontSize: 16 }}><span>Loading pairs...</span></div>
+            </div>}
+          </div>
+
+          {error &&
+            <Row justify="center" style={{ marginTop: 10 }}>
+              <Text type="secondary" style={{ fontSize: 12, color: "red" }}>{error}</Text>
+            </Row>
           }
-          href={generateLink({
-            amount: amountIn * 10 ** selectedInput.token.decimals,
-            aa: selectedDestination.src_bridge_aa,
-            asset: selectedInput.token.asset,
-            data: {
-              reward: Math.round(reward * 10 ** selectedInput.token.decimals),
-              [selectedDestination.type === 'expatriation' ? 'foreign_address' : 'home_address']: recipient.value
-            }
-          })}
-        >
-          Transfer
-        </QRButton> : <Button
-          type="primary"
-          size="large"
-          ref={transferRef}
-          loading={!inputs}
-          key="btn-transfer"
-          disabled={
-            !recipient.valid ||
-            !amountIn ||
-            !(amountOut > 0)
-          }
-          onClick={handleClickTransfer}
-        >
-          Transfer
-        </Button>}
-      </Row>
-      {error &&
-        <Row justify="center" style={{marginTop: 10}}>
-          <Text type="secondary" style={{ fontSize: 12, color: "red" }}>{ error }</Text>
-        </Row>
-      }
 
-      {
-        // todo: display a list of transfers that are not finished yet (if any) and their progress
-        // one line per transfer, e.g. sent -> mined -> received, highlight the stages that have already been completed
-        transfers.map(t => <Row key={t.txid}>{t.amount} {t.src_token.symbol}: {t.src_token.network} -&gt; {t.dst_token.network} {t.status}</Row>)
-      }
+        </div>
+      </div>
+      <div className={`${styles.container} ${styles.container_big}`}>
+        <TransferList />
+      </div>
 
-
-      <Paragraph style={{fontSize: 11, marginTop: 40}}>Counterstake is a fully decentralized cross-chain transfer protocol. There are no admins, no central operators, no owners, no custodians. Participation in the protocol is open, there are no designated multisig participants, federated signers, or threshold signatures. All transfers are direct, there are no central hubs. No token is required to use the protocol. There are no protocol fees. The code is immutable, not upgradable, unstoppable. There are no access controls, no gatekeepers, no KYC, no your customer.</Paragraph>
-
-    </div>
+      <div className={`${styles.container}`}>
+        <Paragraph style={{ fontSize: 13, marginTop: 20, paddingTop: 10, fontWeight: 200 }}>Counterstake is a fully decentralized cross-chain transfer protocol. There are no admins, no central operators, no owners, no custodians. Participation in the protocol is open, there are no designated multisig participants, federated signers, or threshold signatures. All transfers are direct, there are no central hubs. No token is required to use the protocol. There are no protocol fees. The code is immutable, not upgradable, unstoppable. There are no access controls, no gatekeepers, no KYC, no your customer.</Paragraph>
+      </div>
+    </>
   );
 };
+
+const isEqualExceptSymbol = (token1, token2) => token1.network === token2.network && token1.asset === token2.asset;

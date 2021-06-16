@@ -6,6 +6,7 @@ import {
   UserGuidePage,
   FaqPage,
   MainPage,
+  GovernancePage,
 } from "./pages";
 
 import { MainLayout } from "./components/MainLayout/MainLayout";
@@ -18,7 +19,7 @@ const AppRouter = () => {
         <Route path="/how-it-works" component={HowItWorksPage} />
         <Route path="/user-guide/:tab?" component={UserGuidePage} />
         <Route path="/faq" component={FaqPage} />
-
+        {/* <Route path="/governance" component={GovernancePage} /> */}
         <Route path="/" component={MainPage} exact />
       </MainLayout>
     </Router>

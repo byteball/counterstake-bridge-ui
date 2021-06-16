@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useSelector, useDispatch } from 'react-redux';
-import { setPeriods } from 'store/transfersSlice';
 import { Layout, Drawer, Row, Button } from "antd";
 import { NavLink, useLocation } from "react-router-dom";
 import ReactGA from "react-ga";
@@ -14,17 +12,10 @@ import historyInstance from "../../historyInstance";
 const { Header, Content, Footer } = Layout;
 
 export const MainLayout = ({ children }) => {
-  const dispatch = useDispatch();
 
   const { pathname } = useLocation();
   const [width] = useWindowSize();
   const [activeMenu, setActiveMenu] = useState(false);
-  let [counter, setCounter] = useState(0);
-
-
-  useEffect(() => {
-    setInterval(() => setCounter(counter + 1), 10 * 60 * 1000);
-  }, []);
 
   useEffect(() => {
     const unlisten = historyInstance.listen((location, action) => {
@@ -42,10 +33,11 @@ export const MainLayout = ({ children }) => {
     <Layout style={{ minHeight: "100vh" }}>
       <Header
         style={{
-          background: "#fff",
+          background: "#141414",
           paddingLeft: 20,
           paddingRight: 20,
-          height: "100%"
+          height: "100%",
+          color: "#fff"
         }}
       >
         <Row
@@ -53,22 +45,23 @@ export const MainLayout = ({ children }) => {
           align="middle"
         >
           <NavLink to="/" className={styles.navLink}>
-            <img className={styles.logo} src="/logo256.png" alt="Counterstake Bridge" />
+            <img className={styles.logo} src="/logo.svg" alt="Counterstake Bridge" />
 
             {width > 440 && <div style={{ paddingLeft: 10 }}>
-              <span>Counterstake Bridge</span>
+              <span style={{ color: "#fff" }}>Counterstake Bridge</span>
             </div>}
           </NavLink>
+          <div style={width > 990 ? { display: "flex", flex: 1, justifyContent: "flex-end" } : { display: "block" }}>
 
-          {width >= 990 ? (
-            <MainMenu pathname={pathname} width={width} mode="horizontal" />
-          ) : (
+            {width >= 990 ? (
+              <MainMenu pathname={pathname} width={width} mode="horizontal" />
+            ) : (
               <div style={{ display: "flex", alignItems: "center" }}>
                 <Drawer
                   title={
                     <span>
                       Counterstake Bridge
-                  </span>
+                    </span>
                   }
                   placement="left"
                   closable={true}
@@ -87,7 +80,7 @@ export const MainLayout = ({ children }) => {
                 <div style={{ marginLeft: "auto", marginRight: 20 }}><Button onClick={() => setActiveMenu(true)}>Menu</Button></div>
               </div>
             )}
-
+          </div>
 
         </Row>
       </Header>
@@ -97,16 +90,16 @@ export const MainLayout = ({ children }) => {
         style={
           pathname === "/" || width < 1240
             ? { padding: 0 }
-            : { padding: "20px 20px" }
+            : { paddingTop: 20 }
         }
       >
         {children !== undefined && children !== null && (
-          <div style={{ background: "#fff", padding: 20 }}>
+          <div style={{ background: "#141414", padding: 20 }}>
             {children}
           </div>
         )}
       </Content>
-      <Footer>
+      <Footer style={{ backgroundColor: "#141414" }}>
         <SocialIcons centered />
       </Footer>
     </Layout>

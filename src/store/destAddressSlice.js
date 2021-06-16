@@ -2,10 +2,14 @@ import { createSlice } from '@reduxjs/toolkit';
 
 export const destAddressSlice = createSlice({
   name: 'destAddress',
-  initialState: [],
+  initialState: {
+    BSC: null,
+    Ethereum: null,
+    Obyte: null
+  },
   reducers: {
     setDestAddress: (state, action) => {
-		  return action.payload;
+      state[action.payload.network] = action.payload.address
     },
   },
 });
