@@ -19,3 +19,8 @@ code {
   opacity: .08 !important;
   color: #141414 !important;
 }
+
+svg .white {
+  fill: #fff !important;
+  stroke: #fff !important;
+}

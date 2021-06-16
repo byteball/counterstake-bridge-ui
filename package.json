@@ -13,6 +13,7 @@
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
     "antd": "^4.15.3",
+    "copyfiles": "^2.4.1",
     "craco-less": "^1.17.1",
     "ethers": "^5.1.4",
     "lodash": "^4.17.21",
@@ -31,9 +32,10 @@
     "web-vitals": "^1.0.1"
   },
   "scripts": {
-    "start": "craco start",
-    "build": "craco build",
+    "start": "npm run move_icons && craco start",
+    "build": "npm run move_icons && craco build",
     "test": "craco test",
+    "move_icons": "copyfiles -f \"src/pages/Main/img/coins/*.svg\" \"public/coins\"",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

@@ -543,7 +543,7 @@ export const MainPage = () => {
                         address: selectedDestination.dst_bridge_aa, //"0x263a511a935d3330bD4bd882004B43Cad628F653", //tokenAddress, // The address that the token is at.
                         symbol, // A ticker symbol or shorthand, up to 5 chars.
                         decimals: selectedDestination.token.decimals, // The number of decimals in the token
-                        image: `https://dev.twoogi.ru/coins/${String(symbol).toLowerCase().replace("/\d/", "")}-on-${String(selectedDestination.token.network).toLowerCase()}.svg`, // A string url of the token logo
+                        image: `https://${process.env.REACT_APP_FRONTEND_URL}/coins/${String(symbol).toLowerCase().replace("/\d/", "")}.svg`, // A string url of the token logo
                       },
                     },
                   });
