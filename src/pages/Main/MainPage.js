@@ -96,7 +96,7 @@ export const MainPage = () => {
   const isOpenConnection = useSelector(selectConnectionStatus)
   const searchInputInRef = useRef(null);
   const searchInputOutRef = useRef(null);
-  
+  const [chainId, setChainId] = useState();
 
   useEffect(() => {
     if (rehydrated && isOpenConnection) {
@@ -216,7 +216,11 @@ export const MainPage = () => {
         const valid = isValidRecipient(value);
         setRecipient({ value, valid });
       } else if (selectedDestination.token.network !== 'Obyte') {
-        insertRecipientAddress();
+        if (selectedDestination.token.network === 'Obyte' || (chainId === chainIds[environment][selectedDestination.token.network])) {
+          insertRecipientAddress();
+        } else {
+          message.error(`Wrong network selected, please select ${selectedDestination.token.network} in MetaMask`)
+        }
       } else {
         setRecipient({});
       }
@@ -264,8 +268,7 @@ export const MainPage = () => {
     if (!window.ethereum)
       return setError(<>MetaMask not found. You can download it <a target="_blank" rel="noopener" href={metamaskDownloadUrl}>here</a>.</>);
     await loginEthereum();
-    const network = await provider.getNetwork();
-    if (network.chainId !== chainIds[environment][selectedInput.token.network])
+    if (chainId !== chainIds[environment][selectedInput.token.network])
       return setError(`Wrong network selected, please select ${selectedInput.token.network} in MetaMask`);
     const bnAmount = ethers.utils.parseUnits(amountIn + '', selectedInput.token.decimals);
     const bnReward = ethers.utils.parseUnits(reward + '', selectedInput.token.decimals);
@@ -341,6 +344,15 @@ export const MainPage = () => {
       setSelectedDestination(inputs[0].destinations[0])
     }
   }, [inputs, tokenIsInitialized])
+
+  useEffect(async () => {
+    window.ethereum?.on('chainChanged', (newChainId) => {
+      setChainId(Number(newChainId));
+    });
+
+    const { chainId } = await provider.getNetwork();
+    setChainId(chainId);
+  }, [isOpenConnection])
 
   return (
     <>
@@ -512,7 +524,11 @@ export const MainPage = () => {
                           if (!window.ethereum)
                             return alert('Metamask not found');
                           await loginEthereum();
-                          await insertRecipientAddress();
+                          if (selectedDestination.token.network === 'Obyte' || (chainId === chainIds[environment][selectedDestination.token.network])) {
+                            await insertRecipientAddress();
+                          } else {
+                            message.error(`Wrong network selected, please select ${selectedDestination.token.network} in MetaMask`)
+                          }
                         }}
                       />}
                     onChange={(ev) => handleRecipientChange(ev.target.value)}
@@ -530,11 +546,12 @@ export const MainPage = () => {
                 disabled={
                   !recipient.valid ||
                   !amountIn ||
-                  !(amountOut > 0)
+                  !(amountOut > 0) ||
+                  chainId !== chainIds[environment][selectedDestination.token.network]
                 }
                 onClick={() => {
                   const symbol = selectedDestination.token.symbol;
-                  if (["eth"].includes(String(symbol).toLowerCase())) return;
+                  if (["eth"].includes(String(symbol).toLowerCase()) || selectedDestination.type !== 'expatriation') return;
                   window.ethereum.request({
                     method: 'wallet_watchAsset',
                     params: {
@@ -573,7 +590,7 @@ export const MainPage = () => {
                 onClick={() => handleClickTransfer().catch((reason) => { (reason.code === "INSUFFICIENT_FUNDS" || reason.code === "4001") ? message.error("An error occurred, please check your balance") : console.error(`An error occurred, please write and we will help. (${reason?.code || "NO_TY"})`); })}
               >
                 Transfer
-        </Button>}
+              </Button>}
             </Row>
             {!inputs && <div style={{ position: "absolute", top: 0, right: 0, left: 0, bottom: 0, margin: "auto", opacity: 1, zIndex: 999 }}>
               <div style={{ display: "flex", justifyContent: "center" }}>
