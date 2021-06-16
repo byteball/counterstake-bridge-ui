@@ -340,6 +340,8 @@ export const MainPage = () => {
   }, [inputs, tokenIsInitialized])
 
   useEffect(async () => {
+    if (!window.ethereum) // no metamask installed
+      return;
     window.ethereum?.on('chainChanged', (newChainId) => {
       setChainId(Number(newChainId));
     });
@@ -541,7 +543,7 @@ export const MainPage = () => {
                 }
                 onClick={() => {
                   const symbol = selectedDestination.token.symbol;
-                  if (selectedDestination.type !== 'expatriation' || chainId !== chainIds[environment][selectedDestination.token.network]) return;
+                  if (selectedDestination.type !== 'expatriation' || !window.ethereum || chainId !== chainIds[environment][selectedDestination.token.network]) return;
                   window.ethereum.request({
                     method: 'wallet_watchAsset',
                     params: {
