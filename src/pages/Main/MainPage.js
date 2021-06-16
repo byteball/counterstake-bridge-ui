@@ -216,11 +216,7 @@ export const MainPage = () => {
         const valid = isValidRecipient(value);
         setRecipient({ value, valid });
       } else if (selectedDestination.token.network !== 'Obyte') {
-        if (selectedDestination.token.network === 'Obyte' || (chainId === chainIds[environment][selectedDestination.token.network])) {
-          insertRecipientAddress();
-        } else {
-          message.error(`Wrong network selected, please select ${selectedDestination.token.network} in MetaMask`)
-        }
+        insertRecipientAddress();
       } else {
         setRecipient({});
       }
@@ -268,8 +264,6 @@ export const MainPage = () => {
     if (!window.ethereum)
       return setError(<>MetaMask not found. You can download it <a target="_blank" rel="noopener" href={metamaskDownloadUrl}>here</a>.</>);
     await loginEthereum();
-    if (chainId !== chainIds[environment][selectedInput.token.network])
-      return setError(`Wrong network selected, please select ${selectedInput.token.network} in MetaMask`);
     const bnAmount = ethers.utils.parseUnits(amountIn + '', selectedInput.token.decimals);
     const bnReward = ethers.utils.parseUnits(reward + '', selectedInput.token.decimals);
     const sender_address = await signer.getAddress();
@@ -524,11 +518,7 @@ export const MainPage = () => {
                           if (!window.ethereum)
                             return alert('Metamask not found');
                           await loginEthereum();
-                          if (selectedDestination.token.network === 'Obyte' || (chainId === chainIds[environment][selectedDestination.token.network])) {
-                            await insertRecipientAddress();
-                          } else {
-                            message.error(`Wrong network selected, please select ${selectedDestination.token.network} in MetaMask`)
-                          }
+                          await insertRecipientAddress();
                         }}
                       />}
                     onChange={(ev) => handleRecipientChange(ev.target.value)}
@@ -546,21 +536,20 @@ export const MainPage = () => {
                 disabled={
                   !recipient.valid ||
                   !amountIn ||
-                  !(amountOut > 0) ||
-                  chainId !== chainIds[environment][selectedDestination.token.network]
+                  !(amountOut > 0)
                 }
                 onClick={() => {
                   const symbol = selectedDestination.token.symbol;
-                  if (selectedDestination.type !== 'expatriation') return;
+                  if (selectedDestination.type !== 'expatriation' || chainId !== chainIds[environment][selectedDestination.token.network]) return;
                   window.ethereum.request({
                     method: 'wallet_watchAsset',
                     params: {
-                      type: 'ERC20', // Initially only supports ERC20, but eventually more!
+                      type: 'ERC20',
                       options: {
-                        address: selectedDestination.dst_bridge_aa, //"0x263a511a935d3330bD4bd882004B43Cad628F653", //tokenAddress, // The address that the token is at.
-                        symbol, // A ticker symbol or shorthand, up to 5 chars.
-                        decimals: selectedDestination.token.decimals, // The number of decimals in the token
-                        image: `https://${process.env.REACT_APP_FRONTEND_URL}/coins/${String(symbol).toLowerCase().replace("/\d/", "")}.svg`, // A string url of the token logo
+                        address: selectedDestination.dst_bridge_aa,
+                        symbol,
+                        decimals: selectedDestination.token.decimals,
+                        image: `https://${process.env.REACT_APP_FRONTEND_URL}/coins/${String(symbol).toLowerCase().replace("/\d/", "")}.svg`
                       },
                     },
                   });
