@@ -184,7 +184,12 @@ export const MainPage = () => {
         return obyte.utils.isValidAddress(value);
       case 'Ethereum':
       case 'BSC':
-        return ethers.utils.isAddress(value);
+        try {
+          return ethers.utils.getAddress(value) === value;
+        }
+        catch (e) {
+          return false;
+        }
       default: throw Error(`unknown network ${selectedDestination.token.network}`);
     }
   };
