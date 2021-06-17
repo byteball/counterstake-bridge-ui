@@ -30,6 +30,7 @@ const onNewClaim = (claim_num, author_address, sender_address, recipient_address
     return console.log(`claim of unrecognized transfer ${txid}`);
   //transfer.status = 'claimed';
   dispatch(updateTransferStatus({ txid, status: 'claimed' }));
+  setTimeout(() => dispatch(updateTransferStatus({ txid, status: 'claim_confirmed' })), 1000);
 };
 
 // to avoid duplicate event handlers, track the contracts that we are already watching for claims
