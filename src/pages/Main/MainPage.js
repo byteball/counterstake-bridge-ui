@@ -281,8 +281,10 @@ export const MainPage = () => {
         const allowance = await tokenContract.allowance(sender_address, selectedDestination.src_bridge_aa);
 
         if (allowance.lt(bnAmount)) {
-          await tokenContract.approve(selectedDestination.src_bridge_aa, MAX_UINT256);
-          await wait(2000); // wait for the provider to update our nonce
+          const approval_res = await tokenContract.approve(selectedDestination.src_bridge_aa, MAX_UINT256);
+          message.info("After the approval gets mined, Metamask will pop up again and request you to confirm the actual transfer", 3);
+          //await wait(2000); // wait for the provider to update our nonce
+          await approval_res.wait();
         }
       }
       const contract = new ethers.Contract(selectedDestination.src_bridge_aa, exportAbi, signer);
@@ -306,7 +308,7 @@ export const MainPage = () => {
       ts: Date.now(),
     };
     dispatch(addTransfer(transfer));
-    message.success("The translation has been successfully created and added to the list below", 1000)
+    message.success("The translation has been successfully created and added to the list below", 2)
     // start watching dst_bridge_aa on Obyte side
     startWatchingDestinationBridge(selectedDestination.token.network, selectedDestination.dst_bridge_aa);
 
