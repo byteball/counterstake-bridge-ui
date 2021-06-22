@@ -27,6 +27,11 @@ export const MainMenu = ({ mode, pathname, onClose, width }) => {
           How it works
         </NavLink>
       </Menu.Item>
+      <Menu.Item key="/cs-token">
+        <NavLink to="/cs-token" activeClassName="selected" style={{ verticalAlign: "middle" }}>
+          CS Token
+        </NavLink>
+      </Menu.Item>
       <Menu.Item key="/user-guide">
         <NavLink to="/user-guide" activeClassName="selected" style={{ verticalAlign: "middle" }}>
           User guide

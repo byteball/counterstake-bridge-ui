@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { Collapse, Typography } from "antd";
 import { DownOutlined } from "@ant-design/icons";
 import { Helmet } from "react-helmet-async";
@@ -182,7 +183,7 @@ export const FaqPage = () => {
           className={styles.panel}
         >
           <p>
-            No, the protocol does not require any new tokens. However note that by using the protocol you are making CS holders richer, as more use deflates their token faster. You might consider becoming one as well.
+            No, the protocol does not require any new tokens. However note that by using the protocol you are making CS holders richer, as more use deflates their token faster. You might consider <Link to="/cs-token">becoming one</Link> as well.
           </p>
         </Panel>
 
