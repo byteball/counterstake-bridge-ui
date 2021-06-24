@@ -2,7 +2,6 @@ import { updateTransferStatus } from "store/transfersSlice";
 import { ethers } from "ethers";
 import { store } from "index";
 
-
 const counterstakeAbi = [
   "event NewClaim(uint indexed claim_num, address author_address, string sender_address, address recipient_address, string txid, uint32 txts, uint amount, int reward, uint stake, string data, uint32 expiry_ts)"
 ];

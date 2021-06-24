@@ -5,15 +5,13 @@ import { SwapOutlined } from "@ant-design/icons";
 import ReactGA from "react-ga";
 import obyte from "obyte";
 import { ethers } from "ethers";
-
 import { useSelector, useDispatch } from 'react-redux';
 import QRButton from "obyte-qr-button";
+import { isEqual } from "lodash";
 
 import { addTransfer, updateTransferStatus } from "store/transfersSlice";
 import { selectDestAddress, setDestAddress } from "store/destAddressSlice";
-import { setDirections } from "store/directionsSlice";
-import styles from "./MainPage.module.css";
-import { getBridges } from "services/api";
+
 import { sendTransferToGA } from "services/transfer";
 import { startWatchingSourceBridge, startWatchingDestinationBridge } from "services/watch";
 import { useWindowSize } from "hooks/useWindowSize";
@@ -21,10 +19,11 @@ import { generateLink } from "utils/generateLink";
 import { ReactComponent as MetamaskLogo } from "./metamask-fox.svg";
 import { TransferList } from "components/TransferList/TransferList";
 import { getPersist } from "store";
-import { updateTransfersStatus } from "store/thunks";
-import { isEqual } from "lodash";
+import { getCoinsIcon, updateBridges, updateTransfersStatus } from "store/thunks";
 import { getCoinIcon } from "./getCoinIcon";
 import { selectConnectionStatus } from "store/connectionSlice";
+
+import styles from "./MainPage.module.css";
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -66,21 +65,9 @@ function wait(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-const tokensEqual = (t1, t2) => t1.asset === t2.asset && t1.network === t2.network;
-
-function getOrInsertInput(inputs, token) {
-  for (let input of inputs)
-    if (tokensEqual(input.token, token))
-      return input;
-  const new_input = { token, destinations: [] };
-  inputs.push(new_input);
-  return new_input;
-}
-
 export const MainPage = () => {
-
   const [width] = useWindowSize();
-  let [inputs, setInputs] = useState();
+  const { inputs, loaded } = useSelector((state) => state.bridges)
   let [selectedInput, setSelectedInput] = useState();
   let [selectedDestination, setSelectedDestination] = useState();
   const [amountIn, setAmountIn] = useState(0.1);
@@ -97,6 +84,7 @@ export const MainPage = () => {
   const searchInputInRef = useRef(null);
   const searchInputOutRef = useRef(null);
   const [chainId, setChainId] = useState();
+  const [pendingTokens, setPendingTokens] = useState({});
 
   useEffect(() => {
     if (rehydrated && isOpenConnection) {
@@ -105,60 +93,13 @@ export const MainPage = () => {
   }, [rehydrated, isOpenConnection])
 
   useEffect(() => {
-    const updateBridges = async () => {
-      const resp = await getBridges();
-      if (resp.status !== 'success')
-        return;
-      const bridges = resp.data;
-      let directions = {};
-      let inputs = [];
-      for (let { bridge_id, home_network, home_asset, home_asset_decimals, home_symbol, export_aa, foreign_network, foreign_asset, foreign_asset_decimals, foreign_symbol, import_aa, min_expatriation_reward, min_repatriation_reward, count_expatriation_claimants, count_repatriation_claimants } of bridges) {
-        const home_token = { network: home_network, asset: home_asset, decimals: home_asset_decimals, symbol: home_symbol };
-        const foreign_token = { network: foreign_network, asset: foreign_asset, decimals: foreign_asset_decimals, symbol: foreign_symbol };
-        directions[export_aa] = {
-          bridge_id,
-          type: 'expatriation',
-          src_bridge_aa: export_aa,
-          dst_bridge_aa: import_aa,
-          src_token: home_token,
-          dst_token: foreign_token,
-        };
-        directions[import_aa] = {
-          bridge_id,
-          type: 'repatriation',
-          src_bridge_aa: import_aa,
-          dst_bridge_aa: export_aa,
-          src_token: foreign_token,
-          dst_token: home_token,
-        };
-        const home_input = getOrInsertInput(inputs, home_token);
-        home_input.destinations.push({
-          bridge_id,
-          type: 'expatriation',
-          src_bridge_aa: export_aa,
-          dst_bridge_aa: import_aa,
-          min_reward: min_expatriation_reward,
-          count_claimants: count_expatriation_claimants,
-          token: foreign_token
-        });
-        const foreign_input = getOrInsertInput(inputs, foreign_token);
-        foreign_input.destinations.push({
-          bridge_id,
-          type: 'repatriation',
-          src_bridge_aa: import_aa,
-          dst_bridge_aa: export_aa,
-          min_reward: min_repatriation_reward,
-          count_claimants: count_repatriation_claimants,
-          token: home_token
-        });
-      }
-      setInputs(inputs.map((i, index) => ({ index, ...i, destinations: i.destinations.map((d, id) => ({ ...d, index: id })) })));
-      dispatch(setDirections(directions));
-    };
+    dispatch(getCoinsIcon())
+  }, []);
 
-    updateBridges()
+  useEffect(() => {
+    dispatch(updateBridges());
 
-    const intervalId = setInterval(() => { updateBridges() }, 1000 * 60 * 5);
+    const intervalId = setInterval(() => { dispatch(updateBridges()) }, 1000 * 60 * 5);
 
     return () => {
       clearInterval(intervalId)
@@ -337,6 +278,8 @@ export const MainPage = () => {
   }
 
   const indexCurrentInput = selectedInput && inputs && (inputs.length > 0) && inputs.findIndex((f) => isEqual(f, selectedInput));
+  const inputNetwork = selectedInput?.token.network;
+  const inputChainId = inputNetwork && chainIds[environment]?.[inputNetwork]
 
   useEffect(() => {
     if (!tokenIsInitialized && inputs && inputs.length > 0) {
@@ -355,10 +298,22 @@ export const MainPage = () => {
 
     const network = await provider.getNetwork();
 
-    if (network && ("chainId" in network)){
+    if (network && ("chainId" in network)) {
       setChainId(network.chainId);
     }
   }, [isOpenConnection])
+
+  useEffect(async () => {
+    if (chainId in pendingTokens) {
+      if (chainId in pendingTokens) {
+        await wait(1500);
+        await window.ethereum.request({
+          method: 'wallet_watchAsset',
+          params: pendingTokens[chainId]
+        });
+      }
+    }
+  }, [chainId]);
 
   return (
     <>
@@ -370,7 +325,7 @@ export const MainPage = () => {
 
           <Paragraph style={{ fontSize: 20, textAlign: "center", fontStyle: "italic", fontWeight: 200 }}>This is new, untested, unaudited software, use with care.</Paragraph>
           <div style={{ position: "relative" }}>
-            <Row style={{ marginTop: 70, opacity: inputs ? 1 : 0.35 }}>
+            <Row style={{ marginTop: 70, opacity: inputs.length !== 0 ? 1 : 0.35 }}>
               <Col xs={{ span: 24, offset: 0 }} md={{ span: 11 }}>
 
                 <div style={{ marginBottom: 5 }}>
@@ -521,7 +476,7 @@ export const MainPage = () => {
                   <Input
                     size="middle"
                     style={{ height: 45, paddingRight: 30 }}
-                    spellcheck="false"
+                    spellCheck="false"
                     value={recipient.value}
                     placeholder={`Your ${selectedDestination ? selectedDestination.token.network : 'receiving'} wallet address`}
                     prefix={selectedDestination && selectedDestination.token.network !== 'Obyte' &&
@@ -529,7 +484,7 @@ export const MainPage = () => {
                         style={{ cursor: "pointer", marginRight: 5 }}
                         onClick={async () => {
                           if (!window.ethereum)
-                            return alert('Metamask not found');
+                            return message.error("Metamask not found")
                           await loginEthereum();
                           await insertRecipientAddress();
                         }}
@@ -551,21 +506,29 @@ export const MainPage = () => {
                   !amountIn ||
                   !(amountOut > 0)
                 }
-                onClick={() => {
+                onClick={async () => {
                   const symbol = selectedDestination.token.symbol;
-                  if (selectedDestination.type !== 'expatriation' || !window.ethereum || chainId !== chainIds[environment][selectedDestination.token.network]) return;
-                  window.ethereum.request({
-                    method: 'wallet_watchAsset',
-                    params: {
-                      type: 'ERC20',
-                      options: {
-                        address: selectedDestination.dst_bridge_aa,
-                        symbol,
-                        decimals: selectedDestination.token.decimals,
-                        image: `https://${process.env.REACT_APP_FRONTEND_URL}/coins/${String(symbol).toLowerCase().replace("/\d/", "")}.svg`
-                      },
+                  const currentChainId = chainIds[environment][selectedDestination.token.network];
+                  if (selectedDestination.type !== 'expatriation' || !window.ethereum) return;
+
+                  const params = {
+                    type: 'ERC20',
+                    options: {
+                      address: selectedDestination.dst_bridge_aa,
+                      symbol,
+                      decimals: selectedDestination.token.decimals,
+                      image: `${process.env.REACT_APP_ICON_CDN_URL}/${String(symbol).toUpperCase()}.svg`
                     },
-                  });
+                  };
+
+                  if (chainId === currentChainId) {
+                    window.ethereum.request({
+                      method: 'wallet_watchAsset',
+                      params
+                    });
+                  } else {
+                    setPendingTokens({ ...pendingTokens, [currentChainId]: params })
+                  };
                 }}
                 href={generateLink({
                   amount: amountIn * 10 ** selectedInput.token.decimals,
@@ -589,12 +552,12 @@ export const MainPage = () => {
                   !amountIn ||
                   !(amountOut > 0)
                 }
-                onClick={() => handleClickTransfer().catch((reason) => { (reason.code === "INSUFFICIENT_FUNDS" || reason.code === "4001") ? message.error("An error occurred, please check your balance") : console.error(`An error occurred, please write and we will help. (${reason?.code || "NO_TY"})`); })}
+                onClick={() => inputChainId === chainId ? handleClickTransfer().catch((reason) => { (reason.code === "INSUFFICIENT_FUNDS" || reason.code === -32603) ? message.error("An error occurred, please check your balance") : console.error(`An error occurred, please write and we will help. (${reason?.code || "NO_CODE"})`); }) : message.error(`Wrong network selected, please select ${selectedInput.token.network} in MetaMask`)}
               >
                 Transfer
               </Button>}
             </Row>
-            {!inputs && <div style={{ position: "absolute", top: 0, right: 0, left: 0, bottom: 0, margin: "auto", opacity: 1, zIndex: 999 }}>
+            {(inputs.length === 0 || !loaded) && <div style={{ position: "absolute", top: 0, right: 0, left: 0, bottom: 0, margin: "auto", opacity: 1, zIndex: 999 }}>
               <div style={{ display: "flex", justifyContent: "center" }}>
                 <img className={styles.loader} alt="Loading..." src="/logo.svg" width={250} style={{ padding: 40, boxSizing: "border-box" }} />
               </div>

@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { notification } from 'antd';
 import { updateTransfersStatus } from "./thunks";
 
 export const transfersSlice = createSlice({
@@ -24,6 +25,12 @@ export const transfersSlice = createSlice({
       listWithChangeInStatus?.forEach(({ txid, status }) => {
         const transferIndex = state.findIndex(t => t.txid === txid);
         state[transferIndex].status = status;
+      })
+    },
+    [updateTransfersStatus.rejected]: () => {
+      notification.open({
+        message: 'Transfer statuses update error',
+        type: "error"
       })
     },
   }

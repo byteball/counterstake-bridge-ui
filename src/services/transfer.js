@@ -1,6 +1,5 @@
 import ReactGA from "react-ga";
 
-
 export const sendTransferToGA = (src_token, dst_token) => {
   ReactGA.event({
     category: "Transfer",
