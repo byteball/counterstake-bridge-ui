@@ -2,8 +2,8 @@ import { createSlice } from '@reduxjs/toolkit';
 import { notification } from 'antd';
 import { updateBridges } from './thunks';
 
-export const bridgesSlice = createSlice({
-  name: 'bridges',
+export const inputsSlice = createSlice({
+  name: 'inputs',
   initialState: {
     inputs: [],
     loaded: false
@@ -29,4 +29,6 @@ export const bridgesSlice = createSlice({
 // the state. Selectors can also be defined inline where they're used instead of
 // in the slice file. For example: `useSelector((state) => state.auth.value)`
 
-export default bridgesSlice.reducer;
+export const selectInputs = state => state.inputs;
+
+export default inputsSlice.reducer;

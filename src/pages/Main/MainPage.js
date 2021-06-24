@@ -22,6 +22,7 @@ import { getPersist } from "store";
 import { getCoinsIcon, updateBridges, updateTransfersStatus } from "store/thunks";
 import { getCoinIcon } from "./getCoinIcon";
 import { selectConnectionStatus } from "store/connectionSlice";
+import { selectInputs } from "store/inputsSlice";
 
 import styles from "./MainPage.module.css";
 
@@ -67,7 +68,7 @@ function wait(ms) {
 
 export const MainPage = () => {
   const [width] = useWindowSize();
-  const { inputs, loaded } = useSelector((state) => state.bridges)
+  const { inputs, loaded } = useSelector(selectInputs)
   let [selectedInput, setSelectedInput] = useState();
   let [selectedDestination, setSelectedDestination] = useState();
   const [amountIn, setAmountIn] = useState(0.1);

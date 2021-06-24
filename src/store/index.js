@@ -17,7 +17,7 @@ import directionsReducer from './directionsSlice';
 import connectionSlice from './connectionSlice';
 import governanceSlice from './governanceSlice';
 import cdnIconsSlice from './cdnIconsSlice';
-import bridgesSlice from './bridgesSlice';
+import inputsSlice from './inputsSlice';
 
 const rootReducer = combineReducers({
   transfers: transfersReducer,
@@ -26,7 +26,7 @@ const rootReducer = combineReducers({
   connection: connectionSlice,
   governance: governanceSlice,
   cdnIcons: cdnIconsSlice,
-  bridges: bridgesSlice
+  inputs: inputsSlice
 });
 
 const persistConfig = {
