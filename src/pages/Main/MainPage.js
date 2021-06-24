@@ -506,7 +506,7 @@ export const MainPage = () => {
                   !amountIn ||
                   !(amountOut > 0)
                 }
-                onClick={async () => {
+                onClick={() => {
                   const symbol = selectedDestination.token.symbol;
                   const currentChainId = chainIds[environment][selectedDestination.token.network];
                   if (selectedDestination.type !== 'expatriation' || !window.ethereum) return;
