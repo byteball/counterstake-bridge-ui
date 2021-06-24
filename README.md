@@ -11,7 +11,7 @@ yarn
 
 ## ENV
 
-Copy the appropriate .env.XXXX file to .env.
+Copy the appropriate .env.XXXX file to .env and change REACT_APP_FRONTEND_URL 
 
 ## Run
 
