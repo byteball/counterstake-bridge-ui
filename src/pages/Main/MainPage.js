@@ -306,13 +306,11 @@ export const MainPage = () => {
 
   useEffect(async () => {
     if (chainId in pendingTokens) {
-      if (chainId in pendingTokens) {
-        await wait(1500);
-        await window.ethereum.request({
-          method: 'wallet_watchAsset',
-          params: pendingTokens[chainId]
-        });
-      }
+      await wait(1500);
+      await window.ethereum.request({
+        method: 'wallet_watchAsset',
+        params: pendingTokens[chainId]
+      });
     }
   }, [chainId]);
 
