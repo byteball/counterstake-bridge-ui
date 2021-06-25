@@ -220,8 +220,10 @@ export const MainPage = () => {
     if (!window.ethereum)
       return setError(<>MetaMask not found. You can download it <a target="_blank" rel="noopener" href={metamaskDownloadUrl}>here</a>.</>);
     await loginEthereum();
-    const bnAmount = ethers.utils.parseUnits(Number(amountIn).toFixed(selectedInput.token.decimals), selectedInput.token.decimals);
-    const bnReward = ethers.utils.parseUnits(Number(reward).toFixed(selectedInput.token.decimals), selectedInput.token.decimals);
+    // do not exceed the precision of the least precise token, otherwise the money will be lost!
+    const min_decimals = Math.min(selectedInput.token.decimals, selectedDestination.token.decimals);
+    const bnAmount = ethers.utils.parseUnits(Number(amountIn).toFixed(min_decimals), selectedInput.token.decimals);
+    const bnReward = ethers.utils.parseUnits(Number(reward).toFixed(min_decimals), selectedInput.token.decimals);
     const sender_address = await signer.getAddress();
     const dest_address = recipient.value;
     let res;
