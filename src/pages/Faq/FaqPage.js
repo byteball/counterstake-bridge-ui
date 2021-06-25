@@ -144,7 +144,7 @@ export const FaqPage = () => {
           <p>
             See below:
             <div style={{ maxWidth: 560, marginTop: 5 }}>
-              <img src="/protocols.svg" alt="How does Counterstake compare against other cross-chain bridges?" />
+              <img src="/cross-chain-bridge-protocols.svg" alt="How does Counterstake compare against other cross-chain bridges?" />
             </div>
             Counterstake is absolutely decentralized and more universal than most other bridges.
           </p>

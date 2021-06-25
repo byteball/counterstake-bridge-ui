@@ -38,7 +38,7 @@ export const CSTokenPage = () => (
         <Paragraph>
           Counterstake is absolutely decentralized and is one of the most universal cross-chain bridges.
           <div style={{ maxWidth: 560, margin: "50px auto", display: "block", opacity: 0.7 }}>
-            <img src="/protocols.svg" alt="Counterstake is absolutely decentralized and is one of the most universal cross-chain bridges." />
+            <img src="/cross-chain-bridge-protocols.svg" alt="Counterstake is absolutely decentralized and is one of the most universal cross-chain bridges." />
           </div>
         </Paragraph>
       </div>
