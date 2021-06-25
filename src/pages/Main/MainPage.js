@@ -581,7 +581,7 @@ export const MainPage = () => {
                   !amountIn ||
                   !(amountOut > 0)
                 }
-                onClick={async () => { await addToken(); inputChainId === chainId ? handleClickTransfer().catch((reason) => { (reason.code === "INSUFFICIENT_FUNDS" || reason.code === -32603) ? message.error("An error occurred, please check your balance") : console.error(`An error occurred, please write and we will help. (${reason?.code || "NO_CODE"}). ${reason.reason}`); }) : message.error(`Wrong network selected, please select ${selectedInput.token.network} in MetaMask`); }}
+                onClick={() => { addToken(); inputChainId === chainId ? handleClickTransfer().catch((reason) => { (reason.code === "INSUFFICIENT_FUNDS" || reason.code === -32603) ? message.error("An error occurred, please check your balance") : console.error(`An error occurred, please write and we will help. (${reason?.code || "NO_CODE"}). ${reason.reason}`); }) : message.error(`Wrong network selected, please select ${selectedInput.token.network} in MetaMask`); }}
               >
                 Transfer
               </Button>}
