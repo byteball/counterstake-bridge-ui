@@ -60,7 +60,7 @@ export const updateBridges = createAsyncThunk(
     const bridges = resp.data;
     let directions = {};
     let inputs = [];
-    for (let { bridge_id, home_network, home_asset, home_asset_decimals, home_symbol, export_aa, foreign_network, foreign_asset, foreign_asset_decimals, foreign_symbol, import_aa, min_expatriation_reward, min_repatriation_reward, count_expatriation_claimants, count_repatriation_claimants } of bridges) {
+    for (let { bridge_id, home_network, home_asset, home_asset_decimals, home_symbol, export_aa, foreign_network, foreign_asset, foreign_asset_decimals, foreign_symbol, import_aa, min_expatriation_reward, min_repatriation_reward, count_expatriation_claimants, count_repatriation_claimants, max_expatriation_amount, max_repatriation_amount } of bridges) {
       const home_token = { network: home_network, asset: home_asset, decimals: home_asset_decimals, symbol: home_symbol };
       const foreign_token = { network: foreign_network, asset: foreign_asset, decimals: foreign_asset_decimals, symbol: foreign_symbol };
       directions[export_aa] = {
@@ -87,7 +87,8 @@ export const updateBridges = createAsyncThunk(
         dst_bridge_aa: import_aa,
         min_reward: min_expatriation_reward,
         count_claimants: count_expatriation_claimants,
-        token: foreign_token
+        token: foreign_token,
+        max_amount: max_expatriation_amount
       });
       const foreign_input = getOrInsertInput(inputs, foreign_token);
       foreign_input.destinations.push({
@@ -97,7 +98,8 @@ export const updateBridges = createAsyncThunk(
         dst_bridge_aa: export_aa,
         min_reward: min_repatriation_reward,
         count_claimants: count_repatriation_claimants,
-        token: home_token
+        token: home_token,
+        max_amount: max_repatriation_amount
       });
     }
     thunkAPI.dispatch(setDirections(directions));

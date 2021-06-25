@@ -84,6 +84,7 @@ export const MainPage = () => {
   const [inFocus, setInFocus] = useState(true);
   const [pendingTokens, setPendingTokens] = useState({});
   const addedTokens = useSelector(selectAddedTokens);
+  const max_amount = selectedDestination && selectedDestination.max_amount && (selectedDestination.max_amount.toPrecision(4)) || 0;
 
   useEffect(() => {
     if (rehydrated && isOpenConnection) {
@@ -386,10 +387,10 @@ export const MainPage = () => {
                   </Text>
                 </div>
 
-                <Form.Item extra={(Number(amountIn) > 0 && amountOut < 0) ? <span style={{ color: "#e74c3c", fontSize: 16 }}>Too small value to transfer</span> : <span />}>
+                <Form.Item>
                   <Input.Group compact={width > 560}>
                     <Input
-                      style={{ width: !width || width > 560 ? "35%" : "100%", fontSize: 18, lineHeight: '25px', marginBottom: width > 560 ? 0 : 15, }}
+                      style={{ width: !width || width > 560 ? "35%" : "100%", fontSize: 18, lineHeight: '25px', marginBottom: width > 560 ? 0 : 15 }}
                       size="large"
                       autoFocus={true}
                       placeholder="Amount"
@@ -425,6 +426,7 @@ export const MainPage = () => {
                       ))}{" "}
                     </Select>
                   </Input.Group>
+                  {(Number(amountIn) > 0 && Number(amountOut) < 0) ? <Text type="danger" style={{ fontSize: 12 }}>Too small value to transfer.</Text> : (selectedDestination && (Number(amountIn) > Number(selectedDestination.max_amount || 0)) && <Text type="warning" style={{ fontSize: 12 }}>The maximum amount assistants can help with is {max_amount} {selectedDestination.token.symbol}.</Text>)}
                 </Form.Item>
               </Col>
 
@@ -461,7 +463,7 @@ export const MainPage = () => {
                     style={{ width: !width || width > 560 ? "35%" : "100%", marginBottom: width > 560 ? 0 : 15, fontSize: 18, lineHeight: '25px' }}
                     size="large"
                     placeholder="Amount to receive"
-                    value={isNaN(amountOut) ? undefined : amountOut}
+                    value={(isNaN(amountOut) || amountOut < 0) ? undefined : amountOut}
                     disabled={true}
                     onKeyPress={(ev) => {
                       if (ev.key === "Enter") {
@@ -493,7 +495,6 @@ export const MainPage = () => {
                   </Select>
                 </Input.Group>
                 <span style={{ fontSize: 12 }}>Assistant reward: {reward ? +reward.toPrecision(4) : 0} {selectedDestination && selectedDestination.token.symbol}{selectedDestination && `. Active assistants: ${countAssistants}.`}</span>
-
                 <Form.Item
                   hasFeedback
                   style={{ width: "100%", marginTop: 20 }}
