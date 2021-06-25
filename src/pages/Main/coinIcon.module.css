@@ -1,0 +1,10 @@
+.icon svg {
+  height: auto;
+  width: auto;
+  display: inline-block;
+}
+
+.icon svg g .white{
+  fill: #fff !important;
+  stroke: #fff !important;
+}

@@ -122,5 +122,5 @@ export const HowItWorksPage = () =>
       </div>
 
     </div>
-  </div>;
+  </div>
 

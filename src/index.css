@@ -24,3 +24,22 @@ svg .white {
   fill: #fff !important;
   stroke: #fff !important;
 }
+
+.form-control {
+  background-color: #141414 !important;
+  border-radius: 2px !important;
+  border: 1px solid #1C8FFF !important;
+  font-size: 16px !important;
+  color: #fff !important;
+  padding-top: 9px !important;
+  padding-bottom: 9px !important;
+  box-sizing: border-box !important;
+}
+
+.form-control {
+  height: 42px !important;
+}
+
+.ml-form-successContent p, .ml-form-successContent h4 {
+  text-align: center !important;
+}

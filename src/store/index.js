@@ -10,25 +10,32 @@ import {
   REGISTER
 } from 'redux-persist';
 import storage from "redux-persist/lib/storage";
+
 import transfersReducer from './transfersSlice';
 import destAddressReducer from './destAddressSlice';
 import directionsReducer from './directionsSlice';
 import connectionSlice from './connectionSlice';
 import governanceSlice from './governanceSlice';
+import cdnIconsSlice from './cdnIconsSlice';
+import inputsSlice from './inputsSlice';
+import addedTokensSlice from './addedTokensSlice';
 
 const rootReducer = combineReducers({
   transfers: transfersReducer,
   destAddress: destAddressReducer,
   directions: directionsReducer,
   connection: connectionSlice,
-  governance: governanceSlice
+  governance: governanceSlice,
+  cdnIcons: cdnIconsSlice,
+  inputs: inputsSlice,
+  addedTokens: addedTokensSlice
 });
 
 const persistConfig = {
   key: 'root',
   version: 1,
   storage,
-  whitelist: ['transfers', 'destAddress'],
+  whitelist: ['transfers', 'destAddress', 'addedTokens'],
 }
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -51,11 +58,3 @@ const getStore = () => {
 export default getStore;
 
 export const getPersist = (state) => state._persist;
-
-/*
-export default configureStore({
-  reducer: {
-    counter: counterReducer,
-    auth: authReducer,
-  },
-});*/

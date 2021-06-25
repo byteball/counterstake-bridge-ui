@@ -1,7 +1,6 @@
 import socket from "./socket";
 import { startWatchingContractForClaims } from "./evm";
 
-
 export const startWatchingSourceBridge = async (src_network, src_bridge_aa) => {
   if (src_network === 'Obyte') {
     await socket.justsaying("light/new_aa_to_watch", { aa: src_bridge_aa });

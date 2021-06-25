@@ -1,9 +1,7 @@
-import React from "react";
 import { Link } from "react-router-dom";
 import { Collapse, Typography } from "antd";
 import { DownOutlined } from "@ant-design/icons";
 import { Helmet } from "react-helmet-async";
-import { ReactComponent as Protocols } from "./img/protocols.svg";
 
 import styles from "./FaqPage.module.css";
 
@@ -145,8 +143,8 @@ export const FaqPage = () => {
         >
           <p>
             See below:
-            <div>
-              <Protocols style={{ maxWidth: 560, marginTop: 5 }} />
+            <div style={{ maxWidth: 560, marginTop: 5 }}>
+              <img src="/protocols.svg" alt="How does Counterstake compare against other cross-chain bridges?" />
             </div>
             Counterstake is absolutely decentralized and more universal than most other bridges.
           </p>

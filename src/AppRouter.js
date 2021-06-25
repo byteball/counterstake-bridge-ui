@@ -1,5 +1,7 @@
 import React from "react";
 import { Router, Route } from "react-router-dom";
+
+import { MainLayout } from "./components/MainLayout/MainLayout";
 import historyInstance from "./historyInstance";
 import {
   HowItWorksPage,
@@ -7,10 +9,8 @@ import {
   CSTokenPage,
   FaqPage,
   MainPage,
-  GovernancePage,
 } from "./pages";
 
-import { MainLayout } from "./components/MainLayout/MainLayout";
 
 const AppRouter = () => {
 

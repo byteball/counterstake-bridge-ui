@@ -8,6 +8,7 @@ import styles from "./MainLayout.module.css";
 import { MainMenu } from "../MainMenu/MainMenu";
 import { SocialIcons } from "../SocialIcons/SocialIcons";
 import historyInstance from "../../historyInstance";
+import { ScrollToTop } from "components/ScrollToTop/ScrollToTop";
 
 const { Header, Content, Footer } = Layout;
 
@@ -31,6 +32,7 @@ export const MainLayout = ({ children }) => {
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
+      <ScrollToTop />
       <Header
         style={{
           background: "#141414",

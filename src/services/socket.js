@@ -26,7 +26,7 @@ const getAAPayment = (messages = [], recipients = [], asset) => messages.find(m 
 const handleEventBridge = async (err, result) => {
   const dispatch = store.dispatch;
   const state = store.getState();
-  //console.log('state', state)
+  
   const transfers = state.transfers;
 
   const current_dest_addresses = Object.keys(state.destAddress).map((network) => state.destAddress[network]).filter((a) => a);
