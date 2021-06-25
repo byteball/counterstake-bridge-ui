@@ -338,7 +338,7 @@ export const MainPage = () => {
       return;
     const address = await signer.getAddress();
     const symbol = selectedDestination.token.symbol;
-    const currentChainId = chainIds[environment][selectedDestination.token.network];
+    const destinationChainId = chainIds[environment][selectedDestination.token.network];
 
     if (selectedDestination.type !== 'expatriation') return;
 
@@ -352,7 +352,7 @@ export const MainPage = () => {
       },
     };
 
-    if (chainId === currentChainId && !(addedTokens[address]?.[chainId] && (addedTokens[address]?.[chainId]?.includes(symbol)))) {
+    if (chainId === destinationChainId && !(addedTokens[address]?.[chainId] && (addedTokens[address]?.[chainId]?.includes(symbol)))) {
       const wasAdded = await window.ethereum.request({
         method: 'wallet_watchAsset',
         params
@@ -360,10 +360,10 @@ export const MainPage = () => {
       if (wasAdded) {
         dispatch(addTokenToTracked({ address, chainId, symbol }))
       }
-    } else if (!pendingTokens[currentChainId]) {
-      setPendingTokens({ ...pendingTokens, [currentChainId]: [params] })
-    } else if (pendingTokens[currentChainId] && !pendingTokens[currentChainId].find((t) => t.options.symbol === params.options.symbol)) {
-      setPendingTokens({ ...pendingTokens, [currentChainId]: [...pendingTokens[currentChainId], params] })
+    } else if (!pendingTokens[destinationChainId]) {
+      setPendingTokens({ ...pendingTokens, [destinationChainId]: [params] })
+    } else if (pendingTokens[destinationChainId] && !pendingTokens[destinationChainId].find((t) => t.options.symbol === params.options.symbol)) {
+      setPendingTokens({ ...pendingTokens, [destinationChainId]: [...pendingTokens[destinationChainId], params] })
     };
   }
 
