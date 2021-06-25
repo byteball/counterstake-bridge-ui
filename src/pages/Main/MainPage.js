@@ -232,7 +232,7 @@ export const MainPage = () => {
 
         if (allowance.lt(bnAmount)) {
           const approval_res = await tokenContract.approve(selectedDestination.src_bridge_aa, MAX_UINT256);
-          message.info("After the approval gets mined, Metamask will pop up again and request you to confirm the actual transfer", 3);
+          message.info("After the approval gets mined, Metamask will pop up again and request you to confirm the actual transfer", 6);
           //await wait(2000); // wait for the provider to update our nonce
           await approval_res.wait();
         }
@@ -258,7 +258,7 @@ export const MainPage = () => {
       ts: Date.now(),
     };
     dispatch(addTransfer(transfer));
-    message.success("The translation has been successfully created and added to the list below", 2)
+    message.success("Transfer sent and added to the list below", 5)
     // start watching dst_bridge_aa on Obyte side
     startWatchingDestinationBridge(selectedDestination.token.network, selectedDestination.dst_bridge_aa);
 
