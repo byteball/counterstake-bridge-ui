@@ -7,7 +7,6 @@ import obyte from "obyte";
 import { ethers } from "ethers";
 import { useSelector, useDispatch } from 'react-redux';
 import QRButton from "obyte-qr-button";
-import { isEqual } from "lodash";
 
 import { addTransfer, updateTransferStatus } from "store/transfersSlice";
 import { selectDestAddress, setDestAddress } from "store/destAddressSlice";
@@ -19,12 +18,13 @@ import { generateLink } from "utils/generateLink";
 import { ReactComponent as MetamaskLogo } from "./metamask-fox.svg";
 import { TransferList } from "components/TransferList/TransferList";
 import { getPersist } from "store";
-import { getCoinsIcon, updateBridges, updateTransfersStatus } from "store/thunks";
+import { getCoinIcons, updateBridges, updateTransfersStatus } from "store/thunks";
 import { getCoinIcon } from "./getCoinIcon";
 import { selectConnectionStatus } from "store/connectionSlice";
 import { selectInputs } from "store/inputsSlice";
 
 import styles from "./MainPage.module.css";
+import { addTokenToTracked, selectAddedTokens } from "store/addedTokensSlice";
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -62,10 +62,6 @@ const MAX_UINT256 = ethers.BigNumber.from(2).pow(256).sub(1);
 
 const metamaskDownloadUrl = "https://metamask.io/download";
 
-function wait(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 export const MainPage = () => {
   const [width] = useWindowSize();
   const { inputs, loaded } = useSelector(selectInputs)
@@ -85,7 +81,9 @@ export const MainPage = () => {
   const searchInputInRef = useRef(null);
   const searchInputOutRef = useRef(null);
   const [chainId, setChainId] = useState();
+  const [inFocus, setInFocus] = useState(true);
   const [pendingTokens, setPendingTokens] = useState({});
+  const addedTokens = useSelector(selectAddedTokens);
 
   useEffect(() => {
     if (rehydrated && isOpenConnection) {
@@ -94,7 +92,7 @@ export const MainPage = () => {
   }, [rehydrated, isOpenConnection])
 
   useEffect(() => {
-    dispatch(getCoinsIcon())
+    dispatch(getCoinIcons())
   }, []);
 
   useEffect(() => {
@@ -156,6 +154,16 @@ export const MainPage = () => {
   };
 
   useEffect(() => {
+    window.addEventListener('focus', () => {
+      setInFocus(true);
+    });
+
+    window.addEventListener('blur', () => {
+      setInFocus(false);
+    });
+  }, []);
+
+  useEffect(() => {
     const network = selectedDestination?.token?.network;
     if (network) {
       const value = addresses[network];
@@ -211,8 +219,8 @@ export const MainPage = () => {
     if (!window.ethereum)
       return setError(<>MetaMask not found. You can download it <a target="_blank" rel="noopener" href={metamaskDownloadUrl}>here</a>.</>);
     await loginEthereum();
-    const bnAmount = ethers.utils.parseUnits(amountIn + '', selectedInput.token.decimals);
-    const bnReward = ethers.utils.parseUnits(reward + '', selectedInput.token.decimals);
+    const bnAmount = ethers.utils.parseUnits(Number(amountIn).toFixed(selectedInput.token.decimals), selectedInput.token.decimals);
+    const bnReward = ethers.utils.parseUnits(Number(reward).toFixed(selectedInput.token.decimals), selectedInput.token.decimals);
     const sender_address = await signer.getAddress();
     const dest_address = recipient.value;
     let res;
@@ -278,7 +286,6 @@ export const MainPage = () => {
     }
   }
 
-  const indexCurrentInput = selectedInput && inputs && (inputs.length > 0) && inputs.findIndex((f) => isEqual(f, selectedInput));
   const inputNetwork = selectedInput?.token.network;
   const inputChainId = inputNetwork && chainIds[environment]?.[inputNetwork]
 
@@ -287,6 +294,9 @@ export const MainPage = () => {
       setTokenIsInitialized(true);
       setSelectedInput(inputs[0]);
       setSelectedDestination(inputs[0].destinations[0])
+    } else if (tokenIsInitialized && inputs && selectedInput && selectedDestination && inputs.length > 0) {
+      const newDestinationData = inputs[selectedInput.index].destinations[selectedDestination.index];
+      setSelectedDestination(newDestinationData);
     }
   }, [inputs, tokenIsInitialized])
 
@@ -305,14 +315,57 @@ export const MainPage = () => {
   }, [isOpenConnection])
 
   useEffect(async () => {
-    if (chainId in pendingTokens) {
-      await wait(1500);
-      await window.ethereum.request({
-        method: 'wallet_watchAsset',
-        params: pendingTokens[chainId]
+    if (window.ethereum && inFocus && (chainId in pendingTokens)) {
+      const address = await signer.getAddress();
+      pendingTokens[chainId].forEach(async params => {
+        if (!(addedTokens[address]?.[chainId] && (addedTokens[address]?.[chainId]?.includes(params.options.symbol)))) {
+          window.ethereum.request({
+            method: 'wallet_watchAsset',
+            params
+          }).then(data => {
+            if (data) {
+              dispatch(addTokenToTracked({ address, chainId, symbol: params.options.symbol }))
+            }
+          });
+        }
       });
+      setPendingTokens((p) => ({ ...p, [chainId]: [] }));
     }
-  }, [chainId]);
+  }, [chainId, inFocus]);
+
+  const addToken = async () => {
+    if (!window.ethereum) // no metamask installed
+      return;
+    const address = await signer.getAddress();
+    const symbol = selectedDestination.token.symbol;
+    const currentChainId = chainIds[environment][selectedDestination.token.network];
+
+    if (selectedDestination.type !== 'expatriation') return;
+
+    const params = {
+      type: 'ERC20',
+      options: {
+        address: selectedDestination.dst_bridge_aa,
+        symbol,
+        decimals: selectedDestination.token.decimals,
+        image: `${process.env.REACT_APP_ICON_CDN_URL}/${String(symbol).toUpperCase()}.svg`
+      },
+    };
+
+    if (chainId === currentChainId && !(addedTokens[address]?.[chainId] && (addedTokens[address]?.[chainId]?.includes(symbol)))) {
+      const wasAdded = await window.ethereum.request({
+        method: 'wallet_watchAsset',
+        params
+      })
+      if (wasAdded) {
+        dispatch(addTokenToTracked({ address, chainId, symbol }))
+      }
+    } else if (!pendingTokens[currentChainId]) {
+      setPendingTokens({ ...pendingTokens, [currentChainId]: [params] })
+    } else if (pendingTokens[currentChainId] && !pendingTokens[currentChainId].find((t) => t.options.symbol === params.options.symbol)) {
+      setPendingTokens({ ...pendingTokens, [currentChainId]: [...pendingTokens[currentChainId], params] })
+    };
+  }
 
   return (
     <>
@@ -351,7 +404,7 @@ export const MainPage = () => {
                     <Select
                       style={{ width: !width || width > 560 ? "65%" : "100%", fontSize: 18 }}
                       size="large"
-                      loading={!inputs}
+                      loading={inputs.length === 0}
                       showSearch
                       placeholder="Input currency and network"
                       optionFilterProp="label"
@@ -361,7 +414,7 @@ export const MainPage = () => {
                         setSelectedDestination(inputs[index].destinations[0])
                         searchInputInRef?.current?.blur();
                       }}
-                      value={indexCurrentInput >= 0 ? indexCurrentInput : undefined}
+                      value={selectedInput && selectedInput.index}
                     >
                       {inputs && inputs.map((input) => (
                         <Select.Option key={input.index} value={input.index} label={`${input.token.symbol} on ${input.token.network}`}>
@@ -419,14 +472,14 @@ export const MainPage = () => {
                   <Select
                     style={{ width: !width || width > 560 ? "65%" : "100%", fontSize: 18 }}
                     size="large"
-                    loading={!inputs}
+                    loading={inputs.length === 0}
                     placeholder="Token to receive"
                     ref={searchInputOutRef}
                     onChange={index => {
                       setSelectedDestination(selectedInput.destinations[index])
                       searchInputOutRef?.current?.blur();
                     }}
-                    value={selectedInput && selectedDestination && selectedInput.destinations.indexOf(selectedDestination)}
+                    value={selectedDestination?.index}
                     optionFilterProp="label"
                     showSearch
                   >
@@ -505,30 +558,7 @@ export const MainPage = () => {
                   !amountIn ||
                   !(amountOut > 0)
                 }
-                onClick={() => {
-                  const symbol = selectedDestination.token.symbol;
-                  const currentChainId = chainIds[environment][selectedDestination.token.network];
-                  if (selectedDestination.type !== 'expatriation' || !window.ethereum) return;
-
-                  const params = {
-                    type: 'ERC20',
-                    options: {
-                      address: selectedDestination.dst_bridge_aa,
-                      symbol,
-                      decimals: selectedDestination.token.decimals,
-                      image: `${process.env.REACT_APP_ICON_CDN_URL}/${String(symbol).toUpperCase()}.svg`
-                    },
-                  };
-
-                  if (chainId === currentChainId) {
-                    window.ethereum.request({
-                      method: 'wallet_watchAsset',
-                      params
-                    });
-                  } else {
-                    setPendingTokens({ ...pendingTokens, [currentChainId]: params })
-                  };
-                }}
+                onClick={addToken}
                 href={generateLink({
                   amount: amountIn * 10 ** selectedInput.token.decimals,
                   aa: selectedDestination.src_bridge_aa,
@@ -551,7 +581,7 @@ export const MainPage = () => {
                   !amountIn ||
                   !(amountOut > 0)
                 }
-                onClick={() => inputChainId === chainId ? handleClickTransfer().catch((reason) => { (reason.code === "INSUFFICIENT_FUNDS" || reason.code === -32603) ? message.error("An error occurred, please check your balance") : console.error(`An error occurred, please write and we will help. (${reason?.code || "NO_CODE"})`); }) : message.error(`Wrong network selected, please select ${selectedInput.token.network} in MetaMask`)}
+                onClick={async () => { await addToken(); inputChainId === chainId ? handleClickTransfer().catch((reason) => { (reason.code === "INSUFFICIENT_FUNDS" || reason.code === -32603) ? message.error("An error occurred, please check your balance") : console.error(`An error occurred, please write and we will help. (${reason?.code || "NO_CODE"}). ${reason.reason}`); }) : message.error(`Wrong network selected, please select ${selectedInput.token.network} in MetaMask`); }}
               >
                 Transfer
               </Button>}

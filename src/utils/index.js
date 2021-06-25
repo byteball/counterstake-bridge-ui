@@ -1,3 +1,3 @@
 export * from "./encodeData";
-export * from "./other";
+export * from "./otherUtils";
 export * from "./generateLink";

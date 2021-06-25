@@ -18,6 +18,7 @@ import connectionSlice from './connectionSlice';
 import governanceSlice from './governanceSlice';
 import cdnIconsSlice from './cdnIconsSlice';
 import inputsSlice from './inputsSlice';
+import addedTokensSlice from './addedTokensSlice';
 
 const rootReducer = combineReducers({
   transfers: transfersReducer,
@@ -26,14 +27,15 @@ const rootReducer = combineReducers({
   connection: connectionSlice,
   governance: governanceSlice,
   cdnIcons: cdnIconsSlice,
-  inputs: inputsSlice
+  inputs: inputsSlice,
+  addedTokens: addedTokensSlice
 });
 
 const persistConfig = {
   key: 'root',
   version: 1,
   storage,
-  whitelist: ['transfers', 'destAddress'],
+  whitelist: ['transfers', 'destAddress', 'addedTokens'],
 }
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

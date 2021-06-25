@@ -36,7 +36,7 @@ export const TransferList = () => {
     )}
 
     {recentTransfers.length !== 0 ? recentTransfers.map(t => {
-      if (t.status === "claimed" || t.status === "claim_confirmed") {
+      if (t.status && (t.status === "claimed" || t.status === "claim_confirmed")) {
         return <Badge.Ribbon key={'list-item' + t.txid} placement="start" style={{ top: 0 }} text="Finished"> <Transfer key={t.txid} {...t} /> </Badge.Ribbon>
       } else {
         return <Transfer key={'list-item' + t.txid} {...t} />
@@ -44,7 +44,7 @@ export const TransferList = () => {
     }) : null}
 
     {visibleOlder && olderTransfers.map(t => {
-      if (t.status === "claimed" || t.status === "claim_confirmed") {
+      if (t.status && (t.status === "claimed" || t.status === "claim_confirmed")) {
         return <Badge.Ribbon key={'list-item' + t.txid} placement="start" style={{ top: 0 }} text="Finished"> <Transfer key={t.txid} {...t} /> </Badge.Ribbon>
       } else {
         return <Transfer key={'list-item' + t.txid} {...t} />
@@ -63,17 +63,18 @@ const Transfer = ({ src_token, amount, dst_token, status, dest_address, reward, 
 
   return <Card
     bodyStyle={{ padding: 0 }}
-    style={{ marginBottom: 20, cursor: "pointer" }}
-    onClick={() => setIsOpen(!isOpen)}
+    style={{ marginBottom: 20 }}
   >
     <Row
       gutter="10"
       align="middle"
+      onClick={() => setIsOpen(!isOpen)}
       style={{
         paddingTop: 24,
         paddingLeft: 24,
         paddingRight: 24,
-        paddingBottom: 24
+        paddingBottom: 24,
+        cursor: "pointer"
       }}
     >
 
@@ -143,7 +144,7 @@ const Transfer = ({ src_token, amount, dst_token, status, dest_address, reward, 
 
 export const getStatusLabel = (network, status) => {
   if (network === "Obyte") {
-    const index = ["sent", "confirmed", "claimed"].findIndex((s) => s === status)
+    const index = ["sent", "confirmed", "claimed", "claim_confirmed"].findIndex((s) => s === status)
     return index === 2 ? 3 : index
   } else {
     return ["sent", "mined", "claimed", "claim_confirmed"].findIndex((s) => s === status)

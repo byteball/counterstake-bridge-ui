@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { getCoinsIcon } from './thunks';
+import { getCoinIcons } from './thunks';
 
 export const cdnIconsSlice = createSlice({
   name: 'cdnIcons',
@@ -8,7 +8,7 @@ export const cdnIconsSlice = createSlice({
     loaded: false
   },
   extraReducers: {
-    [getCoinsIcon.fulfilled]: (state, action) => {
+    [getCoinIcons.fulfilled]: (state, action) => {
       state.list = action.payload;
       state.loaded = true;
     },

@@ -36,8 +36,8 @@ export const getObyteGovernanceParams = createAsyncThunk(
   }
 );
 
-export const getCoinsIcon = createAsyncThunk(
-  'getCoinsIcon',
+export const getCoinIcons = createAsyncThunk(
+  'getCoinIcons',
   async () => {
     let list = [];
     const response = await fetch(`${process.env.REACT_APP_ICON_CDN_URL}/list.json`);
