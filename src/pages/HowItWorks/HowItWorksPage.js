@@ -51,7 +51,7 @@ export const HowItWorksPage = () =>
   <div>
     <Helmet title="Counterstake Bridge - How It Works" />
     <div className={styles.howItWorks}>
-      <Title level={1}>How it works</Title>
+      <Title level={1}>How It Works</Title>
 
       <div className={styles.item}>
         <div className={styles.info}>
@@ -93,7 +93,7 @@ export const HowItWorksPage = () =>
       <div className={styles.item}>
         <div className={styles.info}>
           <Paragraph>This process of exporting an asset from its home chain and getting the same amount of newly issued imported asset on the foreign chain is called <b>expatriation</b>. The imported asset, such as GBYTE on Ethereum or ETH on Obyte, naturally represents the original asset on the foreign chain. After using the imported asset on the foreign chain, the same or another user can <b>repatriate</b> it back to the home chain by burning the imported asset on the foreign chain, claiming the burned amount on the home chain, and unlocking the previously locked asset on the home chain if the claim succeeds.</Paragraph>
-          <Paragraph>As long as the protocol works correctly and its watchdogs successfully challenge all fraudulent claims, the total amount of the imported asset issued on the foreign chain exactly matches the total amount of the exported asset locked on its home page. Its total circulating supply stays the same, just part of the coins "travel" in foreign chains.</Paragraph>
+          <Paragraph>As long as the protocol works correctly and its watchdogs successfully challenge all fraudulent claims, the total amount of the imported asset issued on the foreign chain exactly matches the total amount of the exported asset locked on its home chain. Its total circulating supply stays the same, just part of the coins "travel" in foreign chains.</Paragraph>
         </div>
         <div className={styles.image}>
           <Networks />
@@ -107,7 +107,7 @@ export const HowItWorksPage = () =>
         <div className={styles.info}>
           <Paragraph>The described process might take rather long time as the user has to wait for at least one challenging period, and the period has to be long enough to give the challengers enough time to counterstake on fraudulent claims. The first challenging period is 3 days by default.</Paragraph>
           <Paragraph>However, <b>assistants</b> can accelerate the process for users by claiming the transfers for them and immediately paying the claimed coins to the user, less a reward to the assistant. The assistant will then wait for the challenging period to expire, defend the claim if necessary, and withdraw the claimed coins with profit. When sending a transfer, users indicate the reward they are prepared to pay to an assistant who picks their transfer. The reward should be large enough to cover the network fees on the destination chain and make a profit for the assistant that is adequate to the risk the assistant takes and the capital they lock in claims.</Paragraph>
-          <Paragraph>Assistants can be either solo asssistants or pooled ones that pool the capital from several investors and are operated by a manager. Pooled assistants are more likely to process large transfers. Assistants usually double as watchogs and can challenge fraudulent claims as well as help users accelerate their transfers.</Paragraph>
+          <Paragraph>Assistants can be either solo assistants or pooled ones that pool the capital from several investors and are operated by a manager. Pooled assistants are more likely to process large transfers. Assistants usually double as watchdogs and can challenge fraudulent claims as well as help users accelerate their transfers.</Paragraph>
         </div>
       </div>
 

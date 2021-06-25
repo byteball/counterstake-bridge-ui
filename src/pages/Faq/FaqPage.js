@@ -40,7 +40,7 @@ export const FaqPage = () => {
           className={styles.panel}
         >
           <p>
-            It depends on the direction of the transfer as the network fees on the destination network are one of the main factors that determines the cost. On Obyte, the fees are fractions of a cent while on Ethereum the total fees required to receive a transfer are $120 (assuming 100 gwei gas price and 1 ETH = $3,000). These fees don't depend on the size of the transfer, that's why larger transfers are less expensive percentage-wise. On top of that, you need to pay a reward to an assistant who helps you to receive your transfer. This website sets the reward to 1% but it may go down in the future thanks to competition among assistants.
+            It depends on the direction of the transfer as the network fees on the destination network are one of the main factors that determines the cost. On Obyte, the fees are fractions of a cent while on Ethereum the total fees required to receive a transfer are about $16 (assuming 20 gwei gas price and 1 ETH = $2,000). These fees don't depend on the size of the transfer, that's why larger transfers are less expensive percentage-wise. On top of that, you need to pay a reward to an assistant who helps you to receive your transfer. This website sets the reward to 1% but it may go down in the future thanks to competition among assistants.
           </p>
         </Panel>
 
@@ -152,13 +152,13 @@ export const FaqPage = () => {
             Note that centralized vs decentralized is not a black-or-white choice, there are varying degrees of decentralization offered by other protocols. For example, a group of custodians bound by a multisignature scheme (including similar technologies such as threshold signatures and MPC) would be more decentralized than a single custodian. A larger group would be more decentralized than a smaller group. A group that is free to join would be more decentralized than a closed group. Absence of any groups at all is the gold standard of decentralization, which Counterstake meets.
           </p>
           <p>
-            We care about decentralization not for the sake of decentralization but because it allows to reduce risks of theft (by hackers or insiders), shut-down, censorship, or regulatory takeover. More decentralized protocols better protect the funds of their users, are harder to stop, are more open to new and small-cap coins, are less likely to censor specific transfers, users, or coins, and are less vulnerable to regulatory interference such as requirement of KYC and other requirements that might cause friction or infringe on privacy.
+            We care about decentralization not for the sake of decentralization but because it allows us to reduce risks of theft (by hackers or insiders), shut-down, censorship, or regulatory takeover. More decentralized protocols better protect the funds of their users, are harder to stop, are more open to new and small-cap coins, are less likely to censor specific transfers, users, or coins, and are less vulnerable to regulatory interference such as requirement of KYC and other requirements that might cause friction or infringe on privacy.
           </p>
           <p>
             The same goes about universality. Different protocols make different requirements to the chains they support, and some are more restrictive than others. Some protocols require custom implementations for each <i>direction</i> of transfer, thus making it N<sup>2</sup> amount of work to support N chains. Other protocols, including Counterstake, require a one-time implementation on each supported chain.
           </p>
           <p>
-            We care about universality because it allows to easily reuse knowledge and experience among various tokens and networks. For developers, universality means that the same APIs work across many tokens and networks.
+            We care about universality because it allows us to easily reuse knowledge and experience among various tokens and networks. For developers, universality means that the same APIs work across many tokens and networks.
           </p>
         </Panel>
 
