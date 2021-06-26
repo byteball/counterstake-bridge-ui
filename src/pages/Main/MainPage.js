@@ -84,7 +84,7 @@ export const MainPage = () => {
   const [inFocus, setInFocus] = useState(true);
   const [pendingTokens, setPendingTokens] = useState({});
   const addedTokens = useSelector(selectAddedTokens);
-  const max_amount = selectedDestination && selectedDestination.max_amount && (selectedDestination.max_amount.toPrecision(4)) || 0;
+  const max_amount = (selectedDestination && selectedDestination.max_amount && (selectedDestination.max_amount.toPrecision(4))) || 0;
 
   useEffect(() => {
     if (rehydrated && isOpenConnection) {
