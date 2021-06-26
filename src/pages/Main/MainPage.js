@@ -250,6 +250,7 @@ export const MainPage = () => {
     const transfer = {
       src_token: selectedInput.token,
       dst_token: selectedDestination.token,
+      dst_bridge_aa: selectedDestination.dst_bridge_aa,
       amount: amountIn,
       reward,
       sender_address,
