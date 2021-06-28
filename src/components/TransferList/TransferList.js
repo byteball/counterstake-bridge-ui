@@ -119,7 +119,7 @@ const Transfer = ({ src_token, amount, dst_token, status, dest_address, reward, 
           xs={{ span: 24 }}
         >
           <div style={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 24, wordBreak: "break-all" }}>
-            <b>Recipient address</b>: <div>{dest_address}</div>
+            <b>Recipient address</b>: <div style={{ fontFamily: "-apple-system, Roboto, Arial, sans-serif" }}>{dest_address}</div>
           </div>
         </Col>
         <Col
@@ -134,7 +134,7 @@ const Transfer = ({ src_token, amount, dst_token, status, dest_address, reward, 
         <Col lg={6}
           sm={{ span: 24 }}
           xs={{ span: 24 }}>
-          <div style={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 24, wordBreak: "break-all"}}>
+          <div style={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 24, wordBreak: "break-all" }}>
             <b>Created</b>: <div>{moment.unix(ts / 1000).format("LLL")}</div>
           </div>
         </Col>
@@ -142,12 +142,12 @@ const Transfer = ({ src_token, amount, dst_token, status, dest_address, reward, 
       <Row>
         <Col lg={12}>
           <div style={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 24, wordBreak: "break-all" }}>
-            <b>Sent in</b>: <div><a href={getExplorerLink(src_token.network, txid)} target="_blank" rel="noopener">{txid}</a></div>
+            <b>Sent in</b>: <div style={{ fontFamily: "-apple-system, Roboto, Arial, sans-serif" }}><a href={getExplorerLink(src_token.network, txid)} target="_blank" rel="noopener">{txid}</a></div>
           </div>
         </Col>
         {claim_txid && <Col lg={12}>
           <div style={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 24, wordBreak: "break-all" }}>
-            <b>Claimed in</b>: <div><a href={getExplorerLink(dst_token.network, claim_txid)} target="_blank" rel="noopener">{claim_txid}</a></div>
+            <b>Claimed in</b>: <div style={{ fontFamily: "-apple-system, Roboto, Arial, sans-serif" }}><a href={getExplorerLink(dst_token.network, claim_txid)} target="_blank" rel="noopener">{claim_txid}</a></div>
           </div>
         </Col>}
       </Row>
