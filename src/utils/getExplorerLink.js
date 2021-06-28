@@ -1,7 +1,7 @@
 export const getExplorerLink = (network, txid) => {
   const env = process.env.REACT_APP_ENVIRONMENT;
 
-  if (env !== "testnet" && env !== "mainnet") return txid
+  if (!(env === "testnet" || env === "mainnet")) return txid
 
   switch (network) {
     case 'Obyte':
