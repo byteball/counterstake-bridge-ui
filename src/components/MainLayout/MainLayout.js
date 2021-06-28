@@ -103,6 +103,9 @@ export const MainLayout = ({ children }) => {
       </Content>
       <Footer style={{ backgroundColor: "#141414" }}>
         <SocialIcons centered />
+        <div style={{ textAlign: "center", marginTop: 10 }}>
+          &copy; <a href="https://obyte.org" target="_blank" rel="noopener" style={{ color: "#fff" }}>Obyte</a>
+        </div>
       </Footer>
     </Layout>
   );

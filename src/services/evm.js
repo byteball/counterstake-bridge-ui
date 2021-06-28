@@ -20,6 +20,7 @@ const providers = {
 // new claim on Ethereum or BSC
 const onNewClaim = (claim_num, author_address, sender_address, recipient_address, txid, txts, amount, reward, stake, data, expiry_ts, event) => {
   console.log('NewClaim event', claim_num, author_address, sender_address, recipient_address, txid, txts, amount, reward, stake, data, expiry_ts, event);
+  const claim_txid = event.transactionHash;
   const dispatch = store.dispatch;
   const state = store.getState();
   const transfers = state.transfers;
@@ -28,7 +29,7 @@ const onNewClaim = (claim_num, author_address, sender_address, recipient_address
   if (!transfer)
     return console.log(`claim of unrecognized transfer ${txid}`);
   //transfer.status = 'claimed';
-  dispatch(updateTransferStatus({ txid, status: 'claimed' }));
+  dispatch(updateTransferStatus({ txid, status: 'claimed', claim_txid }));
   setTimeout(() => dispatch(updateTransferStatus({ txid, status: 'claim_confirmed' })), 1000);
 };
 

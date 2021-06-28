@@ -16,7 +16,7 @@ export const updateTransfersStatus = createAsyncThunk(
         if ("dst_bridge_aa" in tr) {
           subscriptions.push(startWatchingDestinationBridge(tr.dst_token.network, tr.dst_bridge_aa))
         }
-        getStatusList.push(getTransferStatus(tr.txid).then((data => ({ txid: tr.txid, status: data || tr.status }))))
+        getStatusList.push(getTransferStatus(tr.txid).then((data => ({ txid: tr.txid, status: data?.status || tr.status, claim_txid: data?.claim_txid }))))
       }
     })
     await Promise.all(subscriptions);
@@ -25,7 +25,7 @@ export const updateTransfersStatus = createAsyncThunk(
 );
 
 export const getObyteGovernanceParams = createAsyncThunk(
-  'updateTransfersStatus',
+  'getGovernanceParams',
   async (_, thunkAPI) => {
 
     // const import_aa = process.env.REACT_APP_OBYTE_IMPORT_AA;

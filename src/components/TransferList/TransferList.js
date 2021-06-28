@@ -7,6 +7,7 @@ import useCollapse from 'react-hook-collapse';
 import { useRef } from "react";
 import { useWindowSize } from "hooks/useWindowSize";
 import { ArrowRightOutlined } from "@ant-design/icons";
+import { getExplorerLink } from "utils/getExplorerLink";
 
 const { Step } = Steps;
 const { Title } = Typography;
@@ -55,7 +56,7 @@ export const TransferList = () => {
   </div>)
 }
 
-const Transfer = ({ src_token, amount, dst_token, status, dest_address, reward, ts }) => {
+const Transfer = ({ src_token, amount, dst_token, status, dest_address, reward, ts, txid, claim_txid }) => {
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef();
   const [width] = useWindowSize();
@@ -137,6 +138,18 @@ const Transfer = ({ src_token, amount, dst_token, status, dest_address, reward, 
             <b>Created</b>: <div>{moment.unix(ts / 1000).format("LLL")}</div>
           </div>
         </Col>
+      </Row>
+      <Row>
+        <Col lg={12}>
+          <div style={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 24, wordBreak: "break-all" }}>
+            <b>Sent in</b>: <div><a href={getExplorerLink(src_token.network, txid)} target="_blank" rel="noopener">{txid}</a></div>
+          </div>
+        </Col>
+        {claim_txid && <Col lg={12}>
+          <div style={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 24, wordBreak: "break-all" }}>
+            <b>Claimed in</b>: <div><a href={getExplorerLink(dst_token.network, claim_txid)} target="_blank" rel="noopener">{claim_txid}</a></div>
+          </div>
+        </Col>}
       </Row>
     </div>
   </Card >

@@ -17,14 +17,20 @@ export const transfersSlice = createSlice({
       if (!transfer)
         throw Error(`transfer not found in updateTransferStatus ${action.payload.txid}`);
       transfer.status = action.payload.status;
+      if (action?.payload?.claim_txid){
+        transfer.claim_txid = action.payload.claim_txid;
+      }
     },
   },
   extraReducers: {
     [updateTransfersStatus.fulfilled]: (state, action) => {
       const listWithChangeInStatus = action.payload;
-      listWithChangeInStatus?.forEach(({ txid, status }) => {
+      listWithChangeInStatus?.forEach(({ txid, status, claim_txid }) => {
         const transferIndex = state.findIndex(t => t.txid === txid);
         state[transferIndex].status = status;
+        if (claim_txid){
+          state[transferIndex].claim_txid = claim_txid;
+        }
       })
     },
     [updateTransfersStatus.rejected]: () => {
