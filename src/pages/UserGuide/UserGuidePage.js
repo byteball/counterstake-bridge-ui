@@ -65,7 +65,7 @@ const Ethereum2ObyteGuide = () => {
     <Paragraph>3. Copy/paste your Obyte address where you want to receive ETH on Obyte. If you don't have your Obyte wallet yet, <a href="https://obyte.org/#download" target="_blank" rel="noopener">install it from obyte.org website</a>. Mobile wallets are recommended, they are lightweight, and it takes only a couple of minutes to get to a fully operational wallet.</Paragraph>
     <img src="/guide/EthereumToObyte/wallet.png" alt="" />
 
-    <Paragraph>4. Click the Transfer button. Metamask confirmation window will pop up. If you are transferring a token other than ETH, you might see two confirmation windows when you transfer it for the first time: one to approve the smart contract to spend your tokens, the other to actually initiate the transfer. Accept both.</Paragraph>
+    <Paragraph>4. Click the Transfer button. MetaMask confirmation window will pop up. If you are transferring a token other than ETH, you might see two confirmation windows when you transfer it for the first time: one to approve the smart contract to spend your tokens, the other to actually initiate the transfer. Accept both.</Paragraph>
     <div className={styles.images}>
       <img src="/guide/EthereumToObyte/confirmation-1.png" alt="" />
       <img src="/guide/EthereumToObyte/confirmation-2.png" alt="" />
@@ -103,7 +103,7 @@ const Obyte2EthereumGuide = () => {
     <Paragraph>2. Type the amount of GBYTE you want to transfer. Note the amount on the right side that you will receive. It is less than the amount you send by the reward you pay to an assistant who picks your transfer and sends you the money soon after the transfer was sent. Thanks to the assistant, you'll receive your money almost immediately while the assistant will claim your transfer and receive its full amount in a few days. The assistant will also pay the network fees necessary to claim your transfer on the destination chain, and that's included in the reward. The fees are quite high on Ethereum, that's why transferring larger amounts would be less expensive percentage-wise.</Paragraph>
     <img src="/guide/ObyteToEthereum/amount.png" alt="" />
 
-    <Paragraph>3. Click the <MetamaskLogo style={{ height: "1em", width: "1em", verticalAlign: "middle" }} /> (MetaMask icon) to fill in your Ethereum address where you will receive your GBYTE. If you don't have MetaMask installed, please <a href="https://metamask.io/download.html" target="_blank" rel="noopener">install</a>. If this is your first time, a window will appear to confirm the connection of the site to your wallet.</Paragraph>
+    <Paragraph>3. Click the <MetamaskLogo style={{ height: "1em", width: "1em", verticalAlign: "middle" }} /> (MetaMask icon) to fill in your Ethereum address where you will receive your GBYTE. If you don't have MetaMask installed, please <a href="https://metamask.io/download.html" target="_blank" rel="noopener">install</a>. While making the first transfer, a MetaMask window will appear and request an approval to connect this website to your wallet.</Paragraph>
     <img src="/guide/ObyteToEthereum/metamask.png" alt="" />
 
     <div className={styles.images}>
