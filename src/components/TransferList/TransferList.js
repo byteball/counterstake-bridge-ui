@@ -119,7 +119,7 @@ const Transfer = ({ src_token, amount, dst_token, status, dest_address, reward, 
           xs={{ span: 24 }}
         >
           <div style={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 24, wordBreak: "break-all" }}>
-            <b>Recipient address</b>: <div>{dest_address}</div>
+            <b>Recipient address</b>: <div style={{ fontFamily: "-apple-system, Roboto, Arial, sans-serif" }}>{dest_address}</div>
           </div>
         </Col>
         <Col
