@@ -6,9 +6,6 @@
 }
 
 .userGuide img {
-  max-width: calc(70% - 80px);
-  text-align: center;
-  box-shadow: 0px 0px 30px 2px #1e90ff;
   margin: 30px;
 }
 
@@ -45,9 +42,22 @@
   text-align: center;
 }
 
-.image img {
-  max-width: 500px;
+.userGuideTab img {
+  display: block;
+  margin: 30px auto;
   width: 90%;
+}
+
+.images {
+  display: flex;
+  justify-content: center;
+}
+
+.images img {
+  max-width: 250px;
+  padding-right: 10px;
+  padding-left: 10px;
+  box-sizing: border-box;
 }
 
 .action {
@@ -90,11 +100,17 @@
 }
 
 @media (max-width: 880px) {
+  .images {
+    justify-content: center;
+  }
+  .images img {
+    width: 30%;
+    max-width: inherit;
+  }
   .userGuide img {
     max-width: calc(100% - 10px);
     text-align: center;
-    box-shadow: 0px 0px 5px 0px #938C93;
-    margin: 0;
+    margin: 0 auto;
     margin-bottom: 1em;
   }
   .item {
@@ -113,5 +129,24 @@
   }
   .image img {
     max-width: 350px;
+  }
+}
+
+@media (max-width: 600px) {
+  .images {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+  }
+  .images img {
+    width: 70%;
+  }
+}
+
+@media (max-width: 400px) {
+  .images img {
+    width: 100%;
   }
 }
