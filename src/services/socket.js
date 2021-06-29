@@ -86,7 +86,7 @@ const handleEventBridge = async (err, result) => {
       if (!transfer)
         return console.log(`claim of somebody else's transfer ${payload.txid} in ${unit}`)
       //transfer.status = 'claim_sent';
-      dispatch(updateTransferStatus({ txid: payload.txid, status: 'claimed' }));
+      dispatch(updateTransferStatus({ txid: payload.txid, status: 'claimed', claim_txid: unit }));
     }
     else
       console.log(`neither transfer nor claim in ${unit}`);
@@ -127,12 +127,12 @@ const handleEventBridge = async (err, result) => {
       const resp = await client.api.getJoint(trigger_unit);
       if (!resp)
         throw Error(`failed to get trigger ${trigger_unit}`);
-      const { unit: { messages, unit } } = resp.joint;
+      const { unit: { messages } } = resp.joint;
       const payload = getAAPayload(messages);
       const transfer = transfers.find(t => t.txid === payload.txid);
       if (!transfer)
         return console.log(`confirmed claim of somebody else's transfer ${payload.txid} in ${trigger_unit}`)
-      dispatch(updateTransferStatus({ txid: payload.txid, status: 'claim_confirmed', claim_txid: unit }));
+      dispatch(updateTransferStatus({ txid: payload.txid, status: 'claim_confirmed' }));
     }
   }
   else
