@@ -86,7 +86,7 @@ const handleEventBridge = async (err, result) => {
       if (!transfer)
         return console.log(`claim of somebody else's transfer ${payload.txid} in ${unit}`)
       //transfer.status = 'claim_sent';
-      dispatch(updateTransferStatus({ txid: payload.txid, status: 'claimed' }));
+      dispatch(updateTransferStatus({ txid: payload.txid, status: 'claimed', claim_txid: unit }));
     }
     else
       console.log(`neither transfer nor claim in ${unit}`);
