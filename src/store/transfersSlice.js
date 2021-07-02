@@ -17,6 +17,8 @@ export const transfersSlice = createSlice({
       if (!transfer)
         throw Error(`transfer not found in updateTransferStatus ${action.payload.txid}`);
       transfer.status = action.payload.status;
+      if (action.payload.new_txid) // replaced by upping the gas price
+        transfer.txid = action.payload.new_txid;
       if (action?.payload?.claim_txid){
         transfer.claim_txid = action.payload.claim_txid;
       }

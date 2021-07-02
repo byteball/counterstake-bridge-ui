@@ -267,8 +267,23 @@ export const MainPage = () => {
     startWatchingDestinationBridge(selectedDestination.token.network, selectedDestination.dst_bridge_aa);
 
     // wait until mined
-    await res.wait();
-    dispatch(updateTransferStatus({ txid: res.hash, status: 'mined' }));
+    try {
+      await res.wait();
+      dispatch(updateTransferStatus({ txid: res.hash, status: 'mined' }));
+    }
+    catch (e) {
+      console.log('wait failed');
+      if (e.code === 'TRANSACTION_REPLACED') {
+        if (e.cancelled) {
+          console.log(`tx ${res.hash} cancelled`);
+        }
+        else {
+          const new_tx = e.replacement;
+          console.log('new tx', new_tx);
+          dispatch(updateTransferStatus({ txid: res.hash, status: 'mined', new_txid: new_tx.hash }));
+        }
+      }
+    }
   };
 
 
