@@ -9,16 +9,16 @@ export const getClaim = async (num, aa, dst_network, bFinished) => {
     if (dst_network === "Obyte") {
       if (bFinished !== undefined) {
         const prefix = bFinished ? 'f_' : 'o_';
-        const clime = await obyte.api.getAaStateVars({ address: aa, var_prefix: prefix + num });
-        return clime?.[prefix + num] || null;
+        const claim = await obyte.api.getAaStateVars({ address: aa, var_prefix: prefix + num });
+        return claim?.[prefix + num] || null;
       } else {
-        const f_clime = await obyte.api.getAaStateVars({ address: aa, var_prefix: 'f_' + num });
-        if (`f_${num}` in f_clime) {
-          return f_clime?.[`f_${num}`] || null;
+        const f_claim = await obyte.api.getAaStateVars({ address: aa, var_prefix: 'f_' + num });
+        if (`f_${num}` in f_claim) {
+          return f_claim?.[`f_${num}`] || null;
         } else {
-          const o_clime = await obyte.api.getAaStateVars({ address: aa, var_prefix: 'o_' + num });
-          if (`o_${num}` in o_clime) {
-            return o_clime?.[`o_${num}`] || null;
+          const o_claim = await obyte.api.getAaStateVars({ address: aa, var_prefix: 'o_' + num });
+          if (`o_${num}` in o_claim) {
+            return o_claim?.[`o_${num}`] || null;
           } else {
             return null
           }
