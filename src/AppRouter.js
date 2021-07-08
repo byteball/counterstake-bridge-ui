@@ -1,6 +1,8 @@
 import React from "react";
+import { useDispatch } from "react-redux";
 import { Router, Route } from "react-router-dom";
 
+import { getBridgesParams } from "store/thunks";
 import { MainLayout } from "./components/MainLayout/MainLayout";
 import historyInstance from "./historyInstance";
 import {
@@ -13,6 +15,8 @@ import {
 
 
 const AppRouter = () => {
+  const dispatch = useDispatch();
+  dispatch(getBridgesParams())
 
   return (
     <Router history={historyInstance}>

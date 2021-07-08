@@ -12,6 +12,26 @@ export const transfersSlice = createSlice({
     addTransfer: (state, action) => {
       state.push(action.payload);
     },
+    claimMyself: (state, action) => {
+      // payload type: 
+      // { 
+      //   txid: String,
+      //   claim_num?: number | String,
+      //   txts: Number
+      // }
+
+      const transfer = state.find(t => t.txid === action.payload.txid);
+
+      if (!transfer)
+        throw Error(`transfer not found in claimMyself ${action.payload.txid}`);
+
+      transfer.self_claimed = Date.now();
+
+      if (action.payload.claim_num) {
+        transfer.self_claimed_num = action.payload.claim_num;
+      }
+
+    },
     updateTransferStatus: (state, action) => {
       const transfer = state.find(t => t.txid === action.payload.txid);
       if (!transfer)
@@ -22,16 +42,46 @@ export const transfersSlice = createSlice({
       if (action?.payload?.claim_txid){
         transfer.claim_txid = action.payload.claim_txid;
       }
+      if (action?.payload?.ts_confirmed) {
+        transfer.ts_confirmed = action.payload.ts_confirmed;
+      }
+      if (action?.payload?.expiry_ts) {
+        transfer.expiry_ts = action.payload.expiry_ts;
+      }
     },
+    withdrawalConfirmed: (state, action) => {
+      const transfer = state.find(t => t.txid === action.payload.txid);
+
+      if (!transfer)
+        throw Error(`transfer not found in updateTransferStatus ${action.payload.txid}`);
+
+      transfer.is_finished = 1;
+    },
+    updateExpireTs: (state, action) => {
+      const transfer = state.find(t => t.txid === action.payload.txid);
+
+      if (!transfer)
+        throw Error(`transfer not found in updateTransferStatus ${action.payload.txid}`);
+
+      transfer.expiry_ts = action.payload.expiry_ts;
+    }
   },
   extraReducers: {
     [updateTransfersStatus.fulfilled]: (state, action) => {
       const listWithChangeInStatus = action.payload;
-      listWithChangeInStatus?.forEach(({ txid, status, claim_txid }) => {
+      listWithChangeInStatus?.forEach(({ txid, status, claim_txid, is_finished, claim_num }) => {
         const transferIndex = state.findIndex(t => t.txid === txid);
         state[transferIndex].status = status;
         if (claim_txid){
           state[transferIndex].claim_txid = claim_txid;
+        }
+
+        if (is_finished) {
+          state[transferIndex].is_finished = is_finished;
+        }
+
+        if (state[transferIndex].self_claimed && claim_num && !state[transferIndex].self_claimed_num) {
+          state[transferIndex].self_claimed_num = claim_num;
         }
       })
     },
@@ -44,8 +94,7 @@ export const transfersSlice = createSlice({
   }
 });
 
-export const { setTransfers, addTransfer, updateTransferStatus, updateTransfersStatuses } = transfersSlice.actions;
-
+export const { setTransfers, addTransfer, updateTransferStatus, updateTransfersStatuses, claimMyself, withdrawalConfirmed, updateExpireTs } = transfersSlice.actions;
 
 // The function below is called a selector and allows us to select a value from
 // the state. Selectors can also be defined inline where they're used instead of

@@ -1,5 +1,6 @@
-import { updateTransferStatus } from "store/transfersSlice";
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
+
+import { claimMyself, updateTransferStatus } from "store/transfersSlice";
 import { store } from "index";
 
 const counterstakeAbi = [
@@ -8,7 +9,7 @@ const counterstakeAbi = [
 
 const environment = process.env.REACT_APP_ENVIRONMENT;
 
-const providers = {
+export const providers = {
   Ethereum: (environment === 'devnet')
     ? new ethers.providers.JsonRpcProvider("http://0.0.0.0:7545") // ganache
     : new ethers.providers.InfuraProvider(environment === 'testnet' ? "rinkeby" : "homestead", process.env.REACT_APP_INFURA_PROJECT_ID),
@@ -20,8 +21,13 @@ const providers = {
 // new claim on Ethereum or BSC
 const onNewClaim = (claim_num, author_address, sender_address, recipient_address, txid, txts, amount, reward, stake, data, expiry_ts, event) => {
   console.log('NewClaim event', claim_num, author_address, sender_address, recipient_address, txid, txts, amount, reward, stake, data, expiry_ts, event);
-  const claim_txid = event.transactionHash;
   const dispatch = store.dispatch;
+
+  if (author_address === recipient_address) {
+    dispatch(claimMyself({ txid, claim_num: BigNumber.from(claim_num).toString() }));
+  }
+
+  const claim_txid = event.transactionHash;
   const state = store.getState();
   const transfers = state.transfers;
   // const bridge_aa = event.address;
@@ -30,7 +36,7 @@ const onNewClaim = (claim_num, author_address, sender_address, recipient_address
     return console.log(`claim of unrecognized transfer ${txid}`);
   //transfer.status = 'claimed';
   dispatch(updateTransferStatus({ txid, status: 'claimed', claim_txid }));
-  setTimeout(() => dispatch(updateTransferStatus({ txid, status: 'claim_confirmed' })), 1000);
+  setTimeout(() => dispatch(updateTransferStatus({ txid, status: 'claim_confirmed', expiry_ts })), 1000);
 };
 
 // to avoid duplicate event handlers, track the contracts that we are already watching for claims
@@ -45,4 +51,7 @@ export const startWatchingContractForClaims = (dst_network, dst_bridge_aa) => {
   watchedContracts[dst_bridge_aa] = true;
 }
 
-
+export const getRequiredStake = async (dst_bridge_aa, dst_network, amount) => {
+  const contract = new ethers.Contract(dst_bridge_aa, ["function getRequiredStake(uint amount) public view virtual returns (uint)"], providers[dst_network]);
+  return await contract.getRequiredStake(amount);
+}

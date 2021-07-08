@@ -7,6 +7,7 @@ import obyte from "obyte";
 import { ethers } from "ethers";
 import { useSelector, useDispatch } from 'react-redux';
 import QRButton from "obyte-qr-button";
+import Decimal from "decimal.js";
 
 import { addTransfer, updateTransferStatus } from "store/transfersSlice";
 import { selectDestAddress, setDestAddress } from "store/destAddressSlice";
@@ -22,9 +23,10 @@ import { getCoinIcons, updateBridges, updateTransfersStatus } from "store/thunks
 import { getCoinIcon } from "./getCoinIcon";
 import { selectConnectionStatus } from "store/connectionSlice";
 import { selectInputs } from "store/inputsSlice";
+import { addTokenToTracked, selectAddedTokens } from "store/addedTokensSlice";
+import { selectChainId } from "store/chainSlice";
 
 import styles from "./MainPage.module.css";
-import { addTokenToTracked, selectAddedTokens } from "store/addedTokensSlice";
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -42,7 +44,7 @@ const erc20Abi = [
   "function balanceOf(address account) public view virtual override returns (uint256)",
 ];
 
-const chainIds = {
+export const chainIds = {
   mainnet: {
     Ethereum: 1,
     BSC: 56,
@@ -80,7 +82,7 @@ export const MainPage = () => {
   const isOpenConnection = useSelector(selectConnectionStatus)
   const searchInputInRef = useRef(null);
   const searchInputOutRef = useRef(null);
-  const [chainId, setChainId] = useState();
+  const chainId = useSelector(selectChainId);
   const [inFocus, setInFocus] = useState(true);
   const [pendingTokens, setPendingTokens] = useState({});
   const addedTokens = useSelector(selectAddedTokens);
@@ -187,16 +189,16 @@ export const MainPage = () => {
   useEffect(() => {
     if (selectedDestination)
       setCountAssistants(selectedDestination.count_claimants);
-    if (!amountIn) {
+    if (!amountIn || isNaN(Number(amountIn))) {
       setAmountOut(undefined);
       setReward(undefined);
       return;
     }
-    let reward = amountIn * 0.01;
+    let reward = amountIn && Decimal(amountIn).mul(0.01).toNumber();
     if (selectedInput && selectedDestination) {
-      reward += selectedDestination.min_reward * 1.5;
+      reward += Decimal(selectedDestination.min_reward || 0).mul(1.5).toNumber();
     }
-    let amount_out = amountIn - reward;
+    let amount_out = Decimal(amountIn).sub(reward).toNumber();
     if (selectedDestination)
       amount_out = +amount_out.toFixed(selectedDestination.token.decimals);
     setAmountOut(amount_out);
@@ -269,7 +271,7 @@ export const MainPage = () => {
     // wait until mined
     try {
       await res.wait();
-      dispatch(updateTransferStatus({ txid: res.hash, status: 'mined' }));
+      dispatch(updateTransferStatus({ txid: res.hash, status: 'mined', ts_confirmed: Date.now() }));
     }
     catch (e) {
       console.log('wait failed');
@@ -300,7 +302,6 @@ export const MainPage = () => {
       if (willGetToken) {
         setSelectedDestination(willGetToken);
         setSelectedInput(willSendInput);
-        Number(amountOut) > 0 ? setAmountIn(amountOut) : setAmountIn(undefined);
       }
     }
   }
@@ -317,21 +318,7 @@ export const MainPage = () => {
       const newDestinationData = inputs[selectedInput.index].destinations[selectedDestination.index];
       setSelectedDestination(newDestinationData);
     }
-  }, [inputs, tokenIsInitialized])
-
-  useEffect(async () => {
-    if (!window.ethereum) // no metamask installed
-      return;
-    window.ethereum?.on('chainChanged', (newChainId) => {
-      setChainId(Number(newChainId));
-    });
-
-    const network = await provider.getNetwork();
-
-    if (network && ("chainId" in network)) {
-      setChainId(network.chainId);
-    }
-  }, [isOpenConnection])
+  }, [inputs, tokenIsInitialized]);
 
   useEffect(async () => {
     if (window.ethereum && inFocus && (chainId in pendingTokens)) {
@@ -546,7 +533,7 @@ export const MainPage = () => {
                 >
                   <Input
                     size="middle"
-                    style={{ height: 45, paddingRight: 30 }}
+                    style={{ height: 45, paddingRight: 30, fontFamily: "-apple-system, Roboto, Arial, sans-serif" }}
                     spellCheck="false"
                     value={recipient.value}
                     placeholder={`Your ${selectedDestination ? selectedDestination.token.network : 'receiving'} wallet address`}

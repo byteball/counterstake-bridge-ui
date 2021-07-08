@@ -1,20 +1,21 @@
-import { addTransfer, updateTransferStatus } from "store/transfersSlice";
+import { addTransfer, claimMyself, updateTransferStatus, withdrawalConfirmed } from "store/transfersSlice";
 import obyte from "obyte";
 import { startWatchingDestinationBridge } from "./watch";
 import { sendTransferToGA } from "./transfer";
 import { store } from "index";
 import { closeConnection, openConnection } from "store/connectionSlice";
+import { changeChain, getChain } from "store/chainSlice";
+import { getClaim } from "utils/getClaim";
 
 const environment = process.env.REACT_APP_ENVIRONMENT;
 
 let client = new obyte.Client(
-  environment === 'devnet' ? 'ws://localhost:6611' : `wss://obyte.org/bb${environment === 'testnet' ? "-test" : ""}`,
+  environment === 'devnet' ? 'ws://localhost:6611' : `wss://byteball.org/bb${environment === 'testnet' ? "-test" : ""}`,
   {
     testnet: environment === 'testnet',
     reconnect: true,
   }
 );
-
 
 const trackedSubjects = ["light/aa_request", "light/aa_response"];
 
@@ -26,7 +27,7 @@ const getAAPayment = (messages = [], recipients = [], asset) => messages.find(m 
 const handleEventBridge = async (err, result) => {
   const dispatch = store.dispatch;
   const state = store.getState();
-  
+
   const transfers = state.transfers;
 
   const current_dest_addresses = Object.keys(state.destAddress).map((network) => state.destAddress[network]).filter((a) => a);
@@ -86,7 +87,19 @@ const handleEventBridge = async (err, result) => {
       if (!transfer)
         return console.log(`claim of somebody else's transfer ${payload.txid} in ${unit}`)
       //transfer.status = 'claim_sent';
+      if (address === transfer.dest_address) {
+        dispatch(claimMyself({ txid: payload.txid }));
+      }
+
       dispatch(updateTransferStatus({ txid: payload.txid, status: 'claimed', claim_txid: unit }));
+    } else if (payload.withdraw && payload.claim_num !== undefined) {
+
+      const transfer = transfers.find(t => t.self_claimed && (t.self_claimed_num !== undefined) && (Number(t.self_claimed_num) === Number(payload.claim_num)) && (body.aa_address === t.dst_bridge_aa));
+
+      if (!transfer)
+        return console.log(`withdrawal of somebody else's transfer`)
+
+      dispatch(updateTransferStatus({ txid: transfer.txid, status: 'withdrawn' }));
     }
     else
       console.log(`neither transfer nor claim in ${unit}`);
@@ -101,6 +114,10 @@ const handleEventBridge = async (err, result) => {
     if (!message)
       message = '';
 
+    const resp = await client.api.getJoint(trigger_unit);
+    const { unit: { messages, unit } } = resp.joint;
+    const payload = getAAPayload(messages);
+
     // new transfer
     if (message === 'started expatriation' || message === 'started repatriation') {
       const transfer = transfers.find(t => t.txid === trigger_unit);
@@ -109,10 +126,9 @@ const handleEventBridge = async (err, result) => {
         const dest_address = message === 'started expatriation' ? responseVars.foreign_address : responseVars.home_address;
         if (!current_dest_addresses.includes(dest_address))
           return console.log(`AA response to somebody else's transfer in ${trigger_unit}`);
-        const resp = await client.api.getJoint(trigger_unit);
+
         if (!resp)
           throw Error(`failed to get trigger ${trigger_unit}`);
-        const { unit: { messages, unit } } = resp.joint;
         const transfer = createTransfer(unit, trigger_address, messages, dest_address);
         transfer.status = 'confirmed';
         dispatch(addTransfer(transfer));
@@ -120,19 +136,36 @@ const handleEventBridge = async (err, result) => {
       }
       //transfer.status = 'confirmed';
       console.log(`transfer confirmed`, transfer)
-      dispatch(updateTransferStatus({ txid: trigger_unit, status: 'confirmed' }));
+      dispatch(updateTransferStatus({ txid: trigger_unit, status: 'confirmed', ts_confirmed: Date.now() }));
     }
     // new claim
     else if (responseVars.new_claim_num) {
-      const resp = await client.api.getJoint(trigger_unit);
       if (!resp)
         throw Error(`failed to get trigger ${trigger_unit}`);
-      const { unit: { messages, unit } } = resp.joint;
-      const payload = getAAPayload(messages);
       const transfer = transfers.find(t => t.txid === payload.txid);
+
       if (!transfer)
         return console.log(`confirmed claim of somebody else's transfer ${payload.txid} in ${trigger_unit}`)
-      dispatch(updateTransferStatus({ txid: payload.txid, status: 'claim_confirmed', claim_txid: unit }));
+
+      if (trigger_address === transfer.dest_address) {
+        dispatch(claimMyself({ txid: payload.txid, claim_num: responseVars.new_claim_num }));
+      }
+
+      const claim = await getClaim(responseVars.new_claim_num, body.aa_address, transfer.dst_token.network, false);
+
+      dispatch(updateTransferStatus({ txid: payload.txid, status: 'claim_confirmed', claim_txid: unit, expiry_ts: claim?.expiry_ts }));
+
+    }
+    else if (payload.withdraw && payload.claim_num) {
+      const transfer = transfers.find(t => t.self_claimed && (t.self_claimed_num !== undefined) && (Number(t.self_claimed_num) === Number(payload.claim_num)) && (body.aa_address === t.dst_bridge_aa));
+
+      if (!transfer)
+        return console.log(`confirmed withdrawal of somebody else's transfer ${payload.txid} in ${trigger_unit}`)
+
+      if (transfer.self_claimed) {
+        dispatch(updateTransferStatus({ txid: transfer.txid, status: 'withdrawal_confirmed' }));
+        dispatch(withdrawalConfirmed({ txid: transfer.txid }))
+      }
     }
   }
   else
@@ -149,6 +182,14 @@ client.onConnect(() => {
   const heartbeat = setInterval(function () {
     client.api.heartbeat();
   }, 10 * 1000);
+
+  dispatch(getChain());
+
+  if (window.ethereum) {
+    window.ethereum?.on('chainChanged', (newChainId) => {
+      dispatch(changeChain(Number(newChainId)));
+    });
+  }
 
   client.subscribe((err, result) => {
     if (err) return null;

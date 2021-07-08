@@ -43,3 +43,7 @@ svg .white {
 .ml-form-successContent p, .ml-form-successContent h4 {
   text-align: center !important;
 }
+
+.ant-steps-item-wait .ant-steps-item-icon > .ant-steps-icon svg{
+  color: rgba(255, 255, 255, 0.1) !important;
+}

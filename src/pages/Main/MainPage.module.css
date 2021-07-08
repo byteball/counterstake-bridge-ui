@@ -10,7 +10,13 @@
   font-family: 'Inter', sans-serif;
 }
 
-@media (max-width: 1440px) {
+@media (max-width: 1440px) AND (min-width: 1100px) {
+  .container_big {
+    width: 1024px;
+  }
+}
+
+@media (max-width: 1100px) {
   .container_big {
     width: 900px;
   }
@@ -20,8 +26,8 @@
   .container, .container_big {
     margin: 0;
     width: 100%;
-    padding-left: 40px;
-    padding-right: 40px;
+    padding-left: 20px;
+    padding-right: 20px;
     box-sizing: border-box;
   }
 }
