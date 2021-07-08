@@ -12,7 +12,7 @@ import { ArrowRightOutlined } from "@ant-design/icons";
 import { useWindowSize } from "hooks/useWindowSize";
 import { getExplorerLink } from "utils/getExplorerLink";
 import { SelfClaim } from "modals/SelfClaim";
-import { generateLink, getStatusLabel } from "utils";
+import { generateLink, getStatusIndex } from "utils";
 import { getClaim } from "utils/getClaim";
 import { updateExpireTs, updateTransferStatus, withdrawalConfirmed } from "store/transfersSlice";
 import { EllipsisIcon } from "components/EllipsisIcon/EllipsisIcon";
@@ -129,7 +129,7 @@ export const Transfer = (t) => {
           md={{ span: 16 }}
           sm={{ span: 24 }}
           xs={{ span: 24 }}>
-          <Steps size="small" labelPlacement={width > 1100 ? "horizontal" : "vertical"} direction={width >= 992 ? "horizontal" : "vertical"} current={!is_finished ? getStatusLabel(src_token.network, status) : 6}>
+          <Steps size="small" labelPlacement={width > 1100 ? "horizontal" : "vertical"} direction={width >= 992 ? "horizontal" : "vertical"} current={!is_finished ? getStatusIndex(src_token.network, status) : 6}>
             {
               src_token.network === "Obyte" ? <>
                 <Step title="Sent" />
@@ -163,7 +163,7 @@ export const Transfer = (t) => {
             paddingBottom: 24,
           }}>
             <Col lg={{ span: width >= 1300 ? 9 : 12, offset: 8 }} >
-              <Steps size="small" initial={4} labelPlacement={width > 1100 ? "horizontal" : "vertical"} direction={width >= 992 ? "horizontal" : "vertical"} current={!is_finished ? getStatusLabel(src_token.network, status) : 6}>
+              <Steps size="small" initial={4} labelPlacement={width > 1100 ? "horizontal" : "vertical"} direction={width >= 992 ? "horizontal" : "vertical"} current={!is_finished ? getStatusIndex(src_token.network, status) : 6}>
                 <Step title="Withdrawn" />
                 <Step title="Withdrawal confirmed" />
               </Steps>

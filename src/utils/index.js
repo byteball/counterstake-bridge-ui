@@ -5,5 +5,5 @@ export * from "./getTxtsByHash";
 export * from "./getDecimals";
 export * from "./getSymbol";
 export * from "./getOraclePrice";
-export * from "./getStatusLabel";
+export * from "./getStatusIndex";
 export * from "./getChallengingPeriodEVM";
