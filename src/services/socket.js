@@ -10,7 +10,7 @@ import { getClaim } from "utils/getClaim";
 const environment = process.env.REACT_APP_ENVIRONMENT;
 
 let client = new obyte.Client(
-  environment === 'devnet' ? 'ws://localhost:6611' : `wss://byteball.org/bb${environment === 'testnet' ? "-test" : ""}`,
+  environment === 'devnet' ? 'ws://localhost:6611' : `wss://obyte.org/bb${environment === 'testnet' ? "-test" : ""}`,
   {
     testnet: environment === 'testnet',
     reconnect: true,

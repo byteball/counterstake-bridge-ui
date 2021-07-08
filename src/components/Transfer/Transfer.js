@@ -11,7 +11,7 @@ import { ArrowRightOutlined } from "@ant-design/icons";
 
 import { useWindowSize } from "hooks/useWindowSize";
 import { getExplorerLink } from "utils/getExplorerLink";
-import { ClaimMyself } from "modals/ClaimMyself";
+import { SelfClaim } from "modals/SelfClaim";
 import { generateLink, getStatusLabel } from "utils";
 import { getClaim } from "utils/getClaim";
 import { updateExpireTs, updateTransferStatus, withdrawalConfirmed } from "store/transfersSlice";
@@ -197,7 +197,7 @@ export const Transfer = (t) => {
           {signer && ((status === "confirmed" || status === "mined") || ((status === "claim" || status === "claim_confirmed") && self_claimed && !is_finished)) && <Col lg={{ offset: 12, span: 12 }} sm={{ span: 24 }}
             xs={{ span: 24 }}>
             <div style={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 24, wordBreak: "break-all", textAlign: width >= 992 ? "right" : "left" }}>
-              {(status === "confirmed" || status === "mined") && ((ts_confirmed && (!endedWaitingConfirmation || (Date.now() < (ts_confirmed + 5 * 60 * 1000)))) ? <Countdown title="Waiting for more confirmations" value={ts_confirmed + 5 * 60 * 1000} onFinish={() => setEndedWaitingConfirmation(true)} /> : <ClaimMyself {...t} />)}
+              {(status === "confirmed" || status === "mined") && ((ts_confirmed && (!endedWaitingConfirmation || (Date.now() < (ts_confirmed + 5 * 60 * 1000)))) ? <Countdown title="Waiting for more confirmations" value={ts_confirmed + 5 * 60 * 1000} onFinish={() => setEndedWaitingConfirmation(true)} /> : <SelfClaim {...t} />)}
               {expiry_ts && (status === "claim" || status === "claim_confirmed") && (!expired ? <Countdown title="Time until withdrawal" value={expiry_ts * 1000} onFinish={() => setAlreadyExpired(true)} /> : (dst_token.network === "Obyte" ? <QRButton href={withdrawFromObyteLink}>Withdraw</QRButton> : <Button onClick={handleWithdraw}>Withdraw</Button>))}
             </div>
           </Col>}

@@ -19,7 +19,7 @@ const counterstakeAbi = [
 const environment = process.env.REACT_APP_ENVIRONMENT;
 const provider = window.ethereum && new ethers.providers.Web3Provider(window.ethereum);
 
-export const ClaimMyself = ({ txid, amount, dst_token, sender_address, reward, dst_bridge_aa, dest_address, src_token, txts }) => {
+export const SelfClaim = ({ txid, amount, dst_token, sender_address, reward, dst_bridge_aa, dest_address, src_token, txts }) => {
   const { bridges, directions, } = store.getState();
   const { network: dst_network } = dst_token;
   const chainId = useSelector(selectChainId);
