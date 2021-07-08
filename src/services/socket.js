@@ -105,7 +105,7 @@ const handleEventBridge = async (err, result) => {
       console.log(`neither transfer nor claim in ${unit}`);
   }
   else if (isResponse) {
-    const { response, bounced, trigger_unit, trigger_address } = body;
+    const { response, bounced, trigger_unit, trigger_address, timestamp } = body;
     if (bounced) return null;
     let { responseVars } = response;
     if (!responseVars)
@@ -136,7 +136,7 @@ const handleEventBridge = async (err, result) => {
       }
       //transfer.status = 'confirmed';
       console.log(`transfer confirmed`, transfer)
-      dispatch(updateTransferStatus({ txid: trigger_unit, status: 'confirmed', ts_confirmed: Date.now() }));
+      dispatch(updateTransferStatus({ txid: trigger_unit, status: 'confirmed', txts: timestamp }));
     }
     // new claim
     else if (responseVars.new_claim_num) {
@@ -194,7 +194,7 @@ client.onConnect(() => {
   client.subscribe((err, result) => {
     if (err) return null;
     const { subject, body } = result[1];
-    const { aa_address } = body;
+    const aa_address = body?.aa_address;
     if (!subject || !trackedSubjects.includes(subject)) {
       return null;
     }

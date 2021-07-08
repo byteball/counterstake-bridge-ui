@@ -4,6 +4,6 @@ export * from "./generateLink";
 export * from "./getTxtsByHash";
 export * from "./getDecimals";
 export * from "./getSymbol";
-export * from "./getOraclePrice";
+export * from "./getRequiredStakeObyte";
 export * from "./getStatusIndex";
 export * from "./getChallengingPeriodEVM";

@@ -8,7 +8,7 @@ import { useSelector } from "react-redux";
 
 import { getRequiredStake } from "services/evm";
 import { store } from "index";
-import { generateLink, getOraclePrice, getDecimals, getSymbol, getTxtsByHash, getChallengingPeriodEVM } from "utils";
+import { generateLink, getDecimals, getSymbol, getTxtsByHash, getChallengingPeriodEVM, getRequiredStakeObyte } from "utils";
 import { chainIds } from "pages/Main/MainPage";
 import { selectChainId } from "store/chainIdSlice";
 
@@ -19,7 +19,7 @@ const counterstakeAbi = [
 const environment = process.env.REACT_APP_ENVIRONMENT;
 const provider = window.ethereum && new ethers.providers.Web3Provider(window.ethereum);
 
-export const SelfClaim = ({ txid, amount, dst_token, sender_address, reward, dst_bridge_aa, dest_address, src_token }) => {
+export const SelfClaim = ({ txid, amount, dst_token, sender_address, reward, dst_bridge_aa, dest_address, src_token, txts: txtsCache}) => {
   const { bridges, directions, } = store.getState();
   const { network: dst_network } = dst_token;
   const chainId = useSelector(selectChainId);
@@ -75,30 +75,29 @@ export const SelfClaim = ({ txid, amount, dst_token, sender_address, reward, dst
       setStake({ amount: stake.toString(), asset: stake_asset, challenging_period: challenging_period_in_hours, decimals, symbol, txts });
 
     } else if (isModalVisible) {
+      const stake = await getRequiredStakeObyte(dst_bridge_aa, Math.round(amount * 10 ** dst_token.decimals))
+      const txts = txtsCache || await getTxtsByHash(txid, src_token.network);
+
       if (bridges.exportParams[dst_bridge_aa]) {
         //repatriation
         const symbol = await getSymbol(dst_token.asset, dst_network);
-        const txts = await getTxtsByHash(txid, src_token.network);
         const params = bridges.exportParams[dst_bridge_aa];
 
-        // const stake = Math.max(Math.ceil(amount * 10 ** dst_token.decimals * (params.ratio || 1)), params.min_stake) + (dst_token.asset === "base" ? 2000 : 0);
-        const stake = Decimal.max(Decimal.ceil(Decimal(amount).mul(Decimal(10).pow(dst_token.decimals)).mul(params.ratio || 1)), params.min_stake).plus(dst_token.asset === "base" ? 2000 : 0).toString();
+        if (!params) return;
+
         const challenging_period = stake >= params.large_threshold ? params.large_challenging_periods[0] : params.challenging_periods[0];
-        setStake({ amount: stake, asset: dst_token.asset, decimals: dst_token.decimals, symbol, txts, challenging_period });
+
+        setStake({ amount: stake + (dst_token.asset === "base" ? 2000 : 0), asset: dst_token.asset, decimals: dst_token.decimals, symbol, txts, challenging_period });
       } else if (bridges.importParams[dst_bridge_aa]) {
         //expatriation
         const symbol = await getSymbol(stake_asset, dst_network);
         const params = bridges.importParams[dst_bridge_aa];
-        const txts = await getTxtsByHash(txid, src_token.network);
+
         if (!params || !stake_asset) return;
-        const oracle_price = await getOraclePrice(params.oracles);
-        // const oracle_price_in_pennies = 10 ** (params?.stake_asset_decimals - params.asset_decimals) * oracle_price;
-        const oracle_price_in_pennies = (params.stake_asset_decimals && oracle_price) ? (Decimal(10).pow(Decimal(params?.stake_asset_decimals).sub(params.asset_decimals)).mul(oracle_price)) : 0;
-        // const stake = Math.max(Math.ceil(oracle_price_in_pennies * amount * 10 ** dst_token.decimals * (params.ratio || 1)), params.min_stake) + (stake_asset === "base" ? 2000 : 0);
-        const stake = Decimal.max(Decimal.ceil(oracle_price_in_pennies.mul(Decimal(amount).mul(Decimal(10).pow(dst_token.decimals))).mul(params.ratio || 1)).mul(1.1), params.min_stake).plus(stake_asset === "base" ? 2000 : 0).toString();
+
         const challenging_period = stake >= params.large_threshold ? params.large_challenging_periods[0] : params.challenging_periods[0];
 
-        setStake({ amount: stake, asset: stake_asset, decimals: params.stake_asset_decimals, symbol, txts, challenging_period });
+        setStake({ amount: stake * 1.1 + (stake_asset === "base" ? 2000 : 0), asset: stake_asset, decimals: params.stake_asset_decimals, symbol, txts, challenging_period });
       }
 
     }

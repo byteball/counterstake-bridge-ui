@@ -64,7 +64,15 @@ export const transfersSlice = createSlice({
         throw Error(`transfer not found in updateTransferStatus ${action.payload.txid}`);
 
       transfer.expiry_ts = action.payload.expiry_ts;
-    }
+    },
+    updateTxts: (state, action) => {
+      const transfer = state.find(t => t.txid === action.payload.txid);
+
+      if (!transfer)
+        throw Error(`transfer not found in updateTransferStatus ${action.payload.txid}`);
+
+      transfer.txts = action.payload.txts;
+    },
   },
   extraReducers: {
     [updateTransfersStatus.fulfilled]: (state, action) => {
@@ -94,7 +102,7 @@ export const transfersSlice = createSlice({
   }
 });
 
-export const { setTransfers, addTransfer, updateTransferStatus, updateTransfersStatuses, claimMyself, withdrawalConfirmed, updateExpireTs } = transfersSlice.actions;
+export const { setTransfers, addTransfer, updateTransferStatus, updateTransfersStatuses, claimMyself, withdrawalConfirmed, updateExpireTs, updateTxts } = transfersSlice.actions;
 
 // The function below is called a selector and allows us to select a value from
 // the state. Selectors can also be defined inline where they're used instead of
