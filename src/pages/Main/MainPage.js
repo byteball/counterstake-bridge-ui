@@ -24,7 +24,7 @@ import { getCoinIcon } from "./getCoinIcon";
 import { selectConnectionStatus } from "store/connectionSlice";
 import { selectInputs } from "store/inputsSlice";
 import { addTokenToTracked, selectAddedTokens } from "store/addedTokensSlice";
-import { selectChainId } from "store/chainSlice";
+import { selectChainId } from "store/chainIdSlice";
 
 import styles from "./MainPage.module.css";
 

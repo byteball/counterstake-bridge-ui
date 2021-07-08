@@ -20,7 +20,7 @@ import cdnIconsSlice from './cdnIconsSlice';
 import inputsSlice from './inputsSlice';
 import addedTokensSlice from './addedTokensSlice';
 import bridgesSlice from './bridgesSlice';
-import chainSlice from './chainSlice';
+import chainIdSlice from './chainIdSlice';
 
 const rootReducer = combineReducers({
   transfers: transfersReducer,
@@ -32,7 +32,7 @@ const rootReducer = combineReducers({
   inputs: inputsSlice,
   addedTokens: addedTokensSlice,
   bridges: bridgesSlice,
-  chain: chainSlice
+  chainId: chainIdSlice
 });
 
 const persistConfig = {

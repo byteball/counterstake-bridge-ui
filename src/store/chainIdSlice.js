@@ -1,8 +1,8 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { ethers } from 'ethers';
 
-export const getChain = createAsyncThunk(
-  'get/chain',
+export const getChainId = createAsyncThunk(
+  'get/chainId',
   async () => {
     const provider = window.ethereum && new ethers.providers.Web3Provider(window.ethereum);
 
@@ -14,28 +14,28 @@ export const getChain = createAsyncThunk(
   }
 )
 
-export const chainSlice = createSlice({
-  name: 'chain',
+export const chainIdSlice = createSlice({
+  name: 'chainId',
   initialState: null,
   reducers: {
-    changeChain: (_, action) => {
+    changeChainId: (_, action) => {
       return action.payload
     }
   },
   extraReducers: {
-    [getChain.fulfilled]: (_, action) => {
+    [getChainId.fulfilled]: (_, action) => {
       return action.payload;
     },
   }
 });
 
-export const { changeChain } = chainSlice.actions;
+export const { changeChainId } = chainIdSlice.actions;
 
 
 // The function below is called a selector and allows us to select a value from
 // the state. Selectors can also be defined inline where they're used instead of
 // in the slice file. For example: `useSelector((state) => state.auth.value)`
 
-export const selectChainId = state => state.chain;
+export const selectChainId = state => state.chainId;
 
-export default chainSlice.reducer;
+export default chainIdSlice.reducer;

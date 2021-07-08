@@ -4,7 +4,7 @@ import { startWatchingDestinationBridge } from "./watch";
 import { sendTransferToGA } from "./transfer";
 import { store } from "index";
 import { closeConnection, openConnection } from "store/connectionSlice";
-import { changeChain, getChain } from "store/chainSlice";
+import { changeChainId, getChainId } from "store/chainIdSlice";
 import { getClaim } from "utils/getClaim";
 
 const environment = process.env.REACT_APP_ENVIRONMENT;
@@ -183,11 +183,11 @@ client.onConnect(() => {
     client.api.heartbeat();
   }, 10 * 1000);
 
-  dispatch(getChain());
+  dispatch(getChainId());
 
   if (window.ethereum) {
     window.ethereum?.on('chainChanged', (newChainId) => {
-      dispatch(changeChain(Number(newChainId)));
+      dispatch(changeChainId(Number(newChainId)));
     });
   }
 
@@ -207,20 +207,20 @@ client.onConnect(() => {
 
   dispatch(openConnection())
 
-  if (process.env.REACT_APP_OBYTE_IMPORT_AA) {
+  if (process.env.REACT_APP_OBYTE_IMPORT_BASE_AA) {
     client.justsaying("light/new_aa_to_watch", {
-      aa: process.env.REACT_APP_OBYTE_IMPORT_AA
+      aa: process.env.REACT_APP_OBYTE_IMPORT_BASE_AA
     });
   } else {
-    console.error("Please specify ENV: REACT_APP_OBYTE_IMPORT_AA")
+    console.error("Please specify ENV: REACT_APP_OBYTE_IMPORT_BASE_AA")
   }
 
-  if (process.env.REACT_APP_OBYTE_EXPORT_AA) {
+  if (process.env.REACT_APP_OBYTE_EXPORT_BASE_AA) {
     client.justsaying("light/new_aa_to_watch", {
-      aa: process.env.REACT_APP_OBYTE_EXPORT_AA
+      aa: process.env.REACT_APP_OBYTE_EXPORT_BASE_AA
     });
   } else {
-    console.error("Please specify ENV: REACT_APP_OBYTE_EXPORT_AA")
+    console.error("Please specify ENV: REACT_APP_OBYTE_EXPORT_BASE_AA")
   }
 
   client.client.ws.addEventListener("close", () => {

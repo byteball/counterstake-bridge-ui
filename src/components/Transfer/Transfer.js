@@ -17,7 +17,7 @@ import { getClaim } from "utils/getClaim";
 import { updateExpireTs, updateTransferStatus, withdrawalConfirmed } from "store/transfersSlice";
 import { EllipsisIcon } from "components/EllipsisIcon/EllipsisIcon";
 import { LineIcon } from "components/LineIcon/LineIcon";
-import { selectChainId } from "store/chainSlice";
+import { selectChainId } from "store/chainIdSlice";
 import { chainIds } from "pages/Main/MainPage";
 
 const { Step } = Steps;
@@ -68,16 +68,29 @@ export const Transfer = (t) => {
       const contract = new ethers.Contract(dst_bridge_aa, ['function withdraw(uint claim_num) external'], signer);
       const res = await contract.withdraw(self_claimed_num);
       dispatch(updateTransferStatus({ txid, status: "withdrawn" }));
-      await res.wait();
-      dispatch(updateTransferStatus({ txid, status: "withdrawal_confirmed" }))
-      dispatch(withdrawalConfirmed({ txid }))
+      try {
+        await res.wait();
+        dispatch(updateTransferStatus({ txid, status: "withdrawal_confirmed" }))
+        dispatch(withdrawalConfirmed({ txid }))
+      } catch (e) {
+        console.log('wait failed');
+        if (e.code === 'TRANSACTION_REPLACED') {
+          if (e.cancelled) {
+            console.log(`withdraw cancelled`);
+          }
+          else {
+            dispatch(updateTransferStatus({ txid, status: "withdrawal_confirmed" }))
+            dispatch(withdrawalConfirmed({ txid }))
+          }
+        }
+      }
     } catch (e) {
       console.log("Withdraw ERROR", e)
     }
   }
 
   const data = { withdraw: 1, claim_num: self_claimed_num };
-  const withdrawFromObyteLink = dest_address && dst_bridge_aa && self_claimed_num && generateLink({ amount: 1e5, data, from_address: dest_address, aa: dst_bridge_aa, asset: "base" });
+  const withdrawFromObyteLink = dest_address && dst_bridge_aa && self_claimed_num && generateLink({ amount: 1e4, data, from_address: dest_address, aa: dst_bridge_aa, asset: "base" });
   const expired = is_finished || alreadyExpired || (expiry_ts * 1000) < Date.now();
   const showBadge = (t.status && (t.self_claimed ? Boolean(t.is_finished) : (t.status === "claim_confirmed")));
 

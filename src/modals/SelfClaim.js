@@ -10,16 +10,16 @@ import { getRequiredStake } from "services/evm";
 import { store } from "index";
 import { generateLink, getOraclePrice, getDecimals, getSymbol, getTxtsByHash, getChallengingPeriodEVM } from "utils";
 import { chainIds } from "pages/Main/MainPage";
-import { selectChainId } from "store/chainSlice";
+import { selectChainId } from "store/chainIdSlice";
 
 const counterstakeAbi = [
-  "function claim(string memory txid, uint32 txts, uint amount, int reward, uint stake, string memory sender_address, address payable recipient_address, string memory data) nonReentrant payable external"
+  "function claim(string memory txid, uint32 txts, uint amount, int reward, uint stake, string memory sender_address, address payable recipient_address, string memory data) payable external"
 ];
 
 const environment = process.env.REACT_APP_ENVIRONMENT;
 const provider = window.ethereum && new ethers.providers.Web3Provider(window.ethereum);
 
-export const SelfClaim = ({ txid, amount, dst_token, sender_address, reward, dst_bridge_aa, dest_address, src_token, txts }) => {
+export const SelfClaim = ({ txid, amount, dst_token, sender_address, reward, dst_bridge_aa, dest_address, src_token }) => {
   const { bridges, directions, } = store.getState();
   const { network: dst_network } = dst_token;
   const chainId = useSelector(selectChainId);
@@ -77,9 +77,8 @@ export const SelfClaim = ({ txid, amount, dst_token, sender_address, reward, dst
     } else if (isModalVisible) {
       if (bridges.exportParams[dst_bridge_aa]) {
         //repatriation
-        const signer = window.ethereum && provider.getSigner();
-        const symbol = await getSymbol(dst_token.asset, dst_network, signer);
-
+        const symbol = await getSymbol(dst_token.asset, dst_network);
+        const txts = await getTxtsByHash(txid, src_token.network);
         const params = bridges.exportParams[dst_bridge_aa];
 
         // const stake = Math.max(Math.ceil(amount * 10 ** dst_token.decimals * (params.ratio || 1)), params.min_stake) + (dst_token.asset === "base" ? 2000 : 0);
@@ -87,12 +86,10 @@ export const SelfClaim = ({ txid, amount, dst_token, sender_address, reward, dst
         const challenging_period = stake >= params.large_threshold ? params.large_challenging_periods[0] : params.challenging_periods[0];
         setStake({ amount: stake, asset: dst_token.asset, decimals: dst_token.decimals, symbol, txts, challenging_period });
       } else if (bridges.importParams[dst_bridge_aa]) {
-        const signer = window.ethereum && provider.getSigner();
-
         //expatriation
-        const symbol = await getSymbol(stake_asset, dst_network, signer);
+        const symbol = await getSymbol(stake_asset, dst_network);
         const params = bridges.importParams[dst_bridge_aa];
-
+        const txts = await getTxtsByHash(txid, src_token.network);
         if (!params || !stake_asset) return;
         const oracle_price = await getOraclePrice(params.oracles);
         // const oracle_price_in_pennies = 10 ** (params?.stake_asset_decimals - params.asset_decimals) * oracle_price;
@@ -156,7 +153,7 @@ export const SelfClaim = ({ txid, amount, dst_token, sender_address, reward, dst
     aa: dst_bridge_aa
   }) : undefined;
 
-  const stakeAmountView = stake.amount && stake.decimals ? Decimal(stake.amount).dividedBy(Decimal(10).pow(stake.decimals)).toString() : 0
+  const stakeAmountView = stake.amount && stake.decimals ? +Decimal(stake.amount).dividedBy(Decimal(10).pow(stake.decimals)).toFixed(stake.decimals) : 0
 
   return <>
     <Button style={{ padding: 0, color: "#FAAD14" }} type="link" onClick={showModal}>I claim myself</Button>
