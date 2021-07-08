@@ -144,8 +144,8 @@ export const SelfClaim = ({ txid, amount, dst_token, sender_address, reward, dst
     asset: stake.asset,
     data: {
       sender_address,
-      amount: Math.ceil(amount * 10 ** dst_token.decimals),
-      reward: Math.ceil(reward * 10 ** dst_token.decimals),
+      amount: Math.round(amount * 10 ** dst_token.decimals),
+      reward: Math.round(reward * 10 ** dst_token.decimals),
       txid,
       txts: stake.txts,
     },
