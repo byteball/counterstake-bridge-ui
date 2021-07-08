@@ -13,7 +13,7 @@ export const updateTransfersStatus = createAsyncThunk(
     const getStatusList = [];
     const subscriptions = [];
     transfers.forEach((tr) => {
-      if (!(tr.status === "claim_confirmed") || (("self_claimed" in tr) && !Number(tr.is_finished))) {
+      if (!(tr.status === "claim_confirmed" && (!tr.self_claimed)) || (("self_claimed" in tr) && !Number(tr.is_finished))) {
         if ("dst_bridge_aa" in tr) {
           subscriptions.push(startWatchingDestinationBridge(tr.dst_token.network, tr.dst_bridge_aa))
         }

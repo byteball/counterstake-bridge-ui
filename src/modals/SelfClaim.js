@@ -140,12 +140,12 @@ export const SelfClaim = ({ txid, amount, dst_token, sender_address, reward, dst
   }
 
   const href = (dst_network === "Obyte" && stake.amount) ? generateLink({
-    amount: Decimal(stake.amount).trunc(),
+    amount: Math.ceil(stake.amount),
     asset: stake.asset,
     data: {
       sender_address,
-      amount: Decimal(amount).mul(Decimal(10).pow(dst_token.decimals)).trunc(),
-      reward: Decimal(reward).mul(Decimal(10).pow(dst_token.decimals)).trunc(),
+      amount: Math.ceil(amount * 10 ** dst_token.decimals),
+      reward: Math.ceil(reward * 10 ** dst_token.decimals),
       txid,
       txts: stake.txts,
     },
