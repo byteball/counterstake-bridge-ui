@@ -9,8 +9,8 @@ import { useSelector } from "react-redux";
 import { getRequiredStake } from "services/evm";
 import { store } from "index";
 import { generateLink, getDecimals, getSymbol, getTxtsByHash, getChallengingPeriodEVM, getRequiredStakeObyte } from "utils";
-import { chainIds } from "pages/Main/MainPage";
 import { selectChainId } from "store/chainIdSlice";
+import { chainIds } from "chainIds";
 
 const counterstakeAbi = [
   "function claim(string memory txid, uint32 txts, uint amount, int reward, uint stake, string memory sender_address, address payable recipient_address, string memory data) payable external"
@@ -24,8 +24,7 @@ export const SelfClaim = ({ txid, amount, dst_token, sender_address, reward, dst
   const { network: dst_network } = dst_token;
   const chainId = useSelector(selectChainId);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [stake, setStake] = useState({ amount: undefined, asset: undefined });
-
+  const [stake, setStake] = useState({ amount: undefined, asset: undefined, decimals: undefined, symbol: undefined, txts: undefined, challenging_period: undefined  });
 
   const showModal = () => {
     setIsModalVisible(true);

@@ -4,7 +4,6 @@ import { startWatchingDestinationBridge } from "./watch";
 import { sendTransferToGA } from "./transfer";
 import { store } from "index";
 import { closeConnection, openConnection } from "store/connectionSlice";
-import { changeChainId, getChainId } from "store/chainIdSlice";
 import { getClaim } from "utils/getClaim";
 
 const environment = process.env.REACT_APP_ENVIRONMENT;
@@ -114,10 +113,6 @@ const handleEventBridge = async (err, result) => {
     if (!message)
       message = '';
 
-    const resp = await client.api.getJoint(trigger_unit);
-    const { unit: { messages, unit } } = resp.joint;
-    const payload = getAAPayload(messages);
-
     // new transfer
     if (message === 'started expatriation' || message === 'started repatriation') {
       const transfer = transfers.find(t => t.txid === trigger_unit);
@@ -126,9 +121,10 @@ const handleEventBridge = async (err, result) => {
         const dest_address = message === 'started expatriation' ? responseVars.foreign_address : responseVars.home_address;
         if (!current_dest_addresses.includes(dest_address))
           return console.log(`AA response to somebody else's transfer in ${trigger_unit}`);
-
+        const resp = await client.api.getJoint(trigger_unit);
         if (!resp)
           throw Error(`failed to get trigger ${trigger_unit}`);
+        const { unit: { messages, unit } } = resp.joint;
         const transfer = createTransfer(unit, trigger_address, messages, dest_address);
         transfer.status = 'confirmed';
         dispatch(addTransfer(transfer));
@@ -140,8 +136,11 @@ const handleEventBridge = async (err, result) => {
     }
     // new claim
     else if (responseVars.new_claim_num) {
+      const resp = await client.api.getJoint(trigger_unit);
       if (!resp)
         throw Error(`failed to get trigger ${trigger_unit}`);
+      const { unit: { messages, unit } } = resp.joint;
+      const payload = getAAPayload(messages);
       const transfer = transfers.find(t => t.txid === payload.txid);
 
       if (!transfer)
@@ -156,16 +155,19 @@ const handleEventBridge = async (err, result) => {
       dispatch(updateTransferStatus({ txid: payload.txid, status: 'claim_confirmed', claim_txid: unit, expiry_ts: claim?.expiry_ts }));
 
     }
-    else if (payload.withdraw && payload.claim_num) {
+    else if (message.includes("finished claim")) {
+      const resp = await client.api.getJoint(trigger_unit);
+      if (!resp)
+        throw Error(`failed to get trigger ${trigger_unit}`);
+      const { unit: { messages } } = resp.joint;
+      const payload = getAAPayload(messages);
       const transfer = transfers.find(t => t.self_claimed && (t.self_claimed_num !== undefined) && (Number(t.self_claimed_num) === Number(payload.claim_num)) && (body.aa_address === t.dst_bridge_aa));
 
       if (!transfer)
-        return console.log(`confirmed withdrawal of somebody else's transfer ${payload.txid} in ${trigger_unit}`)
+        return console.log(`confirmed withdrawal of somebody else's transfer in ${trigger_unit}`)
 
-      if (transfer.self_claimed) {
-        dispatch(updateTransferStatus({ txid: transfer.txid, status: 'withdrawal_confirmed' }));
-        dispatch(withdrawalConfirmed({ txid: transfer.txid }))
-      }
+      dispatch(updateTransferStatus({ txid: transfer.txid, status: 'withdrawal_confirmed' }));
+      dispatch(withdrawalConfirmed({ txid: transfer.txid }))
     }
   }
   else
@@ -182,14 +184,6 @@ client.onConnect(() => {
   const heartbeat = setInterval(function () {
     client.api.heartbeat();
   }, 10 * 1000);
-
-  dispatch(getChainId());
-
-  if (window.ethereum) {
-    window.ethereum?.on('chainChanged', (newChainId) => {
-      dispatch(changeChainId(Number(newChainId)));
-    });
-  }
 
   client.subscribe((err, result) => {
     if (err) return null;

@@ -48,6 +48,9 @@ export const transfersSlice = createSlice({
       if (action?.payload?.expiry_ts) {
         transfer.expiry_ts = action.payload.expiry_ts;
       }
+      if (action?.payload?.txts) {
+        transfer.txts = action.payload.txts;
+      }
     },
     withdrawalConfirmed: (state, action) => {
       const transfer = state.find(t => t.txid === action.payload.txid);

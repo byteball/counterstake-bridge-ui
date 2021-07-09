@@ -18,13 +18,13 @@ import { updateExpireTs, updateTransferStatus, withdrawalConfirmed } from "store
 import { EllipsisIcon } from "components/EllipsisIcon/EllipsisIcon";
 import { LineIcon } from "components/LineIcon/LineIcon";
 import { selectChainId } from "store/chainIdSlice";
-import { chainIds } from "pages/Main/MainPage";
+import { chainIds } from "chainIds";
 
 const { Step } = Steps;
 const { Countdown } = Statistic;
 
 const environment = process.env.REACT_APP_ENVIRONMENT;
-
+const numberOfMinutesWaitingMoreConfirmations = 5;
 const provider = window.ethereum && new ethers.providers.Web3Provider(window.ethereum);
 const signer = window.ethereum && provider.getSigner();
 
@@ -32,7 +32,7 @@ export const Transfer = (t) => {
   const { src_token, amount, dst_token, status, dest_address, reward, ts, txid, claim_txid, dst_bridge_aa, self_claimed, self_claimed_num, is_finished, ts_confirmed, expiry_ts } = t;
   const [isOpen, setIsOpen] = useState(false);
   const [alreadyExpired, setAlreadyExpired] = useState(false);
-  const [endedWaitingConfirmation, setEndedWaitingConfirmation] = useState(dst_token.network === "Obyte" || (Date.now() > (ts_confirmed + 5 * 60 * 1000)))
+  const [endedWaitingConfirmation, setEndedWaitingConfirmation] = useState(dst_token.network === "Obyte" || (Date.now() > (ts_confirmed + numberOfMinutesWaitingMoreConfirmations * 60 * 1000)))
   const chainId = useSelector(selectChainId);
   const ref = useRef();
   const [width] = useWindowSize();
@@ -52,7 +52,7 @@ export const Transfer = (t) => {
 
   useEffect(() => {
     if (endedWaitingConfirmation && ts_confirmed) {
-      setEndedWaitingConfirmation(Date.now() > (ts_confirmed + 5 * 60 * 1000));
+      setEndedWaitingConfirmation(Date.now() > (ts_confirmed + numberOfMinutesWaitingMoreConfirmations * 60 * 1000));
     }
   }, [isOpen, ts_confirmed]);
 
@@ -210,7 +210,7 @@ export const Transfer = (t) => {
           {signer && ((status === "confirmed" || status === "mined") || ((status === "claim" || status === "claim_confirmed") && self_claimed && !is_finished)) && <Col lg={{ offset: 12, span: 12 }} sm={{ span: 24 }}
             xs={{ span: 24 }}>
             <div style={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 24, wordBreak: "break-all", textAlign: width >= 992 ? "right" : "left" }}>
-              {(status === "confirmed" || status === "mined") && ((ts_confirmed && (!endedWaitingConfirmation || (Date.now() < (ts_confirmed + 5 * 60 * 1000)))) ? <Countdown title="Waiting for more confirmations" value={ts_confirmed + 5 * 60 * 1000} onFinish={() => setEndedWaitingConfirmation(true)} /> : <SelfClaim {...t} />)}
+              {(status === "confirmed" || status === "mined") && ((ts_confirmed && (!endedWaitingConfirmation || (Date.now() < (ts_confirmed + numberOfMinutesWaitingMoreConfirmations * 60 * 1000)))) ? <Countdown title="Waiting for more confirmations" value={ts_confirmed + numberOfMinutesWaitingMoreConfirmations * 60 * 1000} onFinish={() => setEndedWaitingConfirmation(true)} /> : <SelfClaim {...t} />)}
               {expiry_ts && (status === "claim" || status === "claim_confirmed") && (!expired ? <Countdown title="Time until withdrawal" value={expiry_ts * 1000} onFinish={() => setAlreadyExpired(true)} /> : (dst_token.network === "Obyte" ? <QRButton href={withdrawFromObyteLink}>Withdraw</QRButton> : <Button onClick={handleWithdraw}>Withdraw</Button>))}
             </div>
           </Col>}

@@ -25,6 +25,7 @@ import { selectConnectionStatus } from "store/connectionSlice";
 import { selectInputs } from "store/inputsSlice";
 import { addTokenToTracked, selectAddedTokens } from "store/addedTokensSlice";
 import { selectChainId } from "store/chainIdSlice";
+import { chainIds } from "chainIds";
 
 import styles from "./MainPage.module.css";
 
@@ -44,20 +45,6 @@ const erc20Abi = [
   "function balanceOf(address account) public view virtual override returns (uint256)",
 ];
 
-export const chainIds = {
-  mainnet: {
-    Ethereum: 1,
-    BSC: 56,
-  },
-  testnet: {
-    Ethereum: 4, // rinkeby
-    BSC: 97,
-  },
-  devnet: {
-    Ethereum: 1337, // ganache
-    BSC: null,
-  },
-};
 const environment = process.env.REACT_APP_ENVIRONMENT;
 
 const MAX_UINT256 = ethers.BigNumber.from(2).pow(256).sub(1);
@@ -194,9 +181,9 @@ export const MainPage = () => {
       setReward(undefined);
       return;
     }
-    let reward = amountIn && Decimal(amountIn).mul(0.01).toNumber();
+    let reward = amountIn * 0.01;
     if (selectedInput && selectedDestination) {
-      reward += Decimal(selectedDestination.min_reward || 0).mul(1.5).toNumber();
+      reward += selectedDestination.min_reward * 1.5;
     }
     let amount_out = Decimal(amountIn).sub(reward).toNumber();
     if (selectedDestination)
