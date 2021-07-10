@@ -24,7 +24,7 @@ const onNewClaim = (claim_num, author_address, sender_address, recipient_address
   const dispatch = store.dispatch;
 
   if (author_address === recipient_address) {
-    dispatch(claimMyself({ txid, claim_num: BigNumber.from(claim_num).toString() }));
+    dispatch(claimMyself({ txid, claim_num: BigNumber.from(claim_num).toNumber() }));
   }
 
   const claim_txid = event.transactionHash;
