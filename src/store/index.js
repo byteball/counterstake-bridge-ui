@@ -19,7 +19,7 @@ import governanceSlice from './governanceSlice';
 import cdnIconsSlice from './cdnIconsSlice';
 import inputsSlice from './inputsSlice';
 import addedTokensSlice from './addedTokensSlice';
-import bridgesSlice from './bridgesSlice';
+import bridgeAAParamsSlice from './bridgeAAParamsSlice';
 import chainIdSlice from './chainIdSlice';
 
 const rootReducer = combineReducers({
@@ -31,7 +31,7 @@ const rootReducer = combineReducers({
   cdnIcons: cdnIconsSlice,
   inputs: inputsSlice,
   addedTokens: addedTokensSlice,
-  bridges: bridgesSlice,
+  bridgeAAParams: bridgeAAParamsSlice,
   chainId: chainIdSlice
 });
 

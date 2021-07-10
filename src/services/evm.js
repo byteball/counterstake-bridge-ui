@@ -50,8 +50,3 @@ export const startWatchingContractForClaims = (dst_network, dst_bridge_aa) => {
   contract.on('NewClaim', onNewClaim);
   watchedContracts[dst_bridge_aa] = true;
 }
-
-export const getRequiredStake = async (dst_bridge_aa, dst_network, amount) => {
-  const contract = new ethers.Contract(dst_bridge_aa, ["function getRequiredStake(uint amount) public view virtual returns (uint)"], providers[dst_network]);
-  return await contract.getRequiredStake(amount);
-}

@@ -1,8 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { getBridgesParams } from './thunks';
 
-export const bridgesSlice = createSlice({
-  name: 'bridges',
+export const bridgeAAParams = createSlice({
+  name: 'bridgeAAParams',
   initialState: {
     importParams: {},
     exportParams: {}
@@ -22,4 +22,4 @@ export const bridgesSlice = createSlice({
 // in the slice file. For example: `useSelector((state) => state.auth.value)`
 // export const selectConnectionStatus = state => state.connection.open;
 
-export default bridgesSlice.reducer;
+export default bridgeAAParams.reducer;

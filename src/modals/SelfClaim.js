@@ -5,9 +5,8 @@ import QRButton from "obyte-qr-button";
 import { isEmpty, isEqual } from "lodash";
 import { useSelector } from "react-redux";
 
-import { getRequiredStake } from "services/evm";
 import { store } from "index";
-import { generateLink, getDecimals, getSymbol, getTxtsByHash, getChallengingPeriodEVM, getRequiredStakeObyte } from "utils";
+import { generateLink, getDecimals, getSymbol, getTxtsByHash, getChallengingPeriodEVM, getRequiredStake } from "utils";
 import { selectChainId } from "store/chainIdSlice";
 import { chainIds } from "chainIds";
 
@@ -19,11 +18,12 @@ const environment = process.env.REACT_APP_ENVIRONMENT;
 const provider = window.ethereum && new ethers.providers.Web3Provider(window.ethereum);
 
 export const SelfClaim = ({ txid, amount, dst_token, sender_address, reward, dst_bridge_aa, dest_address, src_token, txts: txtsCache}) => {
-  const { bridges, directions, } = store.getState();
+  const { bridgeAAParams, directions } = store.getState();
   const { network: dst_network } = dst_token;
   const chainId = useSelector(selectChainId);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [stake, setStake] = useState({ amount: undefined, asset: undefined, decimals: undefined, symbol: undefined, txts: undefined, challenging_period: undefined  });
+  const min_decimals = Math.min(dst_token.decimals, src_token.decimals);
 
   const showModal = () => {
     setIsModalVisible(true);
@@ -37,16 +37,14 @@ export const SelfClaim = ({ txid, amount, dst_token, sender_address, reward, dst
     setIsModalVisible(false);
   };
 
-
-
   useEffect(async () => {
-    if (isEmpty(directions) || isEmpty(bridges) || !dst_bridge_aa) return;
+    if (isEmpty(directions) || isEmpty(bridgeAAParams) || !dst_bridge_aa) return;
 
-    const directions_aa = Object.keys(directions).find((d) => isEqual(directions[d].dst_token, dst_token) && isEqual(directions[d].src_token, src_token));
+    const src_bridge_aa = Object.keys(directions).find((d) => isEqual(directions[d].dst_token, dst_token) && isEqual(directions[d].src_token, src_token));
 
-    if (!directions_aa) return;
+    if (!src_bridge_aa) return;
 
-    const direction = directions[directions_aa];
+    const direction = directions[src_bridge_aa];
 
     const { stake_asset: st_asset, type } = direction || {};
 
@@ -56,9 +54,9 @@ export const SelfClaim = ({ txid, amount, dst_token, sender_address, reward, dst
 
       const decimals = await getDecimals(stake_asset, dst_network);
 
-      const bnAmount = ethers.utils.parseUnits(Number(amount).toFixed(decimals), decimals);
+      const bnAmount = ethers.utils.parseUnits(Number(amount).toFixed(dst_token.decimals), dst_token.decimals);
 
-      let stake = await getRequiredStake(dst_bridge_aa, dst_network, bnAmount, txid);
+      let stake = await getRequiredStake(dst_bridge_aa, dst_network, bnAmount);
 
       const challenging_period = await getChallengingPeriodEVM(0, stake, dst_network, dst_bridge_aa);
       const challenging_period_in_hours = BigNumber.from(challenging_period).toNumber() / 3600;
@@ -73,38 +71,36 @@ export const SelfClaim = ({ txid, amount, dst_token, sender_address, reward, dst
       setStake({ amount: stake.toString(), asset: stake_asset, challenging_period: challenging_period_in_hours, decimals, symbol, txts });
 
     } else if (isModalVisible) {
-      const stake = await getRequiredStakeObyte(dst_bridge_aa, Math.round(amount * 10 ** dst_token.decimals))
+      const stake = await getRequiredStake(dst_bridge_aa, dst_network, Math.round(amount * 10 ** dst_token.decimals))
       const txts = txtsCache || await getTxtsByHash(txid, src_token.network);
 
-      if (bridges.exportParams[dst_bridge_aa]) {
+      if (bridgeAAParams.exportParams[dst_bridge_aa]) {
         //repatriation
         const symbol = await getSymbol(dst_token.asset, dst_network);
-        const params = bridges.exportParams[dst_bridge_aa];
+        const params = bridgeAAParams.exportParams[dst_bridge_aa];
 
         if (!params) return;
 
         const challenging_period = stake >= params.large_threshold ? params.large_challenging_periods[0] : params.challenging_periods[0];
 
-        setStake({ amount: stake + (dst_token.asset === "base" ? 2000 : 0), asset: dst_token.asset, decimals: dst_token.decimals, symbol, txts, challenging_period });
-      } else if (bridges.importParams[dst_bridge_aa]) {
+        setStake({ amount: Math.ceil(stake + (dst_token.asset === "base" ? 2000 : 0)), asset: dst_token.asset, decimals: dst_token.decimals, symbol, txts, challenging_period });
+      } else if (bridgeAAParams.importParams[dst_bridge_aa]) {
         //expatriation
         const symbol = await getSymbol(stake_asset, dst_network);
-        const params = bridges.importParams[dst_bridge_aa];
+        const params = bridgeAAParams.importParams[dst_bridge_aa];
 
         if (!params || !stake_asset) return;
 
         const challenging_period = stake >= params.large_threshold ? params.large_challenging_periods[0] : params.challenging_periods[0];
 
-        setStake({ amount: stake * 1.1 + (stake_asset === "base" ? 2000 : 0), asset: stake_asset, decimals: params.stake_asset_decimals, symbol, txts, challenging_period });
+        setStake({ amount: Math.ceil(stake * 1.1 + (stake_asset === "base" ? 2000 : 0)), asset: stake_asset, decimals: params.stake_asset_decimals, symbol, txts, challenging_period });
       }
 
     }
-  }, [isModalVisible, amount, bridges, directions]);
+  }, [isModalVisible, amount, bridgeAAParams, directions]);
 
 
   if (!isModalVisible) return <Button style={{ padding: 0, color: "#FAAD14" }} type="link" onClick={showModal}>I claim myself</Button>;
-
-  const min_decimals = Math.min(dst_token.decimals, src_token.decimals);
 
   const newClaim = async () => {
     if (dst_network === "Obyte") return;
@@ -115,7 +111,7 @@ export const SelfClaim = ({ txid, amount, dst_token, sender_address, reward, dst
     const bnAmount = ethers.utils.parseUnits(Number(amount).toFixed(min_decimals), dst_token.decimals);
     const bnReward = ethers.utils.parseUnits(Number(reward).toFixed(min_decimals), dst_token.decimals);
 
-    const data = {}
+    const data = "";
 
     const stakeValue = stake.amount;
 
@@ -141,7 +137,7 @@ export const SelfClaim = ({ txid, amount, dst_token, sender_address, reward, dst
   }
 
   const href = (dst_network === "Obyte" && stake.amount) ? generateLink({
-    amount: Math.ceil(stake.amount),
+    amount: stake.amount,
     asset: stake.asset,
     data: {
       sender_address,
@@ -154,7 +150,7 @@ export const SelfClaim = ({ txid, amount, dst_token, sender_address, reward, dst
     aa: dst_bridge_aa
   }) : undefined;
 
-  const stakeAmountView = stake.amount && stake.decimals ? +Number(stake.amount / 10 ** stake.decimals).toFixed(stake.decimals) : 0;
+  const stakeAmountView = stake.amount && stake.decimals !== undefined ? +Number(stake.amount / 10 ** stake.decimals).toFixed(stake.decimals) : 0;
 
   return <>
     <Button style={{ padding: 0, color: "#FAAD14" }} type="link" onClick={showModal}>I claim myself</Button>
