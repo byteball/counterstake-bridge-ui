@@ -128,10 +128,11 @@ export const SelfClaim = ({ txid, amount, dst_token, sender_address, reward, dst
       if (!contract)
         throw Error(`no contract by bridge AA ${dst_bridge_aa}`);
 
+      await window.ethereum.request({ method: 'eth_requestAccounts' });
+
       const metaMaskAddress = await signer.getAddress();
       if (dest_address !== metaMaskAddress) return message.error(`The wallet address in metamask is different from the recipient. Please select the ${dest_address.slice(0, 10)}... account.`)
 
-      await window.ethereum.request({ method: 'eth_requestAccounts' });
       await contract.claim(txid, stake.txts, bnAmount, bnReward, stakeValue, sender_address, dest_address, data, (stake.asset === ethers.constants.AddressZero) ? { value: stakeValue } : { value: 0 });
     } catch (e) {
       console.log(e)
