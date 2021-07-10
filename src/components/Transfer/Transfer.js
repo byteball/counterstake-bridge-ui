@@ -5,7 +5,6 @@ import { useRef } from "react";
 import { ethers } from "ethers";
 import moment from "moment";
 import QRButton from "obyte-qr-button";
-import Decimal from "decimal.js";
 import { useDispatch, useSelector } from "react-redux";
 import { ArrowRightOutlined } from "@ant-design/icons";
 
@@ -38,6 +37,7 @@ export const Transfer = (t) => {
   const [width] = useWindowSize();
   const dispatch = useDispatch();
   useCollapse(ref, isOpen);
+  const min_decimals = Math.min(dst_token.decimals, src_token.decimals);
 
   useEffect(async () => {
     if (self_claimed_num && !expiry_ts) {
@@ -184,7 +184,7 @@ export const Transfer = (t) => {
             sm={{ span: 24 }}
             xs={{ span: 24 }}>
             <div style={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 24, wordBreak: "break-all" }}>
-              <b>You get</b>: <div>{Decimal(amount).sub(reward).toString()}</div>
+              <b>You get</b>: <div>{+Number(amount - reward).toFixed(min_decimals)}</div>
             </div>
           </Col>
 

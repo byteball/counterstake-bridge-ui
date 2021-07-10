@@ -7,7 +7,6 @@ import obyte from "obyte";
 import { ethers } from "ethers";
 import { useSelector, useDispatch } from 'react-redux';
 import QRButton from "obyte-qr-button";
-import Decimal from "decimal.js";
 
 import { addTransfer, updateTransferStatus } from "store/transfersSlice";
 import { selectDestAddress, setDestAddress } from "store/destAddressSlice";
@@ -185,7 +184,7 @@ export const MainPage = () => {
     if (selectedInput && selectedDestination) {
       reward += selectedDestination.min_reward * 1.5;
     }
-    let amount_out = Decimal(amountIn).sub(reward).toNumber();
+    let amount_out = amountIn - reward;
     if (selectedDestination)
       amount_out = +amount_out.toFixed(selectedDestination.token.decimals);
     setAmountOut(amount_out);

@@ -3,7 +3,6 @@ import { BigNumber, ethers } from "ethers";
 import { useEffect, useState } from "react";
 import QRButton from "obyte-qr-button";
 import { isEmpty, isEqual } from "lodash";
-import { Decimal } from 'decimal.js';
 import { useSelector } from "react-redux";
 
 import { getRequiredStake } from "services/evm";
@@ -151,7 +150,7 @@ export const SelfClaim = ({ txid, amount, dst_token, sender_address, reward, dst
     aa: dst_bridge_aa
   }) : undefined;
 
-  const stakeAmountView = stake.amount && stake.decimals ? +Decimal(stake.amount).dividedBy(Decimal(10).pow(stake.decimals)).toFixed(stake.decimals) : 0
+  const stakeAmountView = stake.amount && stake.decimals ? +Number(stake.amount / 10 ** stake.decimals).toFixed(stake.decimals) : 0;
 
   return <>
     <Button style={{ padding: 0, color: "#FAAD14" }} type="link" onClick={showModal}>I claim myself</Button>
