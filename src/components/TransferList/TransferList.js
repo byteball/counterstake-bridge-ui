@@ -18,7 +18,7 @@ export const TransferList = () => {
 
   transfers.forEach((tr) => {
     const diff = moment().diff(moment(tr.ts), 'days');
-    if (recentTransfers.length >= 5 && (tr.status === "claimed" || tr.status === "claim_confirmed") && diff > numberOfDaysBeforeHiding) {
+    if (recentTransfers.length >= 5 && (tr.self_claimed ? Boolean(tr.is_finished) : (tr.status === "claim_confirmed")) && diff > numberOfDaysBeforeHiding) {
       olderTransfers.push(tr);
     } else {
       recentTransfers.push(tr);
