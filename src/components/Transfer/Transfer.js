@@ -65,6 +65,9 @@ export const Transfer = (t) => {
       const destinationChainId = chainIds[environment][dst_token.network];
       if (!chainId || chainId !== destinationChainId) return message.error(`Wrong network selected, please select ${dst_token.network} in MetaMask`);
 
+      const metaMaskAddress = await signer.getAddress();
+      if (dest_address !== metaMaskAddress) return message.error(`The wallet address in metamask is different from the recipient. Please select the ${dest_address.slice(0, 10)}... account.`)
+
       const contract = new ethers.Contract(dst_bridge_aa, ['function withdraw(uint claim_num) external'], signer);
       const res = await contract.withdraw(self_claimed_num);
       dispatch(updateTransferStatus({ txid, status: "withdrawn" }));
