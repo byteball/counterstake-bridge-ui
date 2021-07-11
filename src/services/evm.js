@@ -23,10 +23,6 @@ const onNewClaim = (claim_num, author_address, sender_address, recipient_address
   console.log('NewClaim event', claim_num, author_address, sender_address, recipient_address, txid, txts, amount, reward, stake, data, expiry_ts, event);
   const dispatch = store.dispatch;
 
-  if (author_address === recipient_address) {
-    dispatch(claimMyself({ txid, claim_num: BigNumber.from(claim_num).toNumber() }));
-  }
-
   const claim_txid = event.transactionHash;
   const state = store.getState();
   const transfers = state.transfers;
@@ -34,9 +30,14 @@ const onNewClaim = (claim_num, author_address, sender_address, recipient_address
   const transfer = transfers.find(t => t.txid === txid);
   if (!transfer)
     return console.log(`claim of unrecognized transfer ${txid}`);
-  //transfer.status = 'claimed';
-  dispatch(updateTransferStatus({ txid, status: 'claimed', claim_txid }));
-  setTimeout(() => dispatch(updateTransferStatus({ txid, status: 'claim_confirmed', expiry_ts })), 1000);
+
+  if (author_address === recipient_address) {
+    dispatch(updateTransferStatus({ txid, status: 'claim_confirmed', expiry_ts, claim_txid }));
+    dispatch(claimMyself({ txid, claim_num: BigNumber.from(claim_num).toNumber() }));
+  } else {
+    dispatch(updateTransferStatus({ txid, status: 'claimed', claim_txid }));
+    setTimeout(() => dispatch(updateTransferStatus({ txid, status: 'claim_confirmed', expiry_ts })), 1000);
+  }
 };
 
 // to avoid duplicate event handlers, track the contracts that we are already watching for claims

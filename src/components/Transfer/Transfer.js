@@ -132,7 +132,7 @@ export const Transfer = (t) => {
           md={{ span: 16 }}
           sm={{ span: 24 }}
           xs={{ span: 24 }}>
-          <Steps size="small" labelPlacement={width > 1100 ? "horizontal" : "vertical"} direction={width >= 992 ? "horizontal" : "vertical"} current={!is_finished ? getStatusIndex(src_token.network, status) : 6}>
+          <Steps size="small" labelPlacement={width > 1100 ? "horizontal" : "vertical"} direction={width >= 992 ? "horizontal" : "vertical"} current={!is_finished ? getStatusIndex(src_token.network, status) : 5}>
             {
               src_token.network === "Obyte" ? <>
                 <Step title="Sent" />
@@ -166,7 +166,7 @@ export const Transfer = (t) => {
             paddingBottom: 24,
           }}>
             <Col lg={{ span: width >= 1300 ? 9 : 12, offset: 8 }} >
-              <Steps size="small" initial={4} labelPlacement={width > 1100 ? "horizontal" : "vertical"} direction={width >= 992 ? "horizontal" : "vertical"} current={!is_finished ? getStatusIndex(src_token.network, status) : 6}>
+              <Steps size="small" initial={4} labelPlacement={width > 1100 ? "horizontal" : "vertical"} direction={width >= 992 ? "horizontal" : "vertical"} current={!is_finished ? getStatusIndex(src_token.network, status) : 5}>
                 <Step title="Withdrawn" />
                 <Step title="Withdrawal confirmed" />
               </Steps>
@@ -187,7 +187,7 @@ export const Transfer = (t) => {
             sm={{ span: 24 }}
             xs={{ span: 24 }}>
             <div style={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 24, wordBreak: "break-all" }}>
-              <b>You get</b>: <div>{+Number(amount - reward).toFixed(min_decimals)}</div>
+              <b>You get</b>: <div>{+Number(t.self_claimed ? amount : amount - reward).toFixed(min_decimals)}</div>
             </div>
           </Col>
 
@@ -214,7 +214,7 @@ export const Transfer = (t) => {
             xs={{ span: 24 }}>
             <div style={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 24, wordBreak: "break-all", textAlign: width >= 992 ? "right" : "left" }}>
               {(status === "confirmed" || status === "mined") && ((ts_confirmed && (!endedWaitingForConfirmation || (Date.now() < (ts_confirmed + numberOfMinutesWaitingForMoreConfirmations * 60 * 1000)))) ? <Countdown title="Waiting for more confirmations" value={ts_confirmed + numberOfMinutesWaitingForMoreConfirmations * 60 * 1000} onFinish={() => setEndedWaitingForConfirmation(true)} /> : <SelfClaim {...t} />)}
-              {expiry_ts && (status === "claim" || status === "claim_confirmed") && (!expired ? <Countdown title="Time until withdrawal" value={expiry_ts * 1000} onFinish={() => setAlreadyExpired(true)} /> : (dst_token.network === "Obyte" ? <QRButton href={withdrawFromObyteLink}>Withdraw</QRButton> : <Button onClick={handleWithdraw}>Withdraw</Button>))}
+              {expiry_ts && (status === "claimed" || status === "claim_confirmed") && (!expired ? <Countdown title="Time until withdrawal" value={expiry_ts * 1000} onFinish={() => setAlreadyExpired(true)} /> : (dst_token.network === "Obyte" ? <QRButton href={withdrawFromObyteLink}>Withdraw</QRButton> : <Button onClick={handleWithdraw}>Withdraw</Button>))}
             </div>
           </Col>}
         </Row>
