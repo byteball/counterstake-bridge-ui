@@ -156,7 +156,7 @@ export const SelfClaim = ({ txid, amount, dst_token, sender_address, reward, dst
   const stakeAmountView = stake.amount && stake.decimals !== undefined ? +Number(stake.amount / 10 ** stake.decimals).toFixed(stake.decimals) : 0;
 
   return <>
-    <Button style={{ padding: 0, color: "#FAAD14" }} type="link" disabled onClick={showModal}>I claim myself</Button>
+    <Button style={{ padding: 0, color: "#FAAD14" }} type="link" onClick={showModal}>I claim myself</Button>
     <Modal loading={!stake} footer={(stake.asset && stake.amount && stake.txts) ? (dst_network === "Obyte" ? <div style={{ textAlign: "right" }}><QRButton type="primary" loading={!stake?.amount} style={{ margin: 0 }} href={href}>Self-claim this transfer</QRButton> </div> : <Button type="primary" onClick={newClaim} loading={!stake?.amount}>Self-claim this transfer</Button>) : null} title="I claim myself" visible={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
       {stake.asset && stake.amount && stake.txts ? <>
         <p>You can claim the transfer yourself if no assistant is able/willing to help you with this transfer. You will have to stake your own money {stakeAmountView} <span style={{ fontFamily: "-apple-system, Roboto, Arial, sans-serif" }}>{stake.symbol || stake.asset}</span>.</p>
