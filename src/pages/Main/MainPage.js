@@ -50,6 +50,8 @@ const MAX_UINT256 = ethers.BigNumber.from(2).pow(256).sub(1);
 
 const metamaskDownloadUrl = "https://metamask.io/download";
 
+const f = (x) => (~(x + "").indexOf(".") ? (x + "").split(".")[1].length : 0);
+
 export const MainPage = () => {
   const [width] = useWindowSize();
   const { inputs, loaded } = useSelector(selectInputs)
@@ -73,6 +75,7 @@ export const MainPage = () => {
   const [pendingTokens, setPendingTokens] = useState({});
   const addedTokens = useSelector(selectAddedTokens);
   const max_amount = (selectedDestination && selectedDestination.max_amount && (selectedDestination.max_amount.toPrecision(4))) || 0;
+  const min_decimals = selectedInput?.token && selectedDestination?.token && Math.min(selectedInput.token.decimals, selectedDestination.token.decimals);
 
   useEffect(() => {
     if (rehydrated && isOpenConnection) {
@@ -100,7 +103,7 @@ export const MainPage = () => {
   const handleAmountIn = (ev) => {
     const value = ev.target.value;
     const reg = /^[0-9.]+$/;
-    if (reg.test(String(value)) || value === "") {
+    if ((reg.test(String(value)) && f(value) <= min_decimals) || value === "") {
       setAmountIn(value);
     }
   };
@@ -196,6 +199,12 @@ export const MainPage = () => {
   }, [selectedDestination, amountIn, isOpenConnection]);
 
 
+  useEffect(()=>{
+    if (Number(amountIn) && min_decimals !==undefined){
+      setAmountIn(+Number(Math.trunc(amountIn * 10 ** min_decimals) / 10 ** min_decimals).toFixed(min_decimals))
+    }
+  }, [min_decimals]);
+
   const loginEthereum = async () => {
     await window.ethereum.request({ method: 'eth_requestAccounts' });
   };
@@ -209,7 +218,6 @@ export const MainPage = () => {
       return setError(<>MetaMask not found. You can download it <a target="_blank" rel="noopener" href={metamaskDownloadUrl}>here</a>.</>);
     await loginEthereum();
     // do not exceed the precision of the least precise token, otherwise the money will be lost!
-    const min_decimals = Math.min(selectedInput.token.decimals, selectedDestination.token.decimals);
     const bnAmount = ethers.utils.parseUnits(Number(amountIn).toFixed(min_decimals), selectedInput.token.decimals);
     const bnReward = ethers.utils.parseUnits(Number(reward).toFixed(min_decimals), selectedInput.token.decimals);
     const sender_address = await signer.getAddress();
