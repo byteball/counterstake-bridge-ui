@@ -56,7 +56,7 @@ export const SelfClaim = ({ txid, amount, dst_token, sender_address, reward, dst
 
       const decimals = await getDecimals(stake_asset, dst_network);
 
-      const bnAmount = ethers.utils.parseUnits(Number(amount).toFixed(dst_token.decimals), dst_token.decimals);
+      const bnAmount = ethers.utils.parseUnits(Number(amount).toFixed(min_decimals), dst_token.decimals);
 
       let stake = await getRequiredStake(dst_bridge_aa, dst_network, bnAmount);
 
