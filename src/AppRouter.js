@@ -1,7 +1,12 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useDispatch } from "react-redux";
 import { Router, Route } from "react-router-dom";
+import { useSelector } from "react-redux";
 
+import { changeChainId, getChainId } from "store/chainIdSlice";
+import { getBridgesParams } from "store/thunks";
 import { MainLayout } from "./components/MainLayout/MainLayout";
+import { selectConnectionStatus } from "store/connectionSlice";
 import historyInstance from "./historyInstance";
 import {
   HowItWorksPage,
@@ -13,6 +18,22 @@ import {
 
 
 const AppRouter = () => {
+  const dispatch = useDispatch();
+  dispatch(getBridgesParams());
+
+  const isOpenConnection = useSelector(selectConnectionStatus);
+
+  useEffect(()=>{
+    dispatch(getChainId());
+  }, [isOpenConnection]);
+  
+  useEffect(()=>{
+    if (window.ethereum) {
+      window.ethereum?.on('chainChanged', (newChainId) => {
+        dispatch(changeChainId(Number(newChainId)));
+      });
+    }
+  }, []);
 
   return (
     <Router history={historyInstance}>

@@ -1,9 +1,10 @@
-import { addTransfer, updateTransferStatus } from "store/transfersSlice";
+import { addTransfer, claimMyself, updateTransferStatus, withdrawalConfirmed } from "store/transfersSlice";
 import obyte from "obyte";
 import { startWatchingDestinationBridge } from "./watch";
 import { sendTransferToGA } from "./transfer";
 import { store } from "index";
 import { closeConnection, openConnection } from "store/connectionSlice";
+import { getClaim } from "utils/getClaim";
 
 const environment = process.env.REACT_APP_ENVIRONMENT;
 
@@ -15,7 +16,6 @@ let client = new obyte.Client(
   }
 );
 
-
 const trackedSubjects = ["light/aa_request", "light/aa_response"];
 
 const getAAPayload = (messages = []) => messages.find(m => m.app === 'data')?.payload || {};
@@ -26,7 +26,7 @@ const getAAPayment = (messages = [], recipients = [], asset) => messages.find(m 
 const handleEventBridge = async (err, result) => {
   const dispatch = store.dispatch;
   const state = store.getState();
-  
+
   const transfers = state.transfers;
 
   const current_dest_addresses = Object.keys(state.destAddress).map((network) => state.destAddress[network]).filter((a) => a);
@@ -86,13 +86,25 @@ const handleEventBridge = async (err, result) => {
       if (!transfer)
         return console.log(`claim of somebody else's transfer ${payload.txid} in ${unit}`)
       //transfer.status = 'claim_sent';
+      if (address === transfer.dest_address) {
+        dispatch(claimMyself({ txid: payload.txid }));
+      }
+
       dispatch(updateTransferStatus({ txid: payload.txid, status: 'claimed', claim_txid: unit }));
+    } else if (payload.withdraw && payload.claim_num !== undefined) {
+
+      const transfer = transfers.find(t => t.self_claimed && (t.self_claimed_num !== undefined) && (Number(t.self_claimed_num) === Number(payload.claim_num)) && (body.aa_address === t.dst_bridge_aa));
+
+      if (!transfer)
+        return console.log(`withdrawal of somebody else's transfer`)
+
+      dispatch(updateTransferStatus({ txid: transfer.txid, status: 'withdrawn' }));
     }
     else
       console.log(`neither transfer nor claim in ${unit}`);
   }
   else if (isResponse) {
-    const { response, bounced, trigger_unit, trigger_address } = body;
+    const { response, bounced, trigger_unit, trigger_address, timestamp } = body;
     if (bounced) return null;
     let { responseVars } = response;
     if (!responseVars)
@@ -120,7 +132,7 @@ const handleEventBridge = async (err, result) => {
       }
       //transfer.status = 'confirmed';
       console.log(`transfer confirmed`, transfer)
-      dispatch(updateTransferStatus({ txid: trigger_unit, status: 'confirmed' }));
+      dispatch(updateTransferStatus({ txid: trigger_unit, status: 'confirmed', txts: timestamp }));
     }
     // new claim
     else if (responseVars.new_claim_num) {
@@ -130,9 +142,32 @@ const handleEventBridge = async (err, result) => {
       const { unit: { messages, unit } } = resp.joint;
       const payload = getAAPayload(messages);
       const transfer = transfers.find(t => t.txid === payload.txid);
+
       if (!transfer)
         return console.log(`confirmed claim of somebody else's transfer ${payload.txid} in ${trigger_unit}`)
-      dispatch(updateTransferStatus({ txid: payload.txid, status: 'claim_confirmed', claim_txid: unit }));
+
+      if (trigger_address === transfer.dest_address) {
+        dispatch(claimMyself({ txid: payload.txid, claim_num: responseVars.new_claim_num }));
+      }
+
+      const claim = await getClaim(responseVars.new_claim_num, body.aa_address, transfer.dst_token.network, false);
+
+      dispatch(updateTransferStatus({ txid: payload.txid, status: 'claim_confirmed', claim_txid: unit, expiry_ts: claim?.expiry_ts }));
+
+    }
+    else if (message.includes("finished claim")) {
+      const resp = await client.api.getJoint(trigger_unit);
+      if (!resp)
+        throw Error(`failed to get trigger ${trigger_unit}`);
+      const { unit: { messages } } = resp.joint;
+      const payload = getAAPayload(messages);
+      const transfer = transfers.find(t => t.self_claimed && (t.self_claimed_num !== undefined) && (Number(t.self_claimed_num) === Number(payload.claim_num)) && (body.aa_address === t.dst_bridge_aa));
+
+      if (!transfer)
+        return console.log(`confirmed withdrawal of somebody else's transfer in ${trigger_unit}`)
+
+      dispatch(updateTransferStatus({ txid: transfer.txid, status: 'withdrawal_confirmed' }));
+      dispatch(withdrawalConfirmed({ txid: transfer.txid }))
     }
   }
   else
@@ -153,7 +188,7 @@ client.onConnect(() => {
   client.subscribe((err, result) => {
     if (err) return null;
     const { subject, body } = result[1];
-    const { aa_address } = body;
+    const aa_address = body?.aa_address;
     if (!subject || !trackedSubjects.includes(subject)) {
       return null;
     }
@@ -166,20 +201,20 @@ client.onConnect(() => {
 
   dispatch(openConnection())
 
-  if (process.env.REACT_APP_OBYTE_IMPORT_AA) {
+  if (process.env.REACT_APP_OBYTE_IMPORT_BASE_AA) {
     client.justsaying("light/new_aa_to_watch", {
-      aa: process.env.REACT_APP_OBYTE_IMPORT_AA
+      aa: process.env.REACT_APP_OBYTE_IMPORT_BASE_AA
     });
   } else {
-    console.error("Please specify ENV: REACT_APP_OBYTE_IMPORT_AA")
+    console.error("Please specify ENV: REACT_APP_OBYTE_IMPORT_BASE_AA")
   }
 
-  if (process.env.REACT_APP_OBYTE_EXPORT_AA) {
+  if (process.env.REACT_APP_OBYTE_EXPORT_BASE_AA) {
     client.justsaying("light/new_aa_to_watch", {
-      aa: process.env.REACT_APP_OBYTE_EXPORT_AA
+      aa: process.env.REACT_APP_OBYTE_EXPORT_BASE_AA
     });
   } else {
-    console.error("Please specify ENV: REACT_APP_OBYTE_EXPORT_AA")
+    console.error("Please specify ENV: REACT_APP_OBYTE_EXPORT_BASE_AA")
   }
 
   client.client.ws.addEventListener("close", () => {

@@ -22,9 +22,11 @@ import { getCoinIcons, updateBridges, updateTransfersStatus } from "store/thunks
 import { getCoinIcon } from "./getCoinIcon";
 import { selectConnectionStatus } from "store/connectionSlice";
 import { selectInputs } from "store/inputsSlice";
+import { addTokenToTracked, selectAddedTokens } from "store/addedTokensSlice";
+import { selectChainId } from "store/chainIdSlice";
+import { chainIds } from "chainIds";
 
 import styles from "./MainPage.module.css";
-import { addTokenToTracked, selectAddedTokens } from "store/addedTokensSlice";
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -42,25 +44,13 @@ const erc20Abi = [
   "function balanceOf(address account) public view virtual override returns (uint256)",
 ];
 
-const chainIds = {
-  mainnet: {
-    Ethereum: 1,
-    BSC: 56,
-  },
-  testnet: {
-    Ethereum: 4, // rinkeby
-    BSC: 97,
-  },
-  devnet: {
-    Ethereum: 1337, // ganache
-    BSC: null,
-  },
-};
 const environment = process.env.REACT_APP_ENVIRONMENT;
 
 const MAX_UINT256 = ethers.BigNumber.from(2).pow(256).sub(1);
 
 const metamaskDownloadUrl = "https://metamask.io/download";
+
+const f = (x) => (~(x + "").indexOf(".") ? (x + "").split(".")[1].length : 0);
 
 export const MainPage = () => {
   const [width] = useWindowSize();
@@ -80,11 +70,12 @@ export const MainPage = () => {
   const isOpenConnection = useSelector(selectConnectionStatus)
   const searchInputInRef = useRef(null);
   const searchInputOutRef = useRef(null);
-  const [chainId, setChainId] = useState();
+  const chainId = useSelector(selectChainId);
   const [inFocus, setInFocus] = useState(true);
   const [pendingTokens, setPendingTokens] = useState({});
   const addedTokens = useSelector(selectAddedTokens);
   const max_amount = (selectedDestination && selectedDestination.max_amount && (selectedDestination.max_amount.toPrecision(4))) || 0;
+  const min_decimals = selectedInput?.token && selectedDestination?.token && Math.min(selectedInput.token.decimals, selectedDestination.token.decimals);
 
   useEffect(() => {
     if (rehydrated && isOpenConnection) {
@@ -112,7 +103,7 @@ export const MainPage = () => {
   const handleAmountIn = (ev) => {
     const value = ev.target.value;
     const reg = /^[0-9.]+$/;
-    if (reg.test(String(value)) || value === "") {
+    if ((reg.test(String(value)) && f(value) <= min_decimals) || value === "") {
       setAmountIn(value);
     }
   };
@@ -187,7 +178,7 @@ export const MainPage = () => {
   useEffect(() => {
     if (selectedDestination)
       setCountAssistants(selectedDestination.count_claimants);
-    if (!amountIn) {
+    if (!amountIn || isNaN(Number(amountIn))) {
       setAmountOut(undefined);
       setReward(undefined);
       return;
@@ -208,6 +199,12 @@ export const MainPage = () => {
   }, [selectedDestination, amountIn, isOpenConnection]);
 
 
+  useEffect(()=>{
+    if (Number(amountIn) && min_decimals !==undefined){
+      setAmountIn(+Number(Math.trunc(amountIn * 10 ** min_decimals) / 10 ** min_decimals).toFixed(min_decimals))
+    }
+  }, [min_decimals]);
+
   const loginEthereum = async () => {
     await window.ethereum.request({ method: 'eth_requestAccounts' });
   };
@@ -221,7 +218,6 @@ export const MainPage = () => {
       return setError(<>MetaMask not found. You can download it <a target="_blank" rel="noopener" href={metamaskDownloadUrl}>here</a>.</>);
     await loginEthereum();
     // do not exceed the precision of the least precise token, otherwise the money will be lost!
-    const min_decimals = Math.min(selectedInput.token.decimals, selectedDestination.token.decimals);
     const bnAmount = ethers.utils.parseUnits(Number(amountIn).toFixed(min_decimals), selectedInput.token.decimals);
     const bnReward = ethers.utils.parseUnits(Number(reward).toFixed(min_decimals), selectedInput.token.decimals);
     const sender_address = await signer.getAddress();
@@ -269,7 +265,7 @@ export const MainPage = () => {
     // wait until mined
     try {
       await res.wait();
-      dispatch(updateTransferStatus({ txid: res.hash, status: 'mined' }));
+      dispatch(updateTransferStatus({ txid: res.hash, status: 'mined', ts_confirmed: Date.now() }));
     }
     catch (e) {
       console.log('wait failed');
@@ -300,7 +296,6 @@ export const MainPage = () => {
       if (willGetToken) {
         setSelectedDestination(willGetToken);
         setSelectedInput(willSendInput);
-        Number(amountOut) > 0 ? setAmountIn(amountOut) : setAmountIn(undefined);
       }
     }
   }
@@ -317,21 +312,7 @@ export const MainPage = () => {
       const newDestinationData = inputs[selectedInput.index].destinations[selectedDestination.index];
       setSelectedDestination(newDestinationData);
     }
-  }, [inputs, tokenIsInitialized])
-
-  useEffect(async () => {
-    if (!window.ethereum) // no metamask installed
-      return;
-    window.ethereum?.on('chainChanged', (newChainId) => {
-      setChainId(Number(newChainId));
-    });
-
-    const network = await provider.getNetwork();
-
-    if (network && ("chainId" in network)) {
-      setChainId(network.chainId);
-    }
-  }, [isOpenConnection])
+  }, [inputs, tokenIsInitialized]);
 
   useEffect(async () => {
     if (window.ethereum && inFocus && (chainId in pendingTokens)) {
@@ -546,7 +527,7 @@ export const MainPage = () => {
                 >
                   <Input
                     size="middle"
-                    style={{ height: 45, paddingRight: 30 }}
+                    style={{ height: 45, paddingRight: 30, fontFamily: "-apple-system, Roboto, Arial, sans-serif" }}
                     spellCheck="false"
                     value={recipient.value}
                     placeholder={`Your ${selectedDestination ? selectedDestination.token.network : 'receiving'} wallet address`}

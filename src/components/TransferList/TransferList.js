@@ -1,15 +1,11 @@
-import { Card, Row, Col, Steps, Typography, Badge, Button } from "antd";
+import { Typography, Button } from "antd";
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import moment from "moment";
-import { selectTransfers } from "store/transfersSlice";
-import useCollapse from 'react-hook-collapse';
-import { useRef } from "react";
-import { useWindowSize } from "hooks/useWindowSize";
-import { ArrowRightOutlined } from "@ant-design/icons";
-import { getExplorerLink } from "utils/getExplorerLink";
 
-const { Step } = Steps;
+import { selectTransfers } from "store/transfersSlice";
+import { Transfer } from "components/Transfer/Transfer";
+
 const { Title } = Typography;
 
 const numberOfDaysBeforeHiding = 1;
@@ -22,7 +18,7 @@ export const TransferList = () => {
 
   transfers.forEach((tr) => {
     const diff = moment().diff(moment(tr.ts), 'days');
-    if (recentTransfers.length >= 5 && (tr.status === "claimed" || tr.status === "claim_confirmed") && diff > numberOfDaysBeforeHiding) {
+    if (recentTransfers.length >= 5 && (tr.self_claimed ? Boolean(tr.is_finished) : (tr.status === "claim_confirmed")) && diff > numberOfDaysBeforeHiding) {
       olderTransfers.push(tr);
     } else {
       recentTransfers.push(tr);
@@ -36,129 +32,10 @@ export const TransferList = () => {
       </Title>
     )}
 
-    {recentTransfers.length !== 0 ? recentTransfers.map(t => {
-      if (t.status && (t.status === "claim_confirmed")) {
-        return <Badge.Ribbon key={'list-item' + t.txid} placement="start" style={{ top: 0 }} text="Finished"> <Transfer key={t.txid} {...t} /> </Badge.Ribbon>
-      } else {
-        return <Transfer key={'list-item' + t.txid} {...t} />
-      }
-    }) : null}
+    {recentTransfers.length !== 0 ? recentTransfers.map(t => <Transfer key={'list-item' + t.txid} {...t} />) : null}
 
-    {visibleOlder && olderTransfers.map(t => {
-      if (t.status && (t.status === "claim_confirmed")) {
-        return <Badge.Ribbon key={'list-item' + t.txid} placement="start" style={{ top: 0 }} text="Finished"> <Transfer key={t.txid} {...t} /> </Badge.Ribbon>
-      } else {
-        return <Transfer key={'list-item' + t.txid} {...t} />
-      }
-    })}
+    {visibleOlder && olderTransfers.map(t => <Transfer key={'list-item' + t.txid} {...t} />)}
 
     {olderTransfers.length > 0 && <Button type="link" onClick={() => { setVisibleOlder(v => !v); }}>{visibleOlder ? "Hide" : "Show older transfers"}</Button>}
   </div>)
-}
-
-const Transfer = ({ src_token, amount, dst_token, status, dest_address, reward, ts, txid, claim_txid }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const ref = useRef();
-  const [width] = useWindowSize();
-  useCollapse(ref, isOpen);
-
-  return <Card
-    bodyStyle={{ padding: 0 }}
-    style={{ marginBottom: 20 }}
-  >
-    <Row
-      gutter="10"
-      align="middle"
-      onClick={() => setIsOpen(!isOpen)}
-      style={{
-        paddingTop: 24,
-        paddingLeft: 24,
-        paddingRight: 24,
-        paddingBottom: 24,
-        cursor: "pointer"
-      }}
-    >
-
-      <Col
-        lg={{ span: 8 }}
-        md={{ span: 24 }}
-        sm={{ span: 24 }}
-        xs={{ span: 24 }}
-        style={{ fontSize: 16, paddingBottom: width < 990 ? 20 : 0, paddingTop: width < 990 ? 5 : 0 }}
-      >
-        <span>{amount} {src_token.symbol}: {src_token.network}</span> <ArrowRightOutlined /> {dst_token.network}
-      </Col>
-      <Col
-        lg={{ span: 16 }}
-        md={{ span: 16 }}
-        sm={{ span: 24 }}
-        xs={{ span: 24 }}>
-        <Steps size="small" direction={width >= 990 ? "horizontal" : "vertical"} current={getStatusLabel(src_token.network, status)}>
-          {
-            src_token.network === "Obyte" ? <>
-              <Step title="Sent" />
-              <Step title="Confirmed" />
-              <Step title="Claimed" />
-              <Step title="Claim confirmed" />
-            </> :
-              <>
-                <Step title="Sent" />
-                <Step title="Mined" />
-                <Step title="Claimed" />
-                <Step title="Claim confirmed" />
-              </>
-          }
-        </Steps>
-      </Col>
-    </Row>
-    <div ref={ref} style={{ overflow: 'hidden', transition: '0.4s' }}>
-      <Row>
-        <Col
-          lg={12}
-          sm={{ span: 24 }}
-          xs={{ span: 24 }}
-        >
-          <div style={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 24, wordBreak: "break-all" }}>
-            <b>Recipient address</b>: <div style={{ fontFamily: "-apple-system, Roboto, Arial, sans-serif" }}>{dest_address}</div>
-          </div>
-        </Col>
-        <Col
-          lg={6}
-          sm={{ span: 24 }}
-          xs={{ span: 24 }}>
-          <div style={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 24, wordBreak: "break-all" }}>
-            <b>You get</b>: <div>{amount - reward}</div>
-          </div>
-        </Col>
-
-        <Col lg={6}
-          sm={{ span: 24 }}
-          xs={{ span: 24 }}>
-          <div style={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 24, wordBreak: "break-all" }}>
-            <b>Created</b>: <div>{moment.unix(ts / 1000).format("LLL")}</div>
-          </div>
-        </Col>
-      </Row>
-      <Row>
-        <Col lg={12}>
-          <div style={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 24, wordBreak: "break-all" }}>
-            <b>Sent in</b>: <div style={{ fontFamily: "-apple-system, Roboto, Arial, sans-serif" }}><a href={getExplorerLink(src_token.network, txid)} target="_blank" rel="noopener">{txid}</a></div>
-          </div>
-        </Col>
-        {claim_txid && <Col lg={12}>
-          <div style={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 24, wordBreak: "break-all" }}>
-            <b>Claimed in</b>: <div style={{ fontFamily: "-apple-system, Roboto, Arial, sans-serif" }}><a href={getExplorerLink(dst_token.network, claim_txid)} target="_blank" rel="noopener">{claim_txid}</a></div>
-          </div>
-        </Col>}
-      </Row>
-    </div>
-  </Card >
-}
-
-export const getStatusLabel = (network, status) => {
-  if (network === "Obyte") {
-    return ["sent", "confirmed", "claimed", "claim_confirmed"].findIndex((s) => s === status);
-  } else {
-    return ["sent", "mined", "claimed", "claim_confirmed"].findIndex((s) => s === status);
-  }
 }

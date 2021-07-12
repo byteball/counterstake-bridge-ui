@@ -19,6 +19,8 @@ import governanceSlice from './governanceSlice';
 import cdnIconsSlice from './cdnIconsSlice';
 import inputsSlice from './inputsSlice';
 import addedTokensSlice from './addedTokensSlice';
+import bridgeAAParamsSlice from './bridgeAAParamsSlice';
+import chainIdSlice from './chainIdSlice';
 
 const rootReducer = combineReducers({
   transfers: transfersReducer,
@@ -28,7 +30,9 @@ const rootReducer = combineReducers({
   governance: governanceSlice,
   cdnIcons: cdnIconsSlice,
   inputs: inputsSlice,
-  addedTokens: addedTokensSlice
+  addedTokens: addedTokensSlice,
+  bridgeAAParams: bridgeAAParamsSlice,
+  chainId: chainIdSlice
 });
 
 const persistConfig = {
