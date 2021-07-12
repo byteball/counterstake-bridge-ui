@@ -73,10 +73,7 @@ export const FaqPage = () => {
           className={styles.panel}
         >
           <p>
-            Technically, you can. However, you'll need to claim the transfer yourself, pay a stake when claiming, monitor and defend your claim if it is challenged, and you'll be able to withdraw your transfer on the destination chain only several days later.
-          </p>
-          <p>
-            That would be too complex for most users and this website offers the UI only for assistant-facilitated transfers.
+            Yes, you can, if you send a transfer that is larger than any assistant can process. In this case, you have an option to claim the transfer yourself or wait for an assistant to refill their capital and claim your transfer. If you decide to claim yourself, you'll need to pay a stake, and you'll be able to withdraw your transfer, along with the stake, on the destination chain only several days later (3 days by default). This website will update the status of your transfer and guide you through the process.
           </p>
         </Panel>
 
