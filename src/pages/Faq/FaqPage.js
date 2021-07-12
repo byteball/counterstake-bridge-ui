@@ -99,7 +99,7 @@ export const FaqPage = () => {
           className={styles.panel}
         >
           <p>
-            Yes, you can be an assistant and make money from assistant rewards. Assistants are bots, you need to run it 24/7 and supply it with some capital that it'll use to claim transfers and challenge fraudulent transfers. See this github repo [link] about setting up an assistant bot.
+            Yes, you can be an assistant and make money from assistant rewards. Assistants are bots, you need to run it 24/7 and supply it with some capital that it'll use to claim transfers and challenge fraudulent transfers. See <a href="https://github.com/byteball/counterstake-bridge" target="_blank" rel="noopener">this github repo about setting up an assistant bot</a>.
           </p>
           <p>
             Alternatively, if you are not technical enough to run a bot yourself, you can contribute capital to <i>pooled assistants</i> operated by a manager, and share their profits.
@@ -112,7 +112,7 @@ export const FaqPage = () => {
           className={styles.panel}
         >
           <p>
-            Counterstake protocol can connect any two chains that support some form of on-chain <i>programmable agents</i>: Autonomous Agents on Obyte, Smart Contracts on Ethereum, Chaincode on Hyperledger Fabric, etc. It is currently implemented for Obyte, Ethereum, and Binance Smart Chain. Launching Counterstake on any other Obyte-based or EVM-compatible chain is as easy as deploying the relevant code [link] on these chains.
+            Counterstake protocol can connect any two chains that support some form of on-chain <i>programmable agents</i>: Autonomous Agents on Obyte, Smart Contracts on Ethereum, Chaincode on Hyperledger Fabric, etc. It is currently implemented for Obyte, Ethereum, and Binance Smart Chain. Launching Counterstake on any other Obyte-based or EVM-compatible chain is as easy as <a href="https://github.com/byteball/counterstake-bridge" target="_blank" rel="noopener">deploying the relevant code</a> on these chains.
           </p>
         </Panel>
 
