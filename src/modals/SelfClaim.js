@@ -10,6 +10,7 @@ import { generateLink, getDecimals, getSymbol, getTxtsByHash, getChallengingPeri
 import { selectChainId } from "store/chainIdSlice";
 import { chainIds } from "chainIds";
 import { updateTransferStatus } from "store/transfersSlice";
+import { changeNetwork } from "utils/changeNetwork";
 
 const counterstakeAbi = [
   "function claim(string memory txid, uint32 txts, uint amount, int reward, uint stake, string memory sender_address, address payable recipient_address, string memory data) payable external"
@@ -18,12 +19,12 @@ const counterstakeAbi = [
 const environment = process.env.REACT_APP_ENVIRONMENT;
 const provider = window.ethereum && new ethers.providers.Web3Provider(window.ethereum);
 
-export const SelfClaim = ({ txid, amount, dst_token, sender_address, reward, dst_bridge_aa, dest_address, src_token, txts: txtsCache}) => {
+export const SelfClaim = ({ txid, amount, dst_token, sender_address, reward, dst_bridge_aa, dest_address, src_token, txts: txtsCache }) => {
   const { bridgeAAParams, directions } = store.getState();
   const { network: dst_network } = dst_token;
   const chainId = useSelector(selectChainId);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [stake, setStake] = useState({ amount: undefined, asset: undefined, decimals: undefined, symbol: undefined, txts: undefined, challenging_period: undefined  });
+  const [stake, setStake] = useState({ amount: undefined, asset: undefined, decimals: undefined, symbol: undefined, txts: undefined, challenging_period: undefined });
   const dispatch = useDispatch();
   const min_decimals = Math.min(dst_token.decimals, src_token.decimals);
 
@@ -108,7 +109,6 @@ export const SelfClaim = ({ txid, amount, dst_token, sender_address, reward, dst
     if (dst_network === "Obyte") return;
 
     const destinationChainId = chainIds[environment][dst_network];
-    if (!chainId || chainId !== destinationChainId) return message.error(`Wrong network selected, please select ${dst_network} in MetaMask`);
 
     const bnAmount = ethers.utils.parseUnits(Number(amount).toFixed(min_decimals), dst_token.decimals);
     const bnReward = ethers.utils.parseUnits(Number(reward).toFixed(min_decimals), dst_token.decimals);
@@ -121,18 +121,41 @@ export const SelfClaim = ({ txid, amount, dst_token, sender_address, reward, dst
       const signer = window.ethereum && provider.getSigner();
       if (!signer) return;
 
-      const contract = new ethers.Contract(dst_bridge_aa, counterstakeAbi, signer);
-
-      if (!contract)
-        throw Error(`no contract by bridge AA ${dst_bridge_aa}`);
-
       await window.ethereum.request({ method: 'eth_requestAccounts' });
 
       const metaMaskAddress = await signer.getAddress();
+
       if (dest_address !== metaMaskAddress) return message.error(`The wallet address in metamask is different from the recipient. Please select the ${dest_address.slice(0, 10)}... account.`)
 
-      await contract.claim(txid, stake.txts, bnAmount, bnReward, stakeValue, sender_address, dest_address, data, (stake.asset === ethers.constants.AddressZero) ? { value: stakeValue } : { value: 0 });
-      dispatch(updateTransferStatus({ txid, status: 'claimed' }))
+      if (!chainId || chainId !== destinationChainId) {
+        await changeNetwork(dst_network)
+
+        const provider = window.ethereum && new ethers.providers.Web3Provider(window.ethereum);
+        const signer = window.ethereum && provider.getSigner();
+
+        const contract = new ethers.Contract(dst_bridge_aa, counterstakeAbi, signer);
+
+        if (!contract)
+          throw Error(`no contract by bridge AA ${dst_bridge_aa}`);
+
+        const { chainId } = await provider.getNetwork();
+        
+        if (!chainId || chainId !== destinationChainId) return null;
+
+        await contract.claim(txid, stake.txts, bnAmount, bnReward, stakeValue, sender_address, dest_address, data, (stake.asset === ethers.constants.AddressZero) ? { value: stakeValue } : { value: 0 })
+
+        dispatch(updateTransferStatus({ txid, status: 'claimed' }))
+
+      } else {
+        const contract = new ethers.Contract(dst_bridge_aa, counterstakeAbi, signer);
+
+        if (!contract)
+          throw Error(`no contract by bridge AA ${dst_bridge_aa}`);
+
+        await contract.claim(txid, stake.txts, bnAmount, bnReward, stakeValue, sender_address, dest_address, data, (stake.asset === ethers.constants.AddressZero) ? { value: stakeValue } : { value: 0 });
+        dispatch(updateTransferStatus({ txid, status: 'claimed' }))
+      }
+
     } catch (e) {
       console.log(e)
     }

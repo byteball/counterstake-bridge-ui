@@ -18,14 +18,13 @@ import { EllipsisIcon } from "components/EllipsisIcon/EllipsisIcon";
 import { LineIcon } from "components/LineIcon/LineIcon";
 import { selectChainId } from "store/chainIdSlice";
 import { chainIds } from "chainIds";
+import { changeNetwork } from "utils/changeNetwork";
 
 const { Step } = Steps;
 const { Countdown } = Statistic;
 
 const environment = process.env.REACT_APP_ENVIRONMENT;
 const numberOfMinutesWaitingForMoreConfirmations = 5;
-const provider = window.ethereum && new ethers.providers.Web3Provider(window.ethereum);
-const signer = window.ethereum && provider.getSigner();
 
 export const Transfer = (t) => {
   const { src_token, amount, dst_token, status, dest_address, reward, ts, txid, claim_txid, dst_bridge_aa, self_claimed, self_claimed_num, is_finished, ts_confirmed, expiry_ts } = t;
@@ -60,15 +59,35 @@ export const Transfer = (t) => {
     if (!self_claimed_num || !window.ethereum) return;
 
     try {
+      let provider = window.ethereum && new ethers.providers.Web3Provider(window.ethereum);
+      let signer = window.ethereum && provider.getSigner();
+
       await window.ethereum.request({ method: 'eth_requestAccounts' });
 
       const destinationChainId = chainIds[environment][dst_token.network];
-      if (!chainId || chainId !== destinationChainId) return message.error(`Wrong network selected, please select ${dst_token.network} in MetaMask`);
 
       const metaMaskAddress = await signer.getAddress();
       if (dest_address !== metaMaskAddress) return message.error(`The wallet address in metamask is different from the recipient. Please select the ${dest_address.slice(0, 10)}... account.`)
 
-      const contract = new ethers.Contract(dst_bridge_aa, ['function withdraw(uint claim_num) external'], signer);
+      let contract = new ethers.Contract(dst_bridge_aa, ['function withdraw(uint claim_num) external'], signer);
+
+      if (!chainId || chainId !== destinationChainId) {
+        await changeNetwork(dst_token.network)
+
+        provider = window.ethereum && new ethers.providers.Web3Provider(window.ethereum);
+
+        signer = window.ethereum && provider.getSigner();
+
+        contract = new ethers.Contract(dst_bridge_aa, ['function withdraw(uint claim_num) external'], signer);
+
+        if (!contract)
+          throw Error(`no contract by bridge AA ${dst_bridge_aa}`);
+
+        const { chainId } = await provider.getNetwork();
+
+        if (!chainId || chainId !== destinationChainId) return null;
+      }
+
       const res = await contract.withdraw(self_claimed_num);
       dispatch(updateTransferStatus({ txid, status: "withdrawn" }));
       try {
@@ -210,7 +229,7 @@ export const Transfer = (t) => {
               <b>Claimed in</b>: <div style={{ fontFamily: "-apple-system, Roboto, Arial, sans-serif" }}><a href={getExplorerLink(dst_token.network, claim_txid)} target="_blank" rel="noopener">{claim_txid}</a></div>
             </div>
           </Col>}
-          {signer && ((status === "confirmed" || status === "mined") || ((status === "claim" || status === "claim_confirmed") && self_claimed && !is_finished)) && <Col lg={{ offset: 12, span: 12 }} sm={{ span: 24 }}
+          {((status === "confirmed" || status === "mined") || ((status === "claim" || status === "claim_confirmed") && self_claimed && !is_finished)) && <Col lg={{ offset: 12, span: 12 }} sm={{ span: 24 }}
             xs={{ span: 24 }}>
             <div style={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 24, wordBreak: "break-all", textAlign: width >= 992 ? "right" : "left" }}>
               {(status === "confirmed" || status === "mined") && ((ts_confirmed && (!endedWaitingForConfirmation || (Date.now() < (ts_confirmed + numberOfMinutesWaitingForMoreConfirmations * 60 * 1000)))) ? <Countdown title="Waiting for more confirmations" value={ts_confirmed + numberOfMinutesWaitingForMoreConfirmations * 60 * 1000} onFinish={() => setEndedWaitingForConfirmation(true)} /> : <SelfClaim {...t} />)}
