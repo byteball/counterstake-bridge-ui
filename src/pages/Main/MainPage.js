@@ -217,8 +217,7 @@ export const MainPage = () => {
     // Ethereum or BSC
     if (!window.ethereum)
       return setError(<>MetaMask not found. You can download it <a target="_blank" rel="noopener" href={metamaskDownloadUrl}>here</a>.</>);
-
-    await window.ethereum.request({ method: 'eth_requestAccounts' });
+    await loginEthereum();
 
     const inputNetwork = selectedInput?.token.network;
     const inputChainId = inputNetwork && chainIds[environment]?.[inputNetwork]
