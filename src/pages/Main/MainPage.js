@@ -237,10 +237,8 @@ export const MainPage = () => {
     // do not exceed the precision of the least precise token, otherwise the money will be lost!
     const bnAmount = ethers.utils.parseUnits(Number(amountIn).toFixed(min_decimals), selectedInput.token.decimals);
     const bnReward = ethers.utils.parseUnits(Number(reward).toFixed(min_decimals), selectedInput.token.decimals);
-    const dest_address = recipient.value;
-
     const sender_address = await signer.getAddress();
-
+    const dest_address = recipient.value;
     let res;
     if (selectedDestination.type === 'expatriation') {
       const isETH = selectedInput.token.asset === ethers.constants.AddressZero;
