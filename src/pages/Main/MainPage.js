@@ -25,6 +25,7 @@ import { selectInputs } from "store/inputsSlice";
 import { addTokenToTracked, selectAddedTokens } from "store/addedTokensSlice";
 import { selectChainId } from "store/chainIdSlice";
 import { chainIds } from "chainIds";
+import { changeNetwork } from "utils/changeNetwork";
 
 import styles from "./MainPage.module.css";
 
@@ -199,8 +200,8 @@ export const MainPage = () => {
   }, [selectedDestination, amountIn, isOpenConnection]);
 
 
-  useEffect(()=>{
-    if (Number(amountIn) && min_decimals !==undefined){
+  useEffect(() => {
+    if (Number(amountIn) && min_decimals !== undefined) {
       setAmountIn(+Number(Math.trunc(amountIn * 10 ** min_decimals) / 10 ** min_decimals).toFixed(min_decimals))
     }
   }, [min_decimals]);
@@ -217,6 +218,21 @@ export const MainPage = () => {
     if (!window.ethereum)
       return setError(<>MetaMask not found. You can download it <a target="_blank" rel="noopener" href={metamaskDownloadUrl}>here</a>.</>);
     await loginEthereum();
+
+    const inputNetwork = selectedInput?.token.network;
+    const inputChainId = inputNetwork && chainIds[environment]?.[inputNetwork]
+
+    if (!chainId || chainId !== inputChainId) {
+      await changeNetwork(inputNetwork)
+    }
+
+    const provider = window.ethereum && new ethers.providers.Web3Provider(window.ethereum);
+    const signer = window.ethereum && provider.getSigner();
+
+    const { chainId: newChainId } = await provider.getNetwork();
+  
+    if (!newChainId || newChainId !== inputChainId) return null;
+
     // do not exceed the precision of the least precise token, otherwise the money will be lost!
     const bnAmount = ethers.utils.parseUnits(Number(amountIn).toFixed(min_decimals), selectedInput.token.decimals);
     const bnReward = ethers.utils.parseUnits(Number(reward).toFixed(min_decimals), selectedInput.token.decimals);
@@ -299,9 +315,6 @@ export const MainPage = () => {
       }
     }
   }
-
-  const inputNetwork = selectedInput?.token.network;
-  const inputChainId = inputNetwork && chainIds[environment]?.[inputNetwork]
 
   useEffect(() => {
     if (!tokenIsInitialized && inputs && inputs.length > 0) {
@@ -581,7 +594,7 @@ export const MainPage = () => {
                   !amountIn ||
                   !(amountOut > 0)
                 }
-                onClick={() => { addToken(); inputChainId === chainId ? handleClickTransfer().catch((reason) => { (reason.code === "INSUFFICIENT_FUNDS" || reason.code === -32603) ? message.error("An error occurred, please check your balance") : console.error(`An error occurred, please write and we will help. (${reason?.code || "NO_CODE"}). ${reason.reason}`); }) : message.error(`Wrong network selected, please select ${selectedInput.token.network} in MetaMask`); }}
+                onClick={() => { handleClickTransfer().then(() => addToken()).catch((reason) => { (reason.code === "INSUFFICIENT_FUNDS" || reason.code === -32603) ? message.error("An error occurred, please check your balance") : console.error(`An error occurred, please write and we will help. (${reason?.code || "NO_CODE"}). ${reason.reason}`); }) }}
               >
                 Transfer
               </Button>}

@@ -26,6 +26,6 @@ export async function getBridges() {
 }
 
 export async function getTransferStatus(txid) {
-  const resp_body = await request(`/transfer/${txid}`);
+  const resp_body = await request(`/transfer/?txid=${encodeURIComponent(txid)}`);
   return resp_body?.data;
 }
