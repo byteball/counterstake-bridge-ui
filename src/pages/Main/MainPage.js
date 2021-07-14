@@ -218,30 +218,26 @@ export const MainPage = () => {
     if (!window.ethereum)
       return setError(<>MetaMask not found. You can download it <a target="_blank" rel="noopener" href={metamaskDownloadUrl}>here</a>.</>);
 
-    let provider = window.ethereum && new ethers.providers.Web3Provider(window.ethereum);
-    let signer = window.ethereum && provider.getSigner();
-
     await window.ethereum.request({ method: 'eth_requestAccounts' });
 
     const inputNetwork = selectedInput?.token.network;
     const inputChainId = inputNetwork && chainIds[environment]?.[inputNetwork]
 
+    if (!chainId || chainId !== inputChainId) {
+      await changeNetwork(inputNetwork)
+    }
+
+    const provider = window.ethereum && new ethers.providers.Web3Provider(window.ethereum);
+    const signer = window.ethereum && provider.getSigner();
+
+    const { chainId: newChainId } = await provider.getNetwork();
+  
+    if (!newChainId || newChainId !== inputChainId) return null;
+
     // do not exceed the precision of the least precise token, otherwise the money will be lost!
     const bnAmount = ethers.utils.parseUnits(Number(amountIn).toFixed(min_decimals), selectedInput.token.decimals);
     const bnReward = ethers.utils.parseUnits(Number(reward).toFixed(min_decimals), selectedInput.token.decimals);
     const dest_address = recipient.value;
-
-    if (!chainId || chainId !== inputChainId) {
-      await changeNetwork(inputNetwork)
-
-      provider = window.ethereum && new ethers.providers.Web3Provider(window.ethereum);
-
-      signer = window.ethereum && provider.getSigner();
-
-      const { chainId } = await provider.getNetwork();
-
-      if (!chainId || chainId !== inputChainId) return null;
-    }
 
     const sender_address = await signer.getAddress();
 

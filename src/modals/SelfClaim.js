@@ -17,7 +17,6 @@ const counterstakeAbi = [
 ];
 
 const environment = process.env.REACT_APP_ENVIRONMENT;
-const provider = window.ethereum && new ethers.providers.Web3Provider(window.ethereum);
 
 export const SelfClaim = ({ txid, amount, dst_token, sender_address, reward, dst_bridge_aa, dest_address, src_token, txts: txtsCache }) => {
   const { bridgeAAParams, directions } = store.getState();
@@ -118,44 +117,31 @@ export const SelfClaim = ({ txid, amount, dst_token, sender_address, reward, dst
     const stakeValue = stake.amount;
 
     try {
-      const signer = window.ethereum && provider.getSigner();
-      if (!signer) return;
+      if (!window.ethereum) return;
 
       await window.ethereum.request({ method: 'eth_requestAccounts' });
 
-      const metaMaskAddress = await signer.getAddress();
-
-      if (dest_address !== metaMaskAddress) return message.error(`The wallet address in metamask is different from the recipient. Please select the ${dest_address.slice(0, 10)}... account.`)
-
       if (!chainId || chainId !== destinationChainId) {
         await changeNetwork(dst_network)
-
-        const provider = window.ethereum && new ethers.providers.Web3Provider(window.ethereum);
-        const signer = window.ethereum && provider.getSigner();
-
-        const contract = new ethers.Contract(dst_bridge_aa, counterstakeAbi, signer);
-
-        if (!contract)
-          throw Error(`no contract by bridge AA ${dst_bridge_aa}`);
-
-        const { chainId } = await provider.getNetwork();
-        
-        if (!chainId || chainId !== destinationChainId) return null;
-
-        await contract.claim(txid, stake.txts, bnAmount, bnReward, stakeValue, sender_address, dest_address, data, (stake.asset === ethers.constants.AddressZero) ? { value: stakeValue } : { value: 0 })
-
-        dispatch(updateTransferStatus({ txid, status: 'claimed' }))
-
-      } else {
-        const contract = new ethers.Contract(dst_bridge_aa, counterstakeAbi, signer);
-
-        if (!contract)
-          throw Error(`no contract by bridge AA ${dst_bridge_aa}`);
-
-        await contract.claim(txid, stake.txts, bnAmount, bnReward, stakeValue, sender_address, dest_address, data, (stake.asset === ethers.constants.AddressZero) ? { value: stakeValue } : { value: 0 });
-        dispatch(updateTransferStatus({ txid, status: 'claimed' }))
       }
 
+      const provider = window.ethereum && new ethers.providers.Web3Provider(window.ethereum);
+      const signer = window.ethereum && provider.getSigner();
+
+      const { chainId: newChainId } = await provider.getNetwork();
+
+      if (!newChainId || newChainId !== destinationChainId) return null;
+
+      const metaMaskAddress = await signer.getAddress();
+      if (dest_address !== metaMaskAddress) return message.error(`The wallet address in metamask is different from the recipient. Please select the ${dest_address.slice(0, 10)}... account.`)
+
+      const contract = new ethers.Contract(dst_bridge_aa, counterstakeAbi, signer);
+      if (!contract)
+        throw Error(`no contract by bridge AA ${dst_bridge_aa}`);
+
+      await contract.claim(txid, stake.txts, bnAmount, bnReward, stakeValue, sender_address, dest_address, data, (stake.asset === ethers.constants.AddressZero) ? { value: stakeValue } : { value: 0 })
+
+      dispatch(updateTransferStatus({ txid, status: 'claimed' }))
     } catch (e) {
       console.log(e)
     }

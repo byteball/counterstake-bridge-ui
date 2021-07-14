@@ -59,34 +59,28 @@ export const Transfer = (t) => {
     if (!self_claimed_num || !window.ethereum) return;
 
     try {
-      let provider = window.ethereum && new ethers.providers.Web3Provider(window.ethereum);
-      let signer = window.ethereum && provider.getSigner();
-
       await window.ethereum.request({ method: 'eth_requestAccounts' });
 
       const destinationChainId = chainIds[environment][dst_token.network];
 
+      if (!chainId || chainId !== destinationChainId) {
+        await changeNetwork(dst_token.network)
+      }
+
+      const provider = window.ethereum && new ethers.providers.Web3Provider(window.ethereum);
+      const signer = window.ethereum && provider.getSigner();
+
       const metaMaskAddress = await signer.getAddress();
       if (dest_address !== metaMaskAddress) return message.error(`The wallet address in metamask is different from the recipient. Please select the ${dest_address.slice(0, 10)}... account.`)
 
-      let contract = new ethers.Contract(dst_bridge_aa, ['function withdraw(uint claim_num) external'], signer);
+      const contract = new ethers.Contract(dst_bridge_aa, ['function withdraw(uint claim_num) external'], signer);
 
-      if (!chainId || chainId !== destinationChainId) {
-        await changeNetwork(dst_token.network)
+      if (!contract)
+        throw Error(`no contract by bridge AA ${dst_bridge_aa}`);
 
-        provider = window.ethereum && new ethers.providers.Web3Provider(window.ethereum);
+      const { chainId: newChainId } = await provider.getNetwork();
 
-        signer = window.ethereum && provider.getSigner();
-
-        contract = new ethers.Contract(dst_bridge_aa, ['function withdraw(uint claim_num) external'], signer);
-
-        if (!contract)
-          throw Error(`no contract by bridge AA ${dst_bridge_aa}`);
-
-        const { chainId } = await provider.getNetwork();
-
-        if (!chainId || chainId !== destinationChainId) return null;
-      }
+      if (!newChainId || newChainId !== destinationChainId) return null;
 
       const res = await contract.withdraw(self_claimed_num);
       dispatch(updateTransferStatus({ txid, status: "withdrawn" }));
