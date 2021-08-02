@@ -17,6 +17,18 @@ const rpcMeta = {
       rpcUrls: ['https://bsc-dataseed.binance.org/'],
       blockExplorerUrls: ['https://bscscan.com/'],
     },
+    Polygon: {
+      chainId: '0x89',
+      chainName: 'Polygon Network',
+      nativeCurrency:
+      {
+        name: 'MATIC',
+        symbol: 'MATIC',
+        decimals: 18
+      },
+      rpcUrls: ['https://rpc-mainnet.maticvigil.com'],
+      blockExplorerUrls: ['https://polygonscan.com/'],
+    }
   },
   testnet: {
     Ethereum: undefined, // rinkeby
@@ -32,6 +44,18 @@ const rpcMeta = {
       rpcUrls: ['https://data-seed-prebsc-1-s1.binance.org:8545'],
       blockExplorerUrls: ['https://testnet.bscscan.com/'],
     },
+    Polygon: {
+      chainId: '0x13881',
+      chainName: 'Polygon TEST Network',
+      nativeCurrency:
+      {
+        name: 'MATIC',
+        symbol: 'MATIC',
+        decimals: 18
+      },
+      rpcUrls: ['https://rpc-mumbai.maticvigil.com'],
+      blockExplorerUrls: ['https://mumbai.polygonscan.com/'],
+    }
   },
   devnet: {
     Ethereum: 1337, // ganache
