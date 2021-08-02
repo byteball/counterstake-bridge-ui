@@ -16,6 +16,9 @@ export const providers = {
   BSC: (environment === 'devnet')
     ? null
     : new ethers.providers.JsonRpcProvider(environment === 'testnet' ? "https://data-seed-prebsc-1-s1.binance.org:8545" : "https://bsc-dataseed.binance.org"),
+  Polygon: (environment === 'devnet')
+    ? null
+    : new ethers.providers.JsonRpcProvider(environment === 'testnet' ? "https://rpc-mumbai.maticvigil.com" : "https://rpc-mainnet.maticvigil.com"),
 };
 
 // new claim on Ethereum or BSC

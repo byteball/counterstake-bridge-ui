@@ -18,7 +18,7 @@ import { generateLink } from "utils/generateLink";
 import { ReactComponent as MetamaskLogo } from "./metamask-fox.svg";
 import { TransferList } from "components/TransferList/TransferList";
 import { getPersist } from "store";
-import { getCoinIcons, updateBridges, updateTransfersStatus } from "store/thunks";
+import { getCoinIcons, updateTransfersStatus } from "store/thunks";
 import { getCoinIcon } from "./getCoinIcon";
 import { selectConnectionStatus } from "store/connectionSlice";
 import { selectInputs } from "store/inputsSlice";
@@ -88,17 +88,6 @@ export const MainPage = () => {
     dispatch(getCoinIcons())
   }, []);
 
-  useEffect(() => {
-    dispatch(updateBridges());
-
-    const intervalId = setInterval(() => { dispatch(updateBridges()) }, 1000 * 60 * 5);
-
-    return () => {
-      clearInterval(intervalId)
-    }
-
-  }, []);
-
   const transferRef = useRef(null);
 
   const handleAmountIn = (ev) => {
@@ -112,18 +101,18 @@ export const MainPage = () => {
   const isValidRecipient = value => {
     if (!selectedDestination || !value)
       return undefined;
-    switch (selectedDestination.token.network) {
-      case 'Obyte':
-        return obyte.utils.isValidAddress(value);
-      case 'Ethereum':
-      case 'BSC':
-        try {
-          return ethers.utils.getAddress(value) === value;
-        }
-        catch (e) {
-          return false;
-        }
-      default: throw Error(`unknown network ${selectedDestination.token.network}`);
+
+    if (selectedDestination.token.network === "Obyte") {
+      return obyte.utils.isValidAddress(value);
+    } else if (Object.keys(chainIds[environment]).includes(selectedDestination.token.network)) {
+      try {
+        return ethers.utils.getAddress(value) === value;
+      }
+      catch (e) {
+        return false;
+      }
+    } else {
+      return false
     }
   };
 
@@ -424,15 +413,16 @@ export const MainPage = () => {
                       ref={searchInputInRef}
                       onChange={index => {
                         setSelectedInput(inputs[index]);
-                        setSelectedDestination(inputs[index].destinations[0])
+                        const validDestination = inputs[index].destinations.find((d) => (d.token.network in chainIds[environment]) || d.token.network === "Obyte");
+                        setSelectedDestination(validDestination);
                         searchInputInRef?.current?.blur();
                       }}
                       value={selectedInput && selectedInput.index}
                     >
                       {inputs && inputs.map((input) => (
-                        <Select.Option key={input.index} value={input.index} label={`${input.token.symbol} on ${input.token.network}`}>
+                        <Select.Option disabled={(!(input.token.network in chainIds[environment]) && input.token.network !== "Obyte") || (!(input.token.home_network in chainIds[environment]) && input.token.home_network !== "Obyte")} key={input.index} value={input.index} label={`${input.token.symbol} on ${input.token.network}`}>
                           <div style={{ display: "flex", alignItems: "center" }}>
-                            {getCoinIcon(input.token.network, input.token.symbol)}  <span>{input.token.symbol} on {input.token.network}</span>
+                            <div style={(!(input.token.network in chainIds[environment]) && input.token.network !== "Obyte") || (!(input.token.home_network in chainIds[environment]) && input.token.home_network !== "Obyte") ? { opacity: .2 } : {}}>{getCoinIcon(input.token.network, input.token.symbol)}</div> <span>{input.token.symbol} on {input.token.network}</span>
                           </div>
                         </Select.Option>
                       ))}{" "}
@@ -498,9 +488,9 @@ export const MainPage = () => {
                     showSearch
                   >
                     {selectedInput && selectedInput.destinations.map((destination) => (
-                      <Select.Option key={destination.index} value={destination.index} label={`${destination.token.symbol} on ${destination.token.network}`}>
+                      <Select.Option disabled={!(destination.token.network in chainIds[environment]) && destination.token.network !== "Obyte"} key={destination.index} value={destination.index} label={`${destination.token.symbol} on ${destination.token.network}`}>
                         <div style={{ display: "flex", alignItems: "center" }}>
-                          {getCoinIcon(destination.token.network, destination.token.symbol)} {destination.token.symbol} on {destination.token.network}{" "}
+                          <div style={!(destination.token.network in chainIds[environment]) && destination.token.network !== "Obyte" ? { opacity: .2 } : {}}>{getCoinIcon(destination.token.network, destination.token.symbol)}</div> {destination.token.symbol} on {destination.token.network}{" "}
                         </div>
                       </Select.Option>
                     ))}

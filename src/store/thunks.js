@@ -62,8 +62,8 @@ export const updateBridges = createAsyncThunk(
     let directions = {};
     let inputs = [];
     for (let { bridge_id, home_network, home_asset, stake_asset, home_asset_decimals, home_symbol, export_aa, foreign_network, foreign_asset, foreign_asset_decimals, foreign_symbol, import_aa, min_expatriation_reward, min_repatriation_reward, count_expatriation_claimants, count_repatriation_claimants, max_expatriation_amount, max_repatriation_amount } of bridges) {
-      const home_token = { network: home_network, asset: home_asset, decimals: home_asset_decimals, symbol: home_symbol };
-      const foreign_token = { network: foreign_network, asset: foreign_asset, decimals: foreign_asset_decimals, symbol: foreign_symbol };
+      const home_token = { network: home_network, asset: home_asset, decimals: home_asset_decimals, symbol: home_symbol, home_network };
+      const foreign_token = { network: foreign_network, asset: foreign_asset, decimals: foreign_asset_decimals, symbol: foreign_symbol, home_network };
       directions[export_aa] = {
         bridge_id,
         type: 'expatriation',

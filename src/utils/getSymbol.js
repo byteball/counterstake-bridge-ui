@@ -22,6 +22,8 @@ export const getSymbol = async (tokenAddress, dst_network) => {
         return "ETH";
       } else if (dst_network === "BSC") {
         return "BNB";
+      } else if (dst_network === "Polygon") {
+        return "MATIC";
       }
     }
 
