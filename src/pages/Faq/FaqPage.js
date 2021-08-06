@@ -109,7 +109,7 @@ export const FaqPage = () => {
           className={styles.panel}
         >
           <p>
-            Counterstake protocol can connect any two chains that support some form of on-chain <i>programmable agents</i>: Autonomous Agents on Obyte, Smart Contracts on Ethereum, Chaincode on Hyperledger Fabric, etc. It is currently implemented for Obyte, Ethereum, and Binance Smart Chain. Launching Counterstake on any other Obyte-based or EVM-compatible chain is as easy as <a href="https://github.com/byteball/counterstake-bridge" target="_blank" rel="noopener">deploying the relevant code</a> on these chains.
+            Counterstake protocol can connect any two chains that support some form of on-chain <i>programmable agents</i>: Autonomous Agents on Obyte, Smart Contracts on Ethereum, Chaincode on Hyperledger Fabric, etc. It is currently implemented for Obyte, Ethereum, Binance Smart Chain, and Polygon (formerly Matic). Launching Counterstake on any other Obyte-based or EVM-compatible chain is as easy as <a href="https://github.com/byteball/counterstake-bridge" target="_blank" rel="noopener">deploying the relevant code</a> on these chains.
           </p>
         </Panel>
 
