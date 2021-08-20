@@ -1,0 +1,10 @@
+.governance {
+  max-width: 990px;
+  margin: 0 auto;
+}
+
+@media (max-width: 380px) {
+  .governance :global(.ant-list .ant-card .ant-card-body) {
+    padding: 10px !important;
+  }
+}

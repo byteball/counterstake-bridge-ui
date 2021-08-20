@@ -37,11 +37,11 @@ export const MainMenu = ({ mode, pathname, onClose, width }) => {
           User guide
         </NavLink>
       </Menu.Item>
-      {/* <Menu.Item key="/governance">
+      <Menu.Item key="/governance">
         <NavLink to="/governance" activeClassName="selected" style={{ verticalAlign: "middle" }}>
           Governance
         </NavLink>
-      </Menu.Item> */}
+      </Menu.Item>
       <Menu.Item key="/faq">
         <NavLink to="/faq" activeClassName="selected" style={{ verticalAlign: "middle" }}>
           F.A.Q.

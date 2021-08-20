@@ -6,7 +6,7 @@ import { isEmpty, isEqual } from "lodash";
 import { useDispatch, useSelector } from "react-redux";
 
 import { store } from "index";
-import { generateLink, getDecimals, getSymbol, getTxtsByHash, getChallengingPeriodEVM, getRequiredStake } from "utils";
+import { generateLink, getDecimals, getSymbol, getTxtsByHash, getChallengingPeriod, getRequiredStake } from "utils";
 import { selectChainId } from "store/chainIdSlice";
 import { chainIds } from "chainIds";
 import { updateTransferStatus } from "store/transfersSlice";
@@ -60,7 +60,7 @@ export const SelfClaim = ({ txid, amount, dst_token, sender_address, reward, dst
 
       let stake = await getRequiredStake(dst_bridge_aa, dst_network, bnAmount);
 
-      const challenging_period = await getChallengingPeriodEVM(0, stake, dst_network, dst_bridge_aa);
+      const challenging_period = await getChallengingPeriod(0, stake, dst_network, dst_bridge_aa);
       const challenging_period_in_hours = BigNumber.from(challenging_period).toNumber() / 3600;
 
       const symbol = await getSymbol(stake_asset, dst_network);
@@ -75,6 +75,7 @@ export const SelfClaim = ({ txid, amount, dst_token, sender_address, reward, dst
     } else if (isModalVisible) {
       const stake = await getRequiredStake(dst_bridge_aa, dst_network, Math.round(amount * 10 ** dst_token.decimals))
       const txts = txtsCache || await getTxtsByHash(txid, src_token.network);
+      const challenging_period = await getChallengingPeriod(0, stake, dst_network, dst_bridge_aa);
 
       if (bridgeAAParams.exportParams[dst_bridge_aa]) {
         //repatriation
@@ -83,8 +84,6 @@ export const SelfClaim = ({ txid, amount, dst_token, sender_address, reward, dst
 
         if (!params) return;
 
-        const challenging_period = stake >= params.large_threshold ? params.large_challenging_periods[0] : params.challenging_periods[0];
-
         setStake({ amount: Math.ceil(stake + (dst_token.asset === "base" ? 2000 : 0)), asset: dst_token.asset, decimals: dst_token.decimals, symbol, txts, challenging_period });
       } else if (bridgeAAParams.importParams[dst_bridge_aa]) {
         //expatriation
@@ -92,8 +91,6 @@ export const SelfClaim = ({ txid, amount, dst_token, sender_address, reward, dst
         const params = bridgeAAParams.importParams[dst_bridge_aa];
 
         if (!params || !stake_asset) return;
-
-        const challenging_period = stake >= params.large_threshold ? params.large_challenging_periods[0] : params.challenging_periods[0];
 
         setStake({ amount: Math.ceil(stake * 1.1 + (stake_asset === "base" ? 2000 : 0)), asset: stake_asset, decimals: params.stake_asset_decimals, symbol, txts, challenging_period });
       }
@@ -168,7 +165,7 @@ export const SelfClaim = ({ txid, amount, dst_token, sender_address, reward, dst
     <Button style={{ padding: 0, color: "#FAAD14" }} type="link" onClick={showModal}>I claim myself</Button>
     <Modal loading={!stake} footer={(stake.asset && stake.amount && stake.txts) ? (dst_network === "Obyte" ? <div style={{ textAlign: "right" }}><QRButton type="primary" loading={!stake?.amount} style={{ margin: 0 }} href={href}>Self-claim this transfer</QRButton> </div> : <Button type="primary" onClick={newClaim} loading={!stake?.amount}>Self-claim this transfer</Button>) : null} title="I claim myself" visible={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
       {stake.asset && stake.amount && stake.txts ? <>
-        <p>You can claim the transfer yourself if no assistant is able/willing to help you with this transfer. You will have to stake your own money {stakeAmountView} <span style={{ fontFamily: "-apple-system, Roboto, Arial, sans-serif" }}>{stake.symbol || stake.asset}</span>.</p>
+        <p>You can claim the transfer yourself if no assistant is able/willing to help you with this transfer. You will have to stake your own money {stakeAmountView} <span className="evmHashOrAddress">{stake.symbol || stake.asset}</span>.</p>
         <p>If the claim is successful, you will get back both the staked money and the transferred amount in {stake?.challenging_period ? `${stake?.challenging_period} hours` : "[loading]"}. Your claim can be challenged during this period if it doesn't exactly match the initial transfer, which can happen due to bugs, and this app makes no guarantees that there aren't any. Use at your own risk.</p>
       </> : <div style={{ width: "100%", height: "100%", display: "flex", justifyContent: "center", alignItems: "center" }}>
         <Spin size="large" />

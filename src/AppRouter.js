@@ -14,6 +14,7 @@ import {
   CSTokenPage,
   FaqPage,
   MainPage,
+  GovernancePage
 } from "./pages";
 
 
@@ -53,7 +54,7 @@ const AppRouter = () => {
         <Route path="/user-guide/:tab?" component={UserGuidePage} />
         <Route path="/cs-token" component={CSTokenPage} />
         <Route path="/faq" component={FaqPage} />
-        {/* <Route path="/governance" component={GovernancePage} /> */}
+        <Route path="/governance/:address?" component={GovernancePage} />
         <Route path="/" component={MainPage} exact />
       </MainLayout>
     </Router>
