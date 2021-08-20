@@ -13,11 +13,11 @@ export const updateTransfersStatus = createAsyncThunk(
     const getStatusList = [];
     const subscriptions = [];
     transfers.forEach((tr) => {
-      if (!(tr.status === "claim_confirmed" && (!tr.self_claimed)) || (("self_claimed" in tr) && !Number(tr.is_finished))) {
+      if (!(tr.status === "claim_confirmed" && (!tr.self_claimed)) || (("self_claimed" in tr) && !Number(tr.is_finished)) || !tr.claimant_address || (tr.claimant_address && (tr.dest_address === tr.claimant_address) && (!tr.self_claimed_num))) {
         if ("dst_bridge_aa" in tr) {
           subscriptions.push(startWatchingDestinationBridge(tr.dst_token.network, tr.dst_bridge_aa))
         }
-        getStatusList.push(getTransferStatus(tr.txid).then((data => ({ txid: tr.txid, status: data?.status || tr.status, claim_txid: data?.claim_txid, type: data?.type || tr.type, is_finished: data?.is_finished, claim_num: data?.claim_num }))))
+        getStatusList.push(getTransferStatus(tr.txid).then((data => ({ txid: tr.txid, status: data?.status || tr.status, claim_txid: data?.claim_txid, type: data?.type || tr.type, is_finished: data?.is_finished, claim_num: data?.claim_num, self_claimed_num: ((data?.claimant_address === data?.dest_address) && (data?.claimant_address && data?.dest_address)) ? data?.claim_num : undefined, claimant_address: data?.claimant_address }))))
       }
     })
     await Promise.all(subscriptions);

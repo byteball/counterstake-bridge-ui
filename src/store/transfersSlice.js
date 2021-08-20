@@ -51,6 +51,9 @@ export const transfersSlice = createSlice({
       if (action?.payload?.txts) {
         transfer.txts = action.payload.txts;
       }
+      if (action?.payload?.claimant_address) {
+        transfer.claimant_address = action.payload.claimant_address;
+      }
     },
     withdrawalConfirmed: (state, action) => {
       const transfer = state.find(t => t.txid === action.payload.txid);
@@ -80,7 +83,7 @@ export const transfersSlice = createSlice({
   extraReducers: {
     [updateTransfersStatus.fulfilled]: (state, action) => {
       const listWithChangeInStatus = action.payload;
-      listWithChangeInStatus?.forEach(({ txid, status, claim_txid, is_finished, claim_num }) => {
+      listWithChangeInStatus?.forEach(({ txid, status, claim_txid, is_finished, claim_num, self_claimed_num }) => {
         const transferIndex = state.findIndex(t => t.txid === txid);
         state[transferIndex].status = status;
         if (claim_txid){
@@ -93,6 +96,11 @@ export const transfersSlice = createSlice({
 
         if (state[transferIndex].self_claimed && claim_num && !state[transferIndex].self_claimed_num) {
           state[transferIndex].self_claimed_num = claim_num;
+        }
+
+        if (self_claimed_num) {
+          state[transferIndex].self_claimed_num = self_claimed_num;
+          state[transferIndex].self_claimed = Date.now();
         }
       })
     },

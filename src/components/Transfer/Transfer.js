@@ -42,6 +42,7 @@ export const Transfer = (t) => {
     if (self_claimed_num && !expiry_ts) {
       try {
         const claim = await getClaim(self_claimed_num, dst_bridge_aa, dst_token.network, is_finished);
+        if (!claim?.expiry_ts) return;
         dispatch(updateExpireTs({ txid, expiry_ts: claim?.expiry_ts }))
       } catch (e) {
         console.log(e)

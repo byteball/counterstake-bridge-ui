@@ -35,10 +35,10 @@ const onNewClaim = (claim_num, author_address, sender_address, recipient_address
     return console.log(`claim of unrecognized transfer ${txid}`);
 
   if (author_address === recipient_address) {
-    dispatch(updateTransferStatus({ txid, status: 'claim_confirmed', expiry_ts, claim_txid }));
+    dispatch(updateTransferStatus({ txid, status: 'claim_confirmed', expiry_ts, claim_txid, claimant_address: author_address }));
     dispatch(claimMyself({ txid, claim_num: BigNumber.from(claim_num).toNumber() }));
   } else {
-    dispatch(updateTransferStatus({ txid, status: 'claimed', claim_txid }));
+    dispatch(updateTransferStatus({ txid, status: 'claimed', claim_txid, claimant_address: author_address }));
     setTimeout(() => dispatch(updateTransferStatus({ txid, status: 'claim_confirmed', expiry_ts })), 1000);
   }
 };
