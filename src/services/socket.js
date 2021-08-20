@@ -90,7 +90,7 @@ const handleEventBridge = async (err, result) => {
         dispatch(claimMyself({ txid: payload.txid }));
       }
 
-      dispatch(updateTransferStatus({ txid: payload.txid, status: 'claimed', claim_txid: unit }));
+      dispatch(updateTransferStatus({ txid: payload.txid, status: 'claimed', claim_txid: unit, claimant_address: address }));
     } else if (payload.withdraw && payload.claim_num !== undefined) {
 
       const transfer = transfers.find(t => t.self_claimed && (t.self_claimed_num !== undefined) && (Number(t.self_claimed_num) === Number(payload.claim_num)) && (body.aa_address === t.dst_bridge_aa));
@@ -152,7 +152,7 @@ const handleEventBridge = async (err, result) => {
 
       const claim = await getClaim(responseVars.new_claim_num, body.aa_address, transfer.dst_token.network, false);
 
-      dispatch(updateTransferStatus({ txid: payload.txid, status: 'claim_confirmed', claim_txid: unit, expiry_ts: claim?.expiry_ts }));
+      dispatch(updateTransferStatus({ txid: payload.txid, status: 'claim_confirmed', claim_txid: unit, expiry_ts: claim?.expiry_ts, claimant_address: trigger_address }));
 
     }
     else if (message.includes("finished claim")) {
