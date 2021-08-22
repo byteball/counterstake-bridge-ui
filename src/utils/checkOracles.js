@@ -77,7 +77,7 @@ export const checkOracles = async (
       return false;
     }
   } else if (oracle3 || feed_name3) {
-    message.error("Not all data for oracle 1 is specified!");
+    message.error("Not all data for oracle 3 is specified!");
     return false;
   }
 
