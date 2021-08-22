@@ -14,7 +14,7 @@ export const WithdrawGovernanceSupportModal = ({
   max,
   symbol,
   activeGovernance,
-  active,
+  selectedAddress,
   activeWallet,
   voteTokenDecimals,
   bridge_network,
@@ -61,7 +61,7 @@ export const WithdrawGovernanceSupportModal = ({
       withdraw: 1,
       amount:
         amount.value !== "" && amount.value !== undefined
-          ? amount.value * 10 ** voteTokenDecimals
+          ? Math.round(amount.value * 10 ** voteTokenDecimals)
           : undefined,
     },
     from_address: activeWallet,
@@ -80,7 +80,7 @@ export const WithdrawGovernanceSupportModal = ({
   const handleWithdraw = async () => {
     if (bridge_network === "Obyte") return;
 
-    const EVM = new EVMBridgeGovernance(bridge_network, active, voteTokenDecimals, activeWallet);
+    const EVM = new EVMBridgeGovernance(bridge_network, selectedAddress, voteTokenDecimals, activeWallet);
 
     await EVM.withdraw(amount.value && amount.valid && amount.value, () => {
       dispatch(applyWithdraw({ wallet: activeWallet, amount: amount.value && amount.valid && amount.value * 10 ** voteTokenDecimals }))
@@ -93,7 +93,7 @@ export const WithdrawGovernanceSupportModal = ({
       {choiceParams.length === 0 ? <Button type="link" style={{ padding: 0, height: "auto", border: 0 }} disabled={disabled} onClick={showModal}>
         <b>{children || "Withdraw"}</b>
       </Button> : <Text disabled>
-        <Tooltip title={<>To be able to withdraw, you need to remove support from these fields: <b>{choiceParams.map((p) => p.replace("deposits.", '')).join(", ").toLowerCase()}</b>.</>}>
+        <Tooltip title={<>To be able to withdraw, you need to remove support from these fields: <b>{choiceParams.join(", ").toLowerCase()}</b>.</>}>
           <b>{children || "Withdraw"}</b>
         </Tooltip>
       </Text>}

@@ -6,16 +6,16 @@ export const updateActiveGovernanceAA = createAsyncThunk(
   'update/updateActiveGovernanceAA',
   async (_, { getState }) => {
     const store = getState();
-    const { bridge_network, active: bridge_aa, voteTokenDecimals, stakeTokenDecimals } = store.governance;
-    const addressWallet = store.destAddress[bridge_network];
-    const EVM = new EVMBridgeGovernance(bridge_network, bridge_aa, voteTokenDecimals, addressWallet, stakeTokenDecimals);
+    const { bridge_network, selectedAddress: bridge_aa, voteTokenDecimals, stakeTokenDecimals } = store.governance;
+    const walletAddress = store.destAddress[bridge_network];
+    const EVM = new EVMBridgeGovernance(bridge_network, bridge_aa, voteTokenDecimals, walletAddress, stakeTokenDecimals);
     const paramsInfo = await EVM.initState(store.governance.type);
     let balances;
     
-    if (addressWallet) {
-      const balancesBn = await EVM.getBalance(addressWallet);
+    if (walletAddress) {
+      const balanceBn = await EVM.getBalance(walletAddress);
       balances = {
-        [addressWallet]: BigNumber.from(balancesBn).toString()
+        [walletAddress]: BigNumber.from(balanceBn).toString()
       }
     }
 

@@ -1,19 +1,20 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Modal, Form, Input, Button, Space, Typography, Select, Row, Col, message, Alert, Tooltip } from "antd";
+import { Modal, Form, Input, Button, Space, Typography, Select, Row, Col, Alert, Tooltip } from "antd";
 import obyte from "obyte";
 import { useDispatch } from "react-redux";
 import QRButton from "obyte-qr-button";
+import { BigNumber, ethers } from "ethers";
 
-import socket from "services/socket";
 import { generateLink } from "utils";
 import { EVMBridgeGovernance } from "pages/Governance/utils/EVMBridgeGovernance";
 import { getParameterList } from "pages/Governance/utils/getParameterList";
 import { updateActiveGovernanceAA } from "store/thunks/updateActiveGovernanceAA";
 import { ChangeAddressModal } from "./ChangeAddressModal";
+import { checkOracles } from "utils/checkOracles";
 
 const { Text, Paragraph } = Typography;
 
-export const ChangeParamsModal = ({ supportValue, description, name, activeGovernance, bridge_network, bridge_decimals, voteTokenAddress, voteTokenDecimals, voteTokenSymbol, stakeTokenDecimals, balance = 0, active, isMyChoice, activeWallet, disabled }) => {
+export const ChangeParamsModal = ({ supportedValue, description, name, activeGovernance, bridge_network, bridge_decimals, voteTokenAddress, voteTokenDecimals, voteTokenSymbol, stakeTokenDecimals, balance = 0, selectedAddress, isMyChoice, activeWallet, disabled }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [oracles, setOracles] = useState({});
   const [checkedOracle, setCheckedOracle] = useState(undefined);
@@ -65,7 +66,7 @@ export const ChangeParamsModal = ({ supportValue, description, name, activeGover
     if (bridge_network === "Obyte") return;
     try {
 
-      const EVM = new EVMBridgeGovernance(bridge_network, active, voteTokenDecimals, activeWallet, stakeTokenDecimals);
+      const EVM = new EVMBridgeGovernance(bridge_network, selectedAddress, voteTokenDecimals, activeWallet, stakeTokenDecimals);
       await EVM.changeParam(name, paramValue.value, amount.valid ? amount.value : undefined, () => {
         handleCancel();
         dispatch(updateActiveGovernanceAA())
@@ -75,99 +76,6 @@ export const ChangeParamsModal = ({ supportValue, description, name, activeGover
       console.log("change param error", e);
     }
   }
-
-  useEffect(() => {
-    const getStatusOracle = async () => {
-      const {
-        oracle1,
-        feed_name1,
-        op1,
-        oracle2,
-        feed_name2,
-        op2,
-        oracle3,
-        feed_name3,
-        op3,
-      } = oracles;
-
-      if (oracle1 && feed_name1 && op1) {
-        try {
-          const data_feed = await socket.api.getDataFeed({
-            oracles: [oracle1],
-            feed_name: feed_name1,
-            ifnone: "none",
-          });
-          if (data_feed !== "none") {
-            setCheckedOracle(true);
-          } else {
-            message.error("Oracle 1 is not active!");
-            setCheckedOracle(null);
-          }
-        } catch (e) {
-          setCheckedOracle(null);
-          message.error("Oracle 1 is not found!");
-          console.log("error", e);
-        }
-      } else {
-        message.error("Not all data for oracle 1 is specified!");
-        setCheckedOracle(null);
-      }
-
-      if (oracle2 || feed_name2) {
-        if (op2) {
-          try {
-            const data_feed = await socket.api.getDataFeed({
-              oracles: [oracle2],
-              feed_name: feed_name2,
-              ifnone: "none",
-            });
-            if (data_feed !== "none") {
-              setCheckedOracle(true);
-            } else {
-              message.error("Oracle 2 is not active!");
-              setCheckedOracle(null);
-            }
-          } catch (e) {
-            setCheckedOracle(null);
-            message.error("Oracle 2 is not found!");
-            console.log("error", e);
-          }
-        } else {
-          message.error("Not all data for oracle 2 is specified!");
-          setCheckedOracle(null);
-        }
-      }
-
-      if (oracle3 || feed_name3) {
-        if (op3) {
-          try {
-            const data_feed = await socket.api.getDataFeed({
-              oracles: [oracle3],
-              feed_name: feed_name3,
-              ifnone: "none",
-            });
-            if (data_feed !== "none") {
-              setCheckedOracle(true);
-            } else {
-              message.error("Oracle 3 is not active!");
-              setCheckedOracle(null);
-            }
-          } catch (e) {
-            setCheckedOracle(null);
-            message.error("Oracle is not found!");
-            console.log("error", e);
-          }
-        } else {
-          message.error("Not all data for oracle 3 is specified!");
-          setCheckedOracle(null);
-        }
-      }
-    };
-
-    if (checkedOracle === false && bridge_network === "Obyte") {
-      getStatusOracle();
-    }
-  }, [checkedOracle]);
 
   const showModal = () => {
     setIsModalVisible(true);
@@ -221,22 +129,22 @@ export const ChangeParamsModal = ({ supportValue, description, name, activeGover
       }
     }
   };
-  
+
   useEffect(() => {
     let transformedValue;
-    if (supportValue !== undefined && bridge_network !== "Obyte" && (name === "ratio" || name === "counterstake_coef")) {
-      transformedValue = supportValue / 100
-    } else if (supportValue !== undefined && (name === "large_threshold" || name === "min_stake")) {
-      transformedValue = supportValue / 10 ** stakeTokenDecimals
-    } else if (supportValue !== undefined && bridge_network !== "Obyte" && name === "min_price") {
-      transformedValue = supportValue / 1e20
+    if (supportedValue !== undefined && bridge_network !== "Obyte" && (name === "ratio" || name === "counterstake_coef")) {
+      transformedValue = supportedValue / 100
+    } else if (supportedValue !== undefined && (name === "large_threshold" || name === "min_stake")) {
+      transformedValue = +ethers.utils.formatUnits(BigNumber.from(supportedValue), stakeTokenDecimals);
+    } else if (supportedValue !== undefined && bridge_network !== "Obyte" && name === "min_price") {
+      transformedValue = +ethers.utils.formatUnits(BigNumber.from(supportedValue), 20);
     } else {
-      transformedValue = supportValue
+      transformedValue = supportedValue
     }
-    console.log("stakeTokenDecimals", supportValue, stakeTokenDecimals, transformedValue)
+
     setParamValue({
       value: transformedValue,
-      valid: supportValue !== undefined
+      valid: supportedValue !== undefined
     });
 
     setAmount({
@@ -258,7 +166,7 @@ export const ChangeParamsModal = ({ supportValue, description, name, activeGover
   }
 
   const link = bridge_network === "Obyte" ? generateLink({
-    amount: amount.valid ? Math.ceil(amount.value * 10 ** voteTokenDecimals) : 1e4,
+    amount: amount.valid ? Math.round(amount.value * 10 ** voteTokenDecimals) : 1e4,
     asset: amount.valid ? voteTokenAddress : undefined,
     data: {
       name,
@@ -288,20 +196,20 @@ export const ChangeParamsModal = ({ supportValue, description, name, activeGover
       {!activeWallet ? <Tooltip zIndex={99} title={<div>
         Please <ChangeAddressModal network={bridge_network}>add your address</ChangeAddressModal> first
       </div>}>
-        <Text disabled>{supportValue !== undefined ? (isMyChoice ? "add support for this value" : "vote for this value") : "suggest another value"}</Text>
+        <Text disabled>{supportedValue !== undefined ? (isMyChoice ? "add support for this value" : "vote for this value") : "suggest another value"}</Text>
       </Tooltip> : <Button type="link" style={{ padding: 0, height: "auto" }} disabled={disabled} onClick={showModal}>
-        {supportValue !== undefined ? (isMyChoice ? "add support for this value" : "vote for this value") : "suggest another value"}
+        {supportedValue !== undefined ? (isMyChoice ? "add support for this value" : "vote for this value") : "suggest another value"}
       </Button>}
       <Modal destroyOnClose width={700} title={`Change ${name.split("_").join(" ")}`} visible={isModalVisible} onOk={handleOk} onCancel={handleCancel}
         footer={
           <Space>
             <Button key="Cancel" onClick={handleCancel}>Close</Button>
             {bridge_network === "Obyte" ? <>
-              {name === "oracles" && !checkedOracle && !supportValue ? <Button
+              {name === "oracles" && !checkedOracle && !supportedValue ? <Button
                 key="check"
                 type="primary"
                 ref={btnRef}
-                onClick={() => setCheckedOracle(false)}
+                onClick={async () => checkOracles(oracles).then((value) => setCheckedOracle(value))}
               >
                 Check
               </Button> : <QRButton
@@ -348,15 +256,15 @@ export const ChangeParamsModal = ({ supportValue, description, name, activeGover
               autoComplete="off"
               className={name === "oracles" ? "evmHashOrAddress" : ""}
               spellCheck="false"
-              autoFocus={supportValue === undefined}
-              disabled={supportValue !== undefined}
+              autoFocus={supportedValue === undefined}
+              disabled={supportedValue !== undefined}
               onChange={handleChangeParamValue}
               value={paramValue.value}
               onKeyPress={handleKeyPress}
             />
           </Form.Item> : (
-            supportValue !== undefined ? <Paragraph>
-              {supportValue}
+            supportedValue !== undefined ? <Paragraph>
+              {supportedValue}
             </Paragraph> : <div>
               <Row>
                 <Col sm={{ span: 24 }} xs={{ span: 24 }} md={{ span: 11 }}>
@@ -483,7 +391,7 @@ export const ChangeParamsModal = ({ supportValue, description, name, activeGover
               autoComplete="off"
               onChange={handleChangeAmount}
               suffix={voteTokenSymbol || "TOKEN"}
-              autoFocus={supportValue !== undefined}
+              autoFocus={supportedValue !== undefined}
               value={amount.value}
               onKeyPress={handleKeyPress}
             />

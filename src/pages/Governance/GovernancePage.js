@@ -19,7 +19,7 @@ const { Option } = Select;
 export const GovernancePage = () => {
   const bridgesAas = useSelector(selectBridgesAA);
   const list = useSelector(selectList);
-  const { loading, active, bridge_network, type, paramsInfo, activeGovernance, voteTokenDecimals, voteTokenSymbol, voteTokenAddress, stakeTokenDecimals, stakeTokenSymbol, stakeTokenAddress, challenging_period, bridge_symbol, bridge_decimals, freeze_period, balances, home_asset_decimals } = useSelector(selectGovernance);
+  const { loading, selectedAddress, bridge_network, type, paramsInfo, activeGovernance, voteTokenDecimals, voteTokenSymbol, voteTokenAddress, stakeTokenDecimals, stakeTokenSymbol, stakeTokenAddress, challenging_period, bridge_symbol, bridge_decimals, freeze_period, balances, home_asset_decimals } = useSelector(selectGovernance);
   const addresses = useSelector(selectDestAddress);
   const dispatch = useDispatch();
   const { address } = useParams();
@@ -41,12 +41,12 @@ export const GovernancePage = () => {
         }
         setInit(true);
       } else {
-        if ((active !== address) && active) {
-          historyInstance.replace(`/governance/${active}`)
+        if ((selectedAddress !== address) && selectedAddress) {
+          historyInstance.replace(`/governance/${selectedAddress}`)
         }
       }
     }
-  }, [address, init, active, bridgesAas]);
+  }, [address, init, selectedAddress, bridgesAas]);
 
   useEffect(() => {
     if (init) {
@@ -58,14 +58,14 @@ export const GovernancePage = () => {
     <Helmet title="Counterstake Bridge - Governance" />
     <Title level={1}>Governance</Title>
 
-    <Select value={active} optionFilterProp="children" showSearch loading={Object.keys(bridgesAas).length === 0} onChange={handleChange} style={{ width: "100%" }} size="large" placeholder="Please select a coin to govern">
+    <Select value={selectedAddress} optionFilterProp="children" showSearch loading={Object.keys(bridgesAas).length === 0} onChange={handleChange} style={{ width: "100%" }} size="large" placeholder="Please select a coin to govern">
       {list?.map((item) => <Select.OptGroup key={item.bridge_label + item.import + item.export} label={<b style={{ fontSize: 14 }}>{item.bridge_label}</b>}>
         <Option style={{ height: 45, display: "flex", alignItems: "center" }} value={item.export}>{bridgesAas[item.export].symbol} on {bridgesAas[item.export].network} ({bridgesAas[item.export].type})</Option>
         <Option style={{ height: 45, display: "flex", alignItems: "center" }} value={item.import}>{bridgesAas[item.import].symbol} on {bridgesAas[item.import].network} ({bridgesAas[item.import].type})</Option>
       </Select.OptGroup>)}
     </Select>
 
-    {active && bridgesAas && Object.keys(bridgesAas).length > 0 && loading === false ? <div>
+    {selectedAddress && bridgesAas && Object.keys(bridgesAas).length > 0 && loading === false ? <div>
       <Withdraw
         voteTokenDecimals={voteTokenDecimals}
         voteTokenSymbol={voteTokenSymbol}
@@ -74,7 +74,7 @@ export const GovernancePage = () => {
         currentAddress={currentAddress}
         choiceParams={paramsInfo && Object.keys(paramsInfo).filter((name) => paramsInfo[name]?.choices && (currentAddress in paramsInfo[name]?.choices))}
         activeGovernance={activeGovernance}
-        active={active}
+        selectedAddress={selectedAddress}
       />
 
       <Title level={3}>Change parameters</Title>
@@ -86,7 +86,7 @@ export const GovernancePage = () => {
         bridge_decimals={bridge_decimals}
 
         home_asset_decimals={home_asset_decimals}
-        active={active}
+        selectedAddress={selectedAddress}
         paramsInfo={paramsInfo}
         activeGovernance={activeGovernance}
 

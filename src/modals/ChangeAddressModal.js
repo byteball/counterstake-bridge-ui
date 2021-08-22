@@ -12,7 +12,7 @@ const environment = process.env.REACT_APP_ENVIRONMENT;
 
 export const ChangeAddressModal = ({ network, children, action = "Add", currentAddress }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [recipient, setRecipient] = useState({});
+  const [address, setAddress] = useState({});
   const dispatch = useDispatch();
   const refBtn = useRef();
 
@@ -20,19 +20,19 @@ export const ChangeAddressModal = ({ network, children, action = "Add", currentA
   const signer = window.ethereum && provider.getSigner();
 
   useEffect(() => {
-    setRecipient(currentAddress ? { value: currentAddress, valid: true } : {})
+    setAddress(currentAddress ? { value: currentAddress, valid: true } : {})
   }, [isModalVisible]);
 
   const loginEthereum = async () => {
     await window.ethereum.request({ method: 'eth_requestAccounts' });
   };
 
-  const handleRecipientChange = (value) => {
-    const valid = isValidRecipient(value);
-    setRecipient({ value, valid });
+  const handleAddressChange = (value) => {
+    const valid = isValidAddress(value);
+    setAddress({ value, valid });
   };
 
-  const isValidRecipient = value => {
+  const isValidAddress = value => {
     if (!network || !value)
       return undefined;
 
@@ -50,9 +50,9 @@ export const ChangeAddressModal = ({ network, children, action = "Add", currentA
     }
   };
 
-  const insertRecipientAddress = async () => {
+  const insertAddress = async () => {
     if (!window.ethereum)
-      return setRecipient({})
+      return setAddress({})
     const accounts = await provider.listAccounts();
 
     if (accounts.length === 0)
@@ -60,7 +60,7 @@ export const ChangeAddressModal = ({ network, children, action = "Add", currentA
 
     const value = await signer.getAddress();
 
-    setRecipient({ value, valid: isValidRecipient(value) });
+    setAddress({ value, valid: isValidAddress(value) });
   };
 
   return (
@@ -73,8 +73,8 @@ export const ChangeAddressModal = ({ network, children, action = "Add", currentA
         title={`${network} address`}
         destroyOnClose={true}
         footer={<Space>
-          <Button type="primary" ref={refBtn} disabled={!recipient.valid || currentAddress === recipient.value} onClick={() => {
-            dispatch(setDestAddress({ address: recipient.value, network }));
+          <Button type="primary" ref={refBtn} disabled={!address.valid || currentAddress === address.value} onClick={() => {
+            dispatch(setDestAddress({ address: address.value, network }));
             setIsModalVisible(false);
           }}>
             {action}
@@ -99,8 +99,8 @@ export const ChangeAddressModal = ({ network, children, action = "Add", currentA
               </span>
             }
             validateStatus={
-              recipient.valid !== undefined
-                ? recipient.valid
+              address.valid !== undefined
+                ? address.valid
                   ? "success"
                   : "error"
                 : undefined
@@ -111,11 +111,11 @@ export const ChangeAddressModal = ({ network, children, action = "Add", currentA
               className="evmHashOrAddress"
               style={{ height: 45, paddingRight: 30 }}
               spellCheck="false"
-              value={recipient.value}
+              value={address.value}
               autoFocus={true}
               placeholder={`Your ${network} wallet address`}
               onKeyPress={(ev) => {
-                if (ev.key === "Enter" && recipient.valid) {
+                if (ev.key === "Enter" && address.valid) {
                   refBtn.current.click();
                 }
               }}
@@ -126,10 +126,10 @@ export const ChangeAddressModal = ({ network, children, action = "Add", currentA
                     if (!window.ethereum)
                       return message.error("MetaMask not found")
                     await loginEthereum();
-                    await insertRecipientAddress();
+                    await insertAddress();
                   }}
                 />}
-              onChange={(ev) => handleRecipientChange(ev.target.value)}
+              onChange={(ev) => handleAddressChange(ev.target.value)}
             />
           </Form.Item>
         </Form>

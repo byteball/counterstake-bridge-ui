@@ -16,7 +16,7 @@ export const changeActiveGovernanceAA = createAsyncThunk(
 
     const { network: bridge_network, symbol: bridge_symbol, decimals: bridge_decimals, type, stake_asset, home_asset } = bridge;
     const parameterList = getParameterList(bridge_network);
-    const addressWallet = store.destAddress[bridge_network];
+    const walletAddress = store.destAddress[bridge_network];
     let governanceState = {}; // only for Obyte network
     let def_params = {}; // only for Obyte network
 
@@ -90,7 +90,7 @@ export const changeActiveGovernanceAA = createAsyncThunk(
       challenging_period = 10 * 24 * 60 * 60;
       freeze_period = 30 * 24 * 60 * 60;
 
-      const EVM = new EVMBridgeGovernance(bridge_network, bridge_aa, voteTokenDecimals, addressWallet);
+      const EVM = new EVMBridgeGovernance(bridge_network, bridge_aa, voteTokenDecimals, walletAddress);
       governance_aa = await EVM.getGovernanceContractAddress();
 
       voteTokenAddress = await EVM.getVotingTokenAddress();
@@ -101,10 +101,10 @@ export const changeActiveGovernanceAA = createAsyncThunk(
       stakeTokenDecimals = voteTokenDecimals;
       stakeTokenSymbol = voteTokenSymbol;
 
-      if (addressWallet && window.ethereum) {
-        const balancesBn = await EVM.getBalance(addressWallet);
+      if (walletAddress && window.ethereum) {
+        const balanceBn = await EVM.getBalance(walletAddress);
         balances = {
-          [addressWallet]: BigNumber.from(balancesBn).toString()
+          [walletAddress]: BigNumber.from(balanceBn).toString()
         }
       }
 
@@ -112,7 +112,7 @@ export const changeActiveGovernanceAA = createAsyncThunk(
     }
 
     return ({
-      active: bridge_aa,
+      selectedAddress: bridge_aa,
       bridge_network,
       bridge_symbol,
       bridge_decimals,

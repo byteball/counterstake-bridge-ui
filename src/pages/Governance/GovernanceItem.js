@@ -23,7 +23,7 @@ const { Countdown } = Statistic;
 /* eslint eqeqeq: "off" */
 
 export const GovernanceItem = (props) => {
-  const { name, value, active, activeGovernance, choice, bridge_network, leader, voteTokenDecimals, voteTokenAddress, voteTokenSymbol, stakeTokenDecimals, stakeTokenSymbol, challenging_period, freeze_period, supports = {}, challenging_period_start_ts, change, balance, activeWallet, contract_address } = props;
+  const { name, value, selectedAddress, activeGovernance, choice, bridge_network, leader, voteTokenDecimals, voteTokenAddress, voteTokenSymbol, stakeTokenDecimals, stakeTokenSymbol, challenging_period, freeze_period, supports = {}, challenging_period_start_ts, change, balance, activeWallet, contract_address } = props;
   const { rule, description } = getParameterList(bridge_network)?.[name];
 
   const valueView = viewParam({ name, value, network: bridge_network, stakeTokenDecimals, stakeTokenSymbol });
@@ -85,7 +85,7 @@ export const GovernanceItem = (props) => {
   const remove = async () => {
     if (bridge_network === "Obyte" || !window.ethereum) return;
     try {
-      const EVM = new EVMBridgeGovernance(bridge_network, active, voteTokenDecimals, activeWallet);
+      const EVM = new EVMBridgeGovernance(bridge_network, selectedAddress, voteTokenDecimals, activeWallet);
 
       await EVM.remove(name, contract_address, () => {
         dispatch(updateActiveGovernanceAA())
@@ -98,7 +98,7 @@ export const GovernanceItem = (props) => {
   const commit = async () => {
     if (bridge_network === "Obyte" || !window.ethereum) return;
     try {
-      const EVM = new EVMBridgeGovernance(bridge_network, active, voteTokenDecimals, activeWallet);
+      const EVM = new EVMBridgeGovernance(bridge_network, selectedAddress, voteTokenDecimals, activeWallet);
 
       await EVM.commit(name, contract_address, () => {
         dispatch(applyCommit(name));
@@ -108,7 +108,7 @@ export const GovernanceItem = (props) => {
     }
   }
 
-  const metamaskInstalled = bridge_network === "Obyte" || window.ethereum;
+  const metamaskInstalledOrNotRequired = bridge_network === "Obyte" || window.ethereum;
 
   return <Card style={{ marginTop: 20, marginBottom: 20 }} key={name + value}>
     <div className={styles.header}>
@@ -126,7 +126,7 @@ export const GovernanceItem = (props) => {
       </div>
       <div>
         {expiredChallengingPeriod ?
-          <Button type="link" disabled={!activeWallet || isEqual(leaderView, valueView) || value == leader || !metamaskInstalled} style={linkStyles} href={commitLink} onClick={commit}>
+          <Button type="link" disabled={!activeWallet || isEqual(leaderView, valueView) || value == leader || !metamaskInstalledOrNotRequired} style={linkStyles} href={commitLink} onClick={commit}>
             commit
           </Button> : (challenging_period_start_ts && <>Challenging period expires in <Countdown style={{ display: "inline" }} onFinish={() => setExpiredChallengingPeriod(true)} valueStyle={{ fontSize: 14, display: "inline", wordBreak: "break-all" }} value={(challenging_period_start_ts + challenging_period) * 1000} format={challenging_period > 86400 ? "D [days] HH:mm:ss" : "HH:mm:ss"} /></>)}
       </div>
@@ -137,7 +137,7 @@ export const GovernanceItem = (props) => {
       </div>
       <div>
         <Tooltip title={((isEqual(choice, leader) || choice === leader) && isFreezeVote) ? "Your choice is the leader and you'll be able to remove your support only after the challenging period and freeze period expire, or if some other value becomes the leader." : null}>
-          <Button type="link" disabled={((isEqual(choice, leader) || choice === leader) && isFreezeVote) || !activeWallet || !metamaskInstalled} style={linkStyles} href={linkRemoveSupport} onClick={remove}>
+          <Button type="link" disabled={((isEqual(choice, leader) || choice === leader) && isFreezeVote) || !activeWallet || !metamaskInstalledOrNotRequired} style={linkStyles} href={linkRemoveSupport} onClick={remove}>
             remove support
           </Button>
         </Tooltip>
@@ -149,14 +149,14 @@ export const GovernanceItem = (props) => {
         <div className={styles.listOfVotersValue}><b>Value</b></div>
         <div className={styles.listOfVotersSupport}><b>Support</b></div>
       </div>
-      {supportsByValue.map(({ value, supports: supportValue }, i) => <div key={i + " " + value} className={styles.listOfVotersItem}>
+      {supportsByValue.map(({ value, supports: supportedValue }, i) => <div key={i + " " + value} className={styles.listOfVotersItem}>
         <div className={styles.listOfVotersValue}>{width <= 780 && <b>Value: </b>}<span className={name === "oracles" ? "evmHashOrAddress" : ""}>{viewParam({ name, value, network: bridge_network, stakeTokenDecimals, stakeTokenSymbol })}</span></div>
-        <div className={styles.listOfVotersSupport}>{width <= 780 && <b>Support: </b>} <SupportListModal sum={+Number(supportValue / 10 ** voteTokenDecimals).toFixed(voteTokenDecimals)} decimals={voteTokenDecimals} symbol={voteTokenSymbol} supportList={supports[value]} bridge_network={bridge_network} /> </div>
-        <div className={styles.listOfVotersAction}><ChangeParamsModal change={change} {...props} disabled={(choice !== undefined && isFreezeVote && (choice == leader || isEqual(leader, choice))) || !activeWallet || !metamaskInstalled} rule={rule} description={description} balance={balance} supportValue={value} isMyChoice={choice !== undefined && (isNumber(choice) ? Number(choice) === Number(value) : choice === value)} /></div>
+        <div className={styles.listOfVotersSupport}>{width <= 780 && <b>Support: </b>} <SupportListModal sum={+Number(supportedValue / 10 ** voteTokenDecimals).toFixed(voteTokenDecimals)} decimals={voteTokenDecimals} symbol={voteTokenSymbol} supportList={supports[value]} bridge_network={bridge_network} /> </div>
+        <div className={styles.listOfVotersAction}><ChangeParamsModal change={change} {...props} disabled={(choice !== undefined && isFreezeVote && (choice == leader || isEqual(leader, choice))) || !activeWallet || !metamaskInstalledOrNotRequired} rule={rule} description={description} balance={balance} supportedValue={value} isMyChoice={choice !== undefined && (isNumber(choice) ? Number(choice) === Number(value) : choice === value)} /></div>
       </div>)}
     </div>}
     <div className={styles.listOfVotersAnotherValue}>
-      <ChangeParamsModal change={change} {...props} rule={rule} description={description} balance={balance} disabled={(choice !== undefined && isFreezeVote && (choice == leader || isEqual(leader, choice))) || !activeWallet || !metamaskInstalled} />
+      <ChangeParamsModal change={change} {...props} rule={rule} description={description} balance={balance} disabled={(choice !== undefined && isFreezeVote && (choice == leader || isEqual(leader, choice))) || !activeWallet || !metamaskInstalledOrNotRequired} />
     </div>
   </Card>
 }

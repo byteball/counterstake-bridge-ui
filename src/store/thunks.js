@@ -49,7 +49,7 @@ export const updateBridges = createAsyncThunk(
       return [];
 
     const { governance } = thunkAPI.getState();
-    const existGovernanceList = Object.keys(governance.exportList || {}).length > 0 || Object.keys(governance.importList || {}).length > 0;
+    const governanceListExists = Object.keys(governance.exportList || {}).length > 0 || Object.keys(governance.importList || {}).length > 0;
 
     const bridges = resp.data;
     let directions = {};
@@ -100,7 +100,7 @@ export const updateBridges = createAsyncThunk(
         token: home_token,
         max_amount: max_repatriation_amount
       });
-      if (!existGovernanceList) {
+      if (!governanceListExists) {
         import_aas[import_aa] = { ...foreign_token, type: "import", stake_asset, home_asset, home_asset_decimals };
         export_aas[export_aa] = { ...home_token, type: "export", stake_asset, home_asset, home_asset_decimals, foreign_asset };
         list.push({
@@ -110,7 +110,7 @@ export const updateBridges = createAsyncThunk(
         })
       }
     }
-    if (!existGovernanceList) {
+    if (!governanceListExists) {
       thunkAPI.dispatch(setGovernanceList({ import_aas, export_aas, list: list.sort((a, b) => compare(a.bridge_label, b.bridge_label)) }));
     }
     thunkAPI.dispatch(setDirections(directions));

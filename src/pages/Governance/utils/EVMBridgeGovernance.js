@@ -78,11 +78,11 @@ export class EVMBridgeGovernance {
     if (['ratio', 'counterstake_coef'].includes(name)) {
       transformedValue = +Number(Number(newValue) * 100).toFixed(3)
     } else if (name === "min_price") {
-      transformedValue = newValue * 1e20;
+      transformedValue = ethers.utils.parseUnits(newValue, 20).toString();
     } else if (['challenging_periods', 'large_challenging_periods'].includes(name)) {
       transformedValue = String(newValue).split(" ").map((v) => BigNumber.from(String(Number(v * 3600))));
     } else if (name === "min_stake" || name === "large_threshold") {
-      transformedValue = +Number(newValue).toFixed(this.stake_asset_decimals) * 10 ** this.stake_asset_decimals;
+      transformedValue = ethers.utils.parseUnits(Number(newValue).toFixed(this.stake_asset_decimals), this.stake_asset_decimals).toString();
     } else {
       transformedValue = newValue;
     }
@@ -100,7 +100,6 @@ export class EVMBridgeGovernance {
         res = await param_contract.vote(bnNewValue)
       } else {
         await this.approve(bnAmount);
-
         if (options) {
           res = await param_contract.voteAndDeposit(bnNewValue, bnAmount, options)
         } else {
@@ -115,8 +114,7 @@ export class EVMBridgeGovernance {
       if (!amount) {
         res = await param_contract.vote(transformedValue)
       } else {
-        await this.approve();
-
+        await this.approve(bnAmount);
         if (options) {
           res = await param_contract.voteAndDeposit(transformedValue, bnAmount, options)
         } else {
@@ -131,7 +129,7 @@ export class EVMBridgeGovernance {
         if (!amount) {
           res = await param_contract.vote(transformedValue);
         } else {
-          await this.approve();
+          await this.approve(bnAmount);
           if (options) {
             res = await param_contract.voteAndDeposit(transformedValue, bnAmount, options);
           } else {
@@ -149,17 +147,6 @@ export class EVMBridgeGovernance {
     await res?.wait();
 
     cb && await cb(name, newValue, amount, this.wallet)
-  }
-
-  async deposit(amount) {
-    await this.login();
-    await this.changeNetwork();
-
-    const amountBn = ethers.utils.parseUnits(Number(amount).toFixed(this.decimals), this.decimals);
-    const governance_contract_signer = await this.getGovernanceContract(true);
-
-    await this.approve();
-    await governance_contract_signer['deposit(uint256)'](amountBn, { value: amountBn })
   }
 
   async remove(name, contract_address, cb) {
@@ -234,7 +221,7 @@ export class EVMBridgeGovernance {
   }
 
   async getAllParams(type) {
-    const [ 
+    const [
       settings,
       challenging_periods,
       large_challenging_periods
@@ -344,10 +331,10 @@ export class EVMBridgeGovernance {
     }
   }
 
-  async approve(bnAmount = BigNumber.from("0")) {
+  async approve(bnAmount) {
     const votingTokenAddress = await this.getVotingTokenAddress();
 
-    if (votingTokenAddress !== ethers.constants.AddressZero) {
+    if (votingTokenAddress !== ethers.constants.AddressZero && bnAmount !== undefined) {
       const address = await this.getGovernanceContractAddress();
       const token = await this.getVotingTokenAddress();
       const signer = this.getSigner();
@@ -396,7 +383,7 @@ export class EVMBridgeGovernance {
           voteContract.challenging_period_start_ts()
         ]);
 
-        return { name: key, address, leader: BigNumber.from(leader).toString(), your_choice: your_choice ? your_choice._hex !== "0x00" && BigNumber.from(your_choice).toString() : undefined, support_leader: support_leader ? support_leader._hex !== "0x00" && BigNumber.from(support_leader).toString() : undefined, support_choices: support_choices ? BigNumber.from(support_choices).toString() : undefined, challenging_period_start_ts: BigNumber.from(challenging_period_start_ts).toNumber() }
+        return { name: key, address, leader: BigNumber.from(leader).toString(), your_choice: your_choice ? !your_choice.isZero() && BigNumber.from(your_choice).toString() : undefined, support_leader: support_leader ? !support_leader.isZero() && BigNumber.from(support_leader).toString() : undefined, support_choices: support_choices ? BigNumber.from(support_choices).toString() : undefined, challenging_period_start_ts: BigNumber.from(challenging_period_start_ts).toNumber() }
       } else if (key === "challenging_periods" || key === "large_challenging_periods") {
         let lastPeriodLeader = null;
         const periodsListLeader = [];
@@ -404,7 +391,7 @@ export class EVMBridgeGovernance {
         for (let i = 0; i < 20; i++) {
           try {
             if (lastPeriodLeader !== null) {
-              const period = await voteContract.leader(BigNumber.from(String(i))).then((value) => BigNumber.from(String(value)).toNumber());
+              const period = await voteContract.leader(i).then((value) => BigNumber.from(String(value)).toNumber());
               if (period !== undefined && Number(period) > lastPeriodLeader) {
                 lastPeriodLeader = Number(period);
                 periodsListLeader.push(Number(period));
@@ -412,7 +399,7 @@ export class EVMBridgeGovernance {
                 break;
               }
             } else {
-              const period = await voteContract.leader(BigNumber.from(String(i))).then((value) => BigNumber.from(String(value)).toNumber());
+              const period = await voteContract.leader(i).then((value) => BigNumber.from(String(value)).toNumber());
               lastPeriodLeader = Number(period);
               periodsListLeader.push(Number(period));
             }
@@ -428,7 +415,7 @@ export class EVMBridgeGovernance {
           for (let i = 0; i < 20; i++) {
             try {
               if (lastPeriodChoice !== null) {
-                const period = await voteContract.choices(this.wallet, BigNumber.from(String(i))).then((value) => BigNumber.from(value).toNumber());
+                const period = await voteContract.choices(this.wallet, i).then((value) => BigNumber.from(value).toNumber());
                 if (period !== undefined && Number(period) > lastPeriodChoice) {
                   lastPeriodChoice = Number(period);
                   periodsListChoice.push(Number(period));
@@ -436,7 +423,7 @@ export class EVMBridgeGovernance {
                   break;
                 }
               } else {
-                const period = await voteContract.choices(this.wallet, BigNumber.from("0")).then((value) => BigNumber.from(value).toNumber());
+                const period = await voteContract.choices(this.wallet, i).then((value) => BigNumber.from(value).toNumber());
                 lastPeriodChoice = period;
                 periodsListChoice.push(period);
               }
@@ -492,7 +479,7 @@ export class EVMBridgeGovernance {
           your_choice ? voteContract.votesByValue(your_choice) : undefined,
           voteContract.challenging_period_start_ts()
         ]);
-        
+
         return {
           name: key,
           address,
@@ -502,7 +489,6 @@ export class EVMBridgeGovernance {
           support_choices: your_choice && support_choices ? BigNumber.from(support_choices).toString() : undefined,
           challenging_period_start_ts: challenging_period_start_ts ? BigNumber.from(challenging_period_start_ts).toNumber() : undefined
         }
-
       }
     }));
 

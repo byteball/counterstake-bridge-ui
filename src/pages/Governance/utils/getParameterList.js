@@ -1,6 +1,8 @@
 import { ethers } from "ethers";
 import obyte from "obyte";
 
+const environment = process.env.REACT_APP_ENVIRONMENT;
+
 export const getParameterList = (network) => ({
   ratio: {
     name: "ratio",
@@ -49,7 +51,7 @@ export const getParameterList = (network) => ({
     type: "unitArray",
     description: "Challenging periods (in hours) for regular amounts.",
     rule: "The value of the challenging_periods parameter must be Array of positive numbers. Numbers must be separated by a space and each of the numbers must be larger than the previous one. Example: 7 30 60 90 120",
-    initValue: network === "Obyte" ? [0.1, 0.2, 0.5, 1] : [3 * 24, 7 * 24, 30 * 24, 60 * 24],
+    initValue: environment === "mainnet" ? [72, 168, 720, 1440] : [0.1, 0.2, 0.5, 1],
     validator: value => is_valid_challenging_periods_string(value, network)
   },
   large_challenging_periods: {
@@ -57,7 +59,7 @@ export const getParameterList = (network) => ({
     type: "unitArray",
     description: "Challenging periods (in hours) for large amounts.",
     rule: "The value of the large_challenging_periods parameter must be Array of positive numbers. Numbers must be separated by a space and each of the numbers must be larger than the previous one. Example: 7 30 60 90 120",
-    initValue: network === "Obyte" ? [0.2, 0.3, 0.7, 1.5] : [7 * 24, 30 * 24, 60 * 24, 90 * 24],
+    initValue: environment === "mainnet" ? [168, 720, 1440, 2160] : [0.2, 0.3, 0.7, 1.5],
     validator: value => is_valid_challenging_periods_string(value, network)
   },
   min_price: {
