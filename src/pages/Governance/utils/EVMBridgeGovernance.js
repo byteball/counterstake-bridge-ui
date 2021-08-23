@@ -241,7 +241,7 @@ export class EVMBridgeGovernance {
 
     if (type === "import") {
       const min_priceBn = await this.bridge_contract.min_price20();
-      result.min_price = { value: min_priceBn && BigNumber.from(min_priceBn).toNumber() / 1e20 }
+      result.min_price = { value: min_priceBn ? +ethers.utils.formatUnits(BigNumber.from(min_priceBn), 20).toString() : undefined }
       result.oracles = { value: await this.bridge_contract.oracleAddress() }
     }
     return result
