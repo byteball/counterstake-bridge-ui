@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { BigNumber } from 'ethers';
 
 import { getParameterList } from 'pages/Governance/utils/getParameterList';
 import { parseGovernanceStateVars } from 'pages/Governance/utils/parseGovernanceStateVars';
@@ -39,11 +40,11 @@ export const governanceSlice = createSlice({
     changeGovernanceState: (state, action) => {
       if (state.bridge_network !== "Obyte") return null;
 
-      const rows = action.payload;
-      const newState = { ...state.governanceState, ...rows };
-      for (const row in rows) {
-        if (rows[row] === undefined || rows[row] === false) {
-          delete newState[row];
+      const variables = action.payload;
+      const newState = { ...state.governanceState, ...variables };
+      for (const variable in variables) {
+        if (variables[variable] === undefined || variables[variable] === false) {
+          delete newState[variable];
         }
       }
 
@@ -78,7 +79,7 @@ export const governanceSlice = createSlice({
     applyWithdraw: (state, action) => {
       const { amount, wallet } = action.payload;
       if (amount) {
-        state.balances[wallet] = state.balances[wallet] - amount
+        state.balances[wallet] = BigNumber.from(state.balances[wallet]).sub(BigNumber.from(amount)).toString()
       } else {
         delete state.balances[wallet]
       }
@@ -129,7 +130,7 @@ export const { setGovernanceList, changeGovernanceState, applyCommit, applyRemov
 // The function below is called a selector and allows us to select a value from
 // the state. Selectors can also be defined inline where they're used instead of
 // in the slice file. For example: `useSelector((state) => state.auth.value)`
-export const selectBridgesAA = state => ({ ...state?.governance?.exportList, ...state?.governance?.importList });
+export const selectBridgeAAs = state => ({ ...state?.governance?.exportList, ...state?.governance?.importList });
 
 export const selectGovernanceActive = state => state.governance.selectedBridgeAddress;
 

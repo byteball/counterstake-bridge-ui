@@ -1,6 +1,7 @@
 import { Button, Input, Modal, Space, Form, Typography, Tooltip } from "antd";
 import { useState, useRef } from "react";
 import { useDispatch } from "react-redux";
+import { ethers } from "ethers";
 
 import { EVMBridgeGovernance } from "pages/Governance/utils/EVMBridgeGovernance";
 import { applyWithdraw } from "store/governanceSlice";
@@ -81,9 +82,10 @@ export const WithdrawGovernanceSupportModal = ({
     if (bridge_network === "Obyte") return;
 
     const EVM = new EVMBridgeGovernance(bridge_network, selectedBridgeAddress, voteTokenDecimals, activeWallet);
+    const amountBn = amount.value && amount.valid && ethers.utils.parseUnits(Number(amount.value).toFixed(voteTokenDecimals), voteTokenDecimals);
 
-    await EVM.withdraw(amount.value && amount.valid && amount.value, () => {
-      dispatch(applyWithdraw({ wallet: activeWallet, amount: amount.value && amount.valid && amount.value * 10 ** voteTokenDecimals }))
+    await EVM.withdraw(amountBn, () => {
+      dispatch(applyWithdraw({ wallet: activeWallet, amount: amountBn.toString() }))
       onCancel();
     })
   }

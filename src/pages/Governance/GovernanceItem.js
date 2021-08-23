@@ -33,7 +33,7 @@ export const GovernanceItem = (props) => {
   const [width] = useWindowSize();
   const dispatch = useDispatch();
 
-  const [isFreezeVote, setIsFreezeVote] = useState(challenging_period_start_ts && ((challenging_period_start_ts + challenging_period + freeze_period) * 1000) > Date.now());
+  const [isFrozen, setIsFrozen] = useState(challenging_period_start_ts && ((challenging_period_start_ts + challenging_period + freeze_period) * 1000) > Date.now());
   const [expiredChallengingPeriod, setExpiredChallengingPeriod] = useState(((challenging_period_start_ts + challenging_period) * 1000) < Date.now());
 
   useEffect(() => {
@@ -42,17 +42,17 @@ export const GovernanceItem = (props) => {
 
   useEffect(() => {
     let intervalId;
-    setIsFreezeVote(((challenging_period_start_ts + challenging_period + freeze_period) * 1000) > Date.now());
-    if (challenging_period_start_ts && isFreezeVote === true) {
+    setIsFrozen(((challenging_period_start_ts + challenging_period + freeze_period) * 1000) > Date.now());
+    if (challenging_period_start_ts && isFrozen === true) {
       intervalId = setInterval(() => {
         if (((challenging_period_start_ts + challenging_period + freeze_period) * 1000) < Date.now()) {
-          setIsFreezeVote(false);
+          setIsFrozen(false);
           clearInterval(intervalId);
         }
       }, 10 * 1000)
     }
     return () => intervalId !== undefined && clearInterval(intervalId);
-  }, [choice, isFreezeVote, challenging_period_start_ts, challenging_period])
+  }, [choice, isFrozen, challenging_period_start_ts, challenging_period])
 
   const supportsByValue = Object.keys(supports).map((value) => ({
     value, supports: supports[value].reduce(function (sum, current) {
@@ -136,8 +136,8 @@ export const GovernanceItem = (props) => {
         <b>My choice:</b> <span className={name === "oracles" ? "evmHashOrAddress" : ""}>{choiceView}</span>
       </div>
       <div>
-        <Tooltip title={((isEqual(choice, leader) || choice === leader) && isFreezeVote) ? "Your choice is the leader and you'll be able to remove your support only after the challenging period and freeze period expire, or if some other value becomes the leader." : null}>
-          <Button type="link" disabled={((isEqual(choice, leader) || choice === leader) && isFreezeVote) || !activeWallet || !metamaskInstalledOrNotRequired} style={linkStyles} href={linkRemoveSupport} onClick={remove}>
+        <Tooltip title={((isEqual(choice, leader) || choice === leader) && isFrozen) ? "Your choice is the leader and you'll be able to remove your support only after the challenging period and freeze period expire, or if some other value becomes the leader." : null}>
+          <Button type="link" disabled={((isEqual(choice, leader) || choice === leader) && isFrozen) || !activeWallet || !metamaskInstalledOrNotRequired} style={linkStyles} href={linkRemoveSupport} onClick={remove}>
             remove support
           </Button>
         </Tooltip>
@@ -152,11 +152,11 @@ export const GovernanceItem = (props) => {
       {supportsByValue.map(({ value, supports: supportedValue }, i) => <div key={i + " " + value} className={styles.listOfVotersItem}>
         <div className={styles.listOfVotersValue}>{width <= 780 && <b>Value: </b>}<span className={name === "oracles" ? "evmHashOrAddress" : ""}>{viewParam({ name, value, network: bridge_network, stakeTokenDecimals, stakeTokenSymbol })}</span></div>
         <div className={styles.listOfVotersSupport}>{width <= 780 && <b>Support: </b>} <SupportListModal sum={+Number(supportedValue / 10 ** voteTokenDecimals).toFixed(voteTokenDecimals)} decimals={voteTokenDecimals} symbol={voteTokenSymbol} supportList={supports[value]} bridge_network={bridge_network} /> </div>
-        <div className={styles.listOfVotersAction}><ChangeParamsModal change={change} {...props} disabled={(choice !== undefined && isFreezeVote && (choice == leader || isEqual(leader, choice))) || !activeWallet || !metamaskInstalledOrNotRequired} rule={rule} description={description} balance={balance} supportedValue={value} isMyChoice={choice !== undefined && (isNumber(choice) ? Number(choice) === Number(value) : choice === value)} /></div>
+        <div className={styles.listOfVotersAction}><ChangeParamsModal change={change} {...props} disabled={(choice !== undefined && isFrozen && (choice == leader || isEqual(leader, choice))) || !activeWallet || !metamaskInstalledOrNotRequired} rule={rule} description={description} balance={balance} supportedValue={value} isMyChoice={choice !== undefined && (isNumber(choice) ? Number(choice) === Number(value) : choice === value)} /></div>
       </div>)}
     </div>}
     <div className={styles.listOfVotersAnotherValue}>
-      <ChangeParamsModal change={change} {...props} rule={rule} description={description} balance={balance} disabled={(choice !== undefined && isFreezeVote && (choice == leader || isEqual(leader, choice))) || !activeWallet || !metamaskInstalledOrNotRequired} />
+      <ChangeParamsModal change={change} {...props} rule={rule} description={description} balance={balance} disabled={(choice !== undefined && isFrozen && (choice == leader || isEqual(leader, choice))) || !activeWallet || !metamaskInstalledOrNotRequired} />
     </div>
   </Card>
 }

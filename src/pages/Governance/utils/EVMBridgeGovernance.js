@@ -177,7 +177,7 @@ export class EVMBridgeGovernance {
     cb && await cb(name, contract_address);
   }
 
-  async withdraw(amount, cb) {
+  async withdraw(amountBn, cb) {
     await this.login();
     await this.changeNetwork();
 
@@ -187,9 +187,7 @@ export class EVMBridgeGovernance {
     const governance_contract = await this.getGovernanceContract(true);
 
     let res;
-    if (amount) {
-
-      const amountBn = amount && BigNumber.from(String(amount * 10 ** this.decimals));
+    if (amountBn) {
       res = await governance_contract['withdraw(uint256)'](amountBn);
     } else {
       res = await governance_contract['withdraw()']();
@@ -197,7 +195,7 @@ export class EVMBridgeGovernance {
 
     await res.wait();
 
-    cb && await cb(amount);
+    cb && await cb(amountBn);
   }
 
   async getParam(name) {

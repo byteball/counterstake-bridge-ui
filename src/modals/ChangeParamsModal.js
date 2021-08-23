@@ -158,11 +158,11 @@ export const ChangeParamsModal = ({ supportedValue, description, name, activeGov
 
   if (!name) return null;
 
-  let sendValue;
+  let sentValue;
   if (name === "min_stake" || name === "large_threshold") {
-    sendValue = Number(paramValue.value).toFixed(stakeTokenDecimals) * 10 ** stakeTokenDecimals
+    sentValue = Number(paramValue.value).toFixed(stakeTokenDecimals) * 10 ** stakeTokenDecimals
   } else {
-    sendValue = paramValue.value;
+    sentValue = paramValue.value;
   }
 
   const link = bridge_network === "Obyte" ? generateLink({
@@ -170,7 +170,7 @@ export const ChangeParamsModal = ({ supportedValue, description, name, activeGov
     asset: amount.valid ? voteTokenAddress : undefined,
     data: {
       name,
-      value: sendValue
+      value: sentValue
     },
     aa: activeGovernance,
     from_address: activeWallet,

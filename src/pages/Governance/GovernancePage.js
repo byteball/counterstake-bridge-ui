@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 
 import { selectDestAddress } from "store/destAddressSlice";
-import { selectBridgesAA, selectGovernance, selectList } from "store/governanceSlice";
+import { selectBridgeAAs, selectGovernance, selectList } from "store/governanceSlice";
 import { changeActiveGovernanceAA } from "store/thunks/changeActiveGovernanceAA";
 import { GovernanceList } from "./GovernanceList";
 import { Withdraw } from "./Withdraw";
@@ -17,39 +17,39 @@ const { Title } = Typography;
 const { Option } = Select;
 
 export const GovernancePage = () => {
-  const bridgesAas = useSelector(selectBridgesAA);
+  const bridgeAAs = useSelector(selectBridgeAAs);
   const list = useSelector(selectList);
   const { loading, selectedBridgeAddress, bridge_network, type, paramsInfo, activeGovernance, voteTokenDecimals, voteTokenSymbol, voteTokenAddress, stakeTokenDecimals, stakeTokenSymbol, stakeTokenAddress, challenging_period, bridge_symbol, bridge_decimals, freeze_period, balances, home_asset_decimals } = useSelector(selectGovernance);
   const addresses = useSelector(selectDestAddress);
   const dispatch = useDispatch();
   const { address } = useParams();
-  const [init, setInit] = useState(false);
+  const [inited, setInited] = useState(false);
 
   const currentAddress = addresses?.[bridge_network];
 
   const handleChange = (aa) => {
-    if (bridgesAas && Object.keys(bridgesAas).length > 0) {
+    if (bridgeAAs && Object.keys(bridgeAAs).length > 0) {
       dispatch(changeActiveGovernanceAA({ bridge_aa: aa }))
     }
   }
 
   useEffect(() => {
-    if (bridgesAas && Object.keys(bridgesAas).length > 0) {
-      if (!init) {
+    if (bridgeAAs && Object.keys(bridgeAAs).length > 0) {
+      if (!inited) {
         if (address) {
           dispatch(changeActiveGovernanceAA({ bridge_aa: address }))
         }
-        setInit(true);
+        setInited(true);
       } else {
         if ((selectedBridgeAddress !== address) && selectedBridgeAddress) {
           historyInstance.replace(`/governance/${selectedBridgeAddress}`)
         }
       }
     }
-  }, [address, init, selectedBridgeAddress, bridgesAas]);
+  }, [address, inited, selectedBridgeAddress, bridgeAAs]);
 
   useEffect(() => {
-    if (init) {
+    if (inited) {
       dispatch(changeActiveGovernanceAA({ bridge_aa: address }))
     }
   }, [addresses]);
@@ -58,14 +58,14 @@ export const GovernancePage = () => {
     <Helmet title="Counterstake Bridge - Governance" />
     <Title level={1}>Governance</Title>
 
-    <Select value={selectedBridgeAddress} optionFilterProp="children" showSearch loading={Object.keys(bridgesAas).length === 0} onChange={handleChange} style={{ width: "100%" }} size="large" placeholder="Please select a coin to govern">
+    <Select value={selectedBridgeAddress} optionFilterProp="children" showSearch loading={Object.keys(bridgeAAs).length === 0} onChange={handleChange} style={{ width: "100%" }} size="large" placeholder="Please select a coin to govern">
       {list?.map((item) => <Select.OptGroup key={item.bridge_label + item.import + item.export} label={<b style={{ fontSize: 14 }}>{item.bridge_label}</b>}>
-        <Option style={{ height: 45, display: "flex", alignItems: "center" }} value={item.export}>{bridgesAas[item.export].symbol} on {bridgesAas[item.export].network} ({bridgesAas[item.export].type})</Option>
-        <Option style={{ height: 45, display: "flex", alignItems: "center" }} value={item.import}>{bridgesAas[item.import].symbol} on {bridgesAas[item.import].network} ({bridgesAas[item.import].type})</Option>
+        <Option style={{ height: 45, display: "flex", alignItems: "center" }} value={item.export}>{bridgeAAs[item.export].symbol} on {bridgeAAs[item.export].network} ({bridgeAAs[item.export].type})</Option>
+        <Option style={{ height: 45, display: "flex", alignItems: "center" }} value={item.import}>{bridgeAAs[item.import].symbol} on {bridgeAAs[item.import].network} ({bridgeAAs[item.import].type})</Option>
       </Select.OptGroup>)}
     </Select>
 
-    {selectedBridgeAddress && bridgesAas && Object.keys(bridgesAas).length > 0 && loading === false ? <div>
+    {selectedBridgeAddress && bridgeAAs && Object.keys(bridgeAAs).length > 0 && loading === false ? <div>
       <Withdraw
         voteTokenDecimals={voteTokenDecimals}
         voteTokenSymbol={voteTokenSymbol}

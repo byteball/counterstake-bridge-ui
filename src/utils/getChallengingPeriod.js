@@ -7,9 +7,9 @@ export const getChallengingPeriod = async (period_number, stake, dst_network, aa
   try {
     if (dst_network === "Obyte") {
       const is_large = await executeGetter(aa, 'is_stake_large', [stake]);
-      const challenging_period_in_seconds = await executeGetter(aa, 'get_challenging_period', [period_number, is_large]);
+      const challenging_period_in_hours = await executeGetter(aa, 'get_challenging_period', [period_number, is_large]);
       
-      return challenging_period_in_seconds / 3600;
+      return challenging_period_in_hours / 3600;
     } else {
       const contract = new ethers.Contract(aa, counterstakeAbi, providers[dst_network]);
       const settings = await contract.settings();
