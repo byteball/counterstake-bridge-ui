@@ -186,12 +186,12 @@ const handleEventGovernance = (result) => {
 
   if (subject === "light/aa_response") {
     if (updatedStateVars) {
-      for (let variable in updatedStateVars[address]) {
+      for (let var_name in updatedStateVars[address]) {
         const value =
-          updatedStateVars[address][variable].value !== false
-            ? updatedStateVars[address][variable].value
+          updatedStateVars[address][var_name].value !== false
+            ? updatedStateVars[address][var_name].value
             : undefined;
-        diff[variable] = value;
+        diff[var_name] = value;
       }
     }
 

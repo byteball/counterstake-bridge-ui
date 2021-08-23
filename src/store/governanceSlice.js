@@ -42,9 +42,9 @@ export const governanceSlice = createSlice({
 
       const variables = action.payload;
       const newState = { ...state.governanceState, ...variables };
-      for (const variable in variables) {
-        if (variables[variable] === undefined || variables[variable] === false) {
-          delete newState[variable];
+      for (const var_name in variables) {
+        if (variables[var_name] === undefined || variables[var_name] === false) {
+          delete newState[var_name];
         }
       }
 
