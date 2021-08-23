@@ -530,7 +530,8 @@ export const MainPage = () => {
                 >
                   <Input
                     size="middle"
-                    style={{ height: 45, paddingRight: 30, fontFamily: "-apple-system, Roboto, Arial, sans-serif" }}
+                    className="evmHashOrAddress"
+                    style={{ height: 45, paddingRight: 30}}
                     spellCheck="false"
                     value={recipient.value}
                     placeholder={`Your ${selectedDestination ? selectedDestination.token.network : 'receiving'} wallet address`}

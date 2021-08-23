@@ -14,6 +14,7 @@ module.exports = {
               '@statistic-content-font-size': '16px',
               '@margin-sm': '5px',
               '@input-height-lg': '60px',
+              '@input-height-base': '40px',
               "@select-single-item-height-lg": "60px",
             },
             javascriptEnabled: true,

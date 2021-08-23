@@ -3,6 +3,7 @@ import { startWatchingDestinationBridge } from "services/watch";
 import { getOrInsertInput } from "utils";
 import { setDirections } from "./directionsSlice";
 import obyte from "../services/socket";
+import { setGovernanceList } from "./governanceSlice";
 
 const { createAsyncThunk } = require("@reduxjs/toolkit")
 
@@ -22,18 +23,6 @@ export const updateTransfersStatus = createAsyncThunk(
     })
     await Promise.all(subscriptions);
     return await Promise.all(getStatusList);
-  }
-);
-
-export const getObyteGovernanceParams = createAsyncThunk(
-  'getGovernanceParams',
-  async (_, thunkAPI) => {
-
-    // const import_aa = process.env.REACT_APP_OBYTE_IMPORT_AA;
-    // const export_aa = process.env.REACT_APP_OBYTE_EXPORT_AA;
-
-    // const importDef = await client.api.getDefinition(import_aa);
-    // const exportDef = await client.api.getDefinition(export_aa);
   }
 );
 
@@ -58,9 +47,16 @@ export const updateBridges = createAsyncThunk(
     const resp = await getBridges();
     if (resp.status !== 'success')
       return [];
+
+    const { governance } = thunkAPI.getState();
+    const governanceListExists = Object.keys(governance.exportList || {}).length > 0 || Object.keys(governance.importList || {}).length > 0;
+
     const bridges = resp.data;
     let directions = {};
     let inputs = [];
+    const import_aas = {};
+    const export_aas = {};
+    const list = [];
     for (let { bridge_id, home_network, home_asset, stake_asset, home_asset_decimals, home_symbol, export_aa, foreign_network, foreign_asset, foreign_asset_decimals, foreign_symbol, import_aa, min_expatriation_reward, min_repatriation_reward, count_expatriation_claimants, count_repatriation_claimants, max_expatriation_amount, max_repatriation_amount } of bridges) {
       const home_token = { network: home_network, asset: home_asset, decimals: home_asset_decimals, symbol: home_symbol, home_network };
       const foreign_token = { network: foreign_network, asset: foreign_asset, decimals: foreign_asset_decimals, symbol: foreign_symbol, home_network };
@@ -104,6 +100,18 @@ export const updateBridges = createAsyncThunk(
         token: home_token,
         max_amount: max_repatriation_amount
       });
+      if (!governanceListExists) {
+        import_aas[import_aa] = { ...foreign_token, type: "import", stake_asset, home_asset, home_asset_decimals };
+        export_aas[export_aa] = { ...home_token, type: "export", stake_asset, home_asset, home_asset_decimals, foreign_asset };
+        list.push({
+          import: import_aa,
+          export: export_aa,
+          bridge_label: `${home_token.symbol}: ${home_token.network} -> ${foreign_token.network}`
+        })
+      }
+    }
+    if (!governanceListExists) {
+      thunkAPI.dispatch(setGovernanceList({ import_aas, export_aas, list: list.sort((a, b) => compare(a.bridge_label, b.bridge_label)) }));
     }
     thunkAPI.dispatch(setDirections(directions));
     return inputs.map((i, index) => ({ index, ...i, destinations: i.destinations.map((d, id) => ({ ...d, index: id })) }));
@@ -136,3 +144,13 @@ export const getBridgesParams = createAsyncThunk(
     }
   }
 )
+
+const compare = (a, b) => {
+  if (a > b) {
+    return 1;
+  } else if (a < b) {
+    return -1;
+  } else if (a === b) {
+    return 0;
+  }
+}

@@ -193,7 +193,7 @@ export const Transfer = (t) => {
             xs={{ span: 24 }}
           >
             <div style={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 24, wordBreak: "break-all" }}>
-              <b>Recipient address</b>: <div style={{ fontFamily: "-apple-system, Roboto, Arial, sans-serif" }}>{dest_address}</div>
+              <b>Recipient address</b>: <div className="evmHashOrAddress">{dest_address}</div>
             </div>
           </Col>
           <Col
@@ -216,12 +216,12 @@ export const Transfer = (t) => {
         <Row>
           <Col lg={12}>
             <div style={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 24, wordBreak: "break-all" }}>
-              <b>Sent in</b>: <div style={{ fontFamily: "-apple-system, Roboto, Arial, sans-serif" }}><a href={getExplorerLink(src_token.network, txid)} target="_blank" rel="noopener">{txid}</a></div>
+              <b>Sent in</b>: <div className="evmHashOrAddress"><a href={getExplorerLink(src_token.network, txid)} target="_blank" rel="noopener">{txid}</a></div>
             </div>
           </Col>
           {claim_txid && <Col lg={12}>
             <div style={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 24, wordBreak: "break-all" }}>
-              <b>Claimed in</b>: <div style={{ fontFamily: "-apple-system, Roboto, Arial, sans-serif" }}><a href={getExplorerLink(dst_token.network, claim_txid)} target="_blank" rel="noopener">{claim_txid}</a></div>
+              <b>Claimed in</b>: <div className="evmHashOrAddress"><a href={getExplorerLink(dst_token.network, claim_txid)} target="_blank" rel="noopener">{claim_txid}</a></div>
             </div>
           </Col>}
           {((status === "confirmed" || status === "mined") || ((status === "claim" || status === "claim_confirmed") && self_claimed && !is_finished)) && <Col lg={{ offset: 12, span: 12 }} sm={{ span: 24 }}

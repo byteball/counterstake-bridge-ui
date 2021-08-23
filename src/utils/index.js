@@ -6,4 +6,4 @@ export * from "./getDecimals";
 export * from "./getSymbol";
 export * from "./getRequiredStake";
 export * from "./getStatusIndex";
-export * from "./getChallengingPeriodEVM";
+export * from "./getChallengingPeriod";

@@ -1,8 +1,8 @@
+import { counterstakeAbi } from "abi";
 import { BigNumber, ethers } from "ethers";
 
 import { providers } from "services/evm";
 import obyte from "services/socket";
-import { counterstakeAbi } from "counterstakeAbi.js";
 
 export const getClaim = async (num, aa, dst_network, bFinished) => {
   try {

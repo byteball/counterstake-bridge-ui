@@ -1,10 +1,13 @@
 import { addTransfer, claimMyself, updateTransferStatus, withdrawalConfirmed } from "store/transfersSlice";
 import obyte from "obyte";
+import { isEmpty } from "lodash";
+
 import { startWatchingDestinationBridge } from "./watch";
 import { sendTransferToGA } from "./transfer";
 import { store } from "index";
 import { closeConnection, openConnection } from "store/connectionSlice";
 import { getClaim } from "utils/getClaim";
+import { changeGovernanceState } from "store/governanceSlice";
 
 const environment = process.env.REACT_APP_ENVIRONMENT;
 
@@ -175,8 +178,27 @@ const handleEventBridge = async (err, result) => {
 
 };
 
-const handleEventGovernance = (err, result) => {
-  console.log("Governance event ")
+const handleEventGovernance = (result) => {
+
+  const { subject, body } = result[1];
+  const { aa_address: address, updatedStateVars } = body;
+  let diff = {};
+
+  if (subject === "light/aa_response") {
+    if (updatedStateVars) {
+      for (let var_name in updatedStateVars[address]) {
+        const value =
+          updatedStateVars[address][var_name].value !== false
+            ? updatedStateVars[address][var_name].value
+            : undefined;
+        diff[var_name] = value;
+      }
+    }
+
+    if (!isEmpty(diff)) {
+      store.dispatch(changeGovernanceState(diff))
+    }
+  }
 }
 
 client.onConnect(() => {
@@ -188,12 +210,16 @@ client.onConnect(() => {
   client.subscribe((err, result) => {
     if (err) return null;
     const { subject, body } = result[1];
-    const aa_address = body?.aa_address;
+
     if (!subject || !trackedSubjects.includes(subject)) {
       return null;
     }
-    if ([process.env.REACT_APP_OBYTE_IMPORT_AA, process.env.REACT_APP_OBYTE_EXPORT_AA].includes(aa_address)) {
-      handleEventGovernance(err, result)
+
+    const state = store.getState();
+    const aa_address = body?.aa_address;
+
+    if (aa_address === state.governance.activeGovernance) {
+      handleEventGovernance(result)
     } else {
       handleEventBridge(err, result);
     }

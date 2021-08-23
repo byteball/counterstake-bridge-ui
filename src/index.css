@@ -44,6 +44,10 @@ svg .white {
   text-align: center !important;
 }
 
-.ant-steps-item-wait .ant-steps-item-icon > .ant-steps-icon svg{
+.ant-steps-item-wait .ant-steps-item-icon>.ant-steps-icon svg {
   color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.evmHashOrAddress {
+  font-family: -apple-system, Roboto, Arial, sans-serif !important;
 }

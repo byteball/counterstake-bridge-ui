@@ -18,7 +18,8 @@ export const getDecimals = async (tokenAddress, dst_network) => {
 
       if (tokenAddress === ethers.constants.AddressZero) return 18;
 
-      const token = new ethers.Contract(tokenAddress, ['function decimals(uint256) public view virtual returns (uint8)'], providers[dst_network]);
+      const token = new ethers.Contract(tokenAddress, ['function decimals() public view returns (uint8)'], providers[dst_network]);
+
       return await token.decimals();
     }
   } catch (e) {
