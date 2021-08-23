@@ -14,7 +14,7 @@ export const WithdrawGovernanceSupportModal = ({
   max,
   symbol,
   activeGovernance,
-  selectedAddress,
+  selectedBridgeAddress,
   activeWallet,
   voteTokenDecimals,
   bridge_network,
@@ -80,7 +80,7 @@ export const WithdrawGovernanceSupportModal = ({
   const handleWithdraw = async () => {
     if (bridge_network === "Obyte") return;
 
-    const EVM = new EVMBridgeGovernance(bridge_network, selectedAddress, voteTokenDecimals, activeWallet);
+    const EVM = new EVMBridgeGovernance(bridge_network, selectedBridgeAddress, voteTokenDecimals, activeWallet);
 
     await EVM.withdraw(amount.value && amount.valid && amount.value, () => {
       dispatch(applyWithdraw({ wallet: activeWallet, amount: amount.value && amount.valid && amount.value * 10 ** voteTokenDecimals }))

@@ -14,7 +14,7 @@ import { checkOracles } from "utils/checkOracles";
 
 const { Text, Paragraph } = Typography;
 
-export const ChangeParamsModal = ({ supportedValue, description, name, activeGovernance, bridge_network, bridge_decimals, voteTokenAddress, voteTokenDecimals, voteTokenSymbol, stakeTokenDecimals, balance = 0, selectedAddress, isMyChoice, activeWallet, disabled }) => {
+export const ChangeParamsModal = ({ supportedValue, description, name, activeGovernance, bridge_network, bridge_decimals, voteTokenAddress, voteTokenDecimals, voteTokenSymbol, stakeTokenDecimals, balance = 0, selectedBridgeAddress, isMyChoice, activeWallet, disabled }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [oracles, setOracles] = useState({});
   const [checkedOracle, setCheckedOracle] = useState(undefined);
@@ -66,7 +66,7 @@ export const ChangeParamsModal = ({ supportedValue, description, name, activeGov
     if (bridge_network === "Obyte") return;
     try {
 
-      const EVM = new EVMBridgeGovernance(bridge_network, selectedAddress, voteTokenDecimals, activeWallet, stakeTokenDecimals);
+      const EVM = new EVMBridgeGovernance(bridge_network, selectedBridgeAddress, voteTokenDecimals, activeWallet, stakeTokenDecimals);
       await EVM.changeParam(name, paramValue.value, amount.valid ? amount.value : undefined, () => {
         handleCancel();
         dispatch(updateActiveGovernanceAA())

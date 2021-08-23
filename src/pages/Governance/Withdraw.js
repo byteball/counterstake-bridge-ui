@@ -5,7 +5,7 @@ import { WithdrawGovernanceSupportModal } from "modals/WithdrawGovernanceSupport
 
 const { Text } = Typography;
 
-export const Withdraw = ({ voteTokenSymbol, balance = 0, voteTokenDecimals, choiceParams = [], currentAddress, activeGovernance, bridge_network, selectedAddress }) => {
+export const Withdraw = ({ voteTokenSymbol, balance = 0, voteTokenDecimals, choiceParams = [], currentAddress, activeGovernance, bridge_network, selectedBridgeAddress }) => {
   const metamaskInstalledOrNotRequired = bridge_network === "Obyte" || window.ethereum;
 
   return (
@@ -20,7 +20,7 @@ export const Withdraw = ({ voteTokenSymbol, balance = 0, voteTokenDecimals, choi
             voteTokenDecimals={voteTokenDecimals}
             bridge_network={bridge_network}
             max={balance}
-            selectedAddress={selectedAddress}
+            selectedBridgeAddress={selectedBridgeAddress}
             activeGovernance={activeGovernance}
             activeWallet={currentAddress}
             disabled={!currentAddress || choiceParams?.length > 0 || balance === 0 || balance === "0" || !metamaskInstalledOrNotRequired}

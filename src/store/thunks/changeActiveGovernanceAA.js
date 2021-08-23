@@ -112,7 +112,7 @@ export const changeActiveGovernanceAA = createAsyncThunk(
     }
 
     return ({
-      selectedAddress: bridge_aa,
+      selectedBridgeAddress: bridge_aa,
       bridge_network,
       bridge_symbol,
       bridge_decimals,

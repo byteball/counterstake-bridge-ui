@@ -3,7 +3,7 @@ import { useEffect, useState } from "react"
 
 import { GovernanceItem } from "./GovernanceItem";
 
-export const GovernanceList = ({ paramsInfo, selectedAddress, bridge_network, bridge_symbol, bridge_decimals, activeGovernance, voteTokenDecimals, voteTokenSymbol, voteTokenAddress, freeze_period, challenging_period, activeWallet, balance, home_asset_decimals, stakeTokenDecimals, stakeTokenSymbol, stakeTokenAddress, }) => {
+export const GovernanceList = ({ paramsInfo, selectedBridgeAddress, bridge_network, bridge_symbol, bridge_decimals, activeGovernance, voteTokenDecimals, voteTokenSymbol, voteTokenAddress, freeze_period, challenging_period, activeWallet, balance, home_asset_decimals, stakeTokenDecimals, stakeTokenSymbol, stakeTokenAddress, }) => {
   const [data, setData] = useState([]);
   
   useEffect(async () => {
@@ -14,7 +14,7 @@ export const GovernanceList = ({ paramsInfo, selectedAddress, bridge_network, br
         choice: paramsInfo[name]?.choices?.[activeWallet]
       }));
       setData(data);
-  }, [selectedAddress, paramsInfo, balance, activeWallet]);
+  }, [selectedBridgeAddress, paramsInfo, balance, activeWallet]);
 
   if (data.length === 0) return <div style={{ padding: 30, display: "flex", justifyContent: "center", width: "100%" }}>
     <Spin size="large" />
@@ -33,7 +33,7 @@ export const GovernanceList = ({ paramsInfo, selectedAddress, bridge_network, br
         stakeTokenAddress={stakeTokenAddress}
 
         activeGovernance={activeGovernance}
-        selectedAddress={selectedAddress}
+        selectedBridgeAddress={selectedBridgeAddress}
         freeze_period={freeze_period}
         challenging_period={challenging_period}
 

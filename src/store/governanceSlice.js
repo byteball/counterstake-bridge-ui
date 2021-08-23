@@ -9,7 +9,7 @@ const initialState = {
   loading: undefined,
   exportList: {},
   importList: {},
-  selectedAddress: null,
+  selectedBridgeAddress: null,
   bridge_network: null,
   bridge_symbol: null,
   bridge_decimals: null,
@@ -87,7 +87,7 @@ export const governanceSlice = createSlice({
   },
   extraReducers: {
     [changeActiveGovernanceAA.fulfilled]: (state, action) => {
-      state.selectedAddress = action.payload.selectedAddress;
+      state.selectedBridgeAddress = action.payload.selectedBridgeAddress;
       state.bridge_network = action.payload.bridge_network;
       state.bridge_symbol = action.payload.bridge_symbol;
       state.bridge_decimals = action.payload.bridge_decimals;
@@ -114,7 +114,7 @@ export const governanceSlice = createSlice({
     },
     [changeActiveGovernanceAA.pending]: (state) => {
       state.loading = true
-      state.selectedAddress = null
+      state.selectedBridgeAddress = null
     },
     [updateActiveGovernanceAA.fulfilled]: (state, action) => {
       state.balances = action.payload.balances;
@@ -131,7 +131,7 @@ export const { setGovernanceList, changeGovernanceState, applyCommit, applyRemov
 // in the slice file. For example: `useSelector((state) => state.auth.value)`
 export const selectBridgesAA = state => ({ ...state?.governance?.exportList, ...state?.governance?.importList });
 
-export const selectGovernanceActive = state => state.governance.selectedAddress;
+export const selectGovernanceActive = state => state.governance.selectedBridgeAddress;
 
 export const selectGovernance = state => state.governance;
 

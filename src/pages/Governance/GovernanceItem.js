@@ -23,7 +23,7 @@ const { Countdown } = Statistic;
 /* eslint eqeqeq: "off" */
 
 export const GovernanceItem = (props) => {
-  const { name, value, selectedAddress, activeGovernance, choice, bridge_network, leader, voteTokenDecimals, voteTokenAddress, voteTokenSymbol, stakeTokenDecimals, stakeTokenSymbol, challenging_period, freeze_period, supports = {}, challenging_period_start_ts, change, balance, activeWallet, contract_address } = props;
+  const { name, value, selectedBridgeAddress, activeGovernance, choice, bridge_network, leader, voteTokenDecimals, voteTokenAddress, voteTokenSymbol, stakeTokenDecimals, stakeTokenSymbol, challenging_period, freeze_period, supports = {}, challenging_period_start_ts, change, balance, activeWallet, contract_address } = props;
   const { rule, description } = getParameterList(bridge_network)?.[name];
 
   const valueView = viewParam({ name, value, network: bridge_network, stakeTokenDecimals, stakeTokenSymbol });
@@ -85,7 +85,7 @@ export const GovernanceItem = (props) => {
   const remove = async () => {
     if (bridge_network === "Obyte" || !window.ethereum) return;
     try {
-      const EVM = new EVMBridgeGovernance(bridge_network, selectedAddress, voteTokenDecimals, activeWallet);
+      const EVM = new EVMBridgeGovernance(bridge_network, selectedBridgeAddress, voteTokenDecimals, activeWallet);
 
       await EVM.remove(name, contract_address, () => {
         dispatch(updateActiveGovernanceAA())
@@ -98,7 +98,7 @@ export const GovernanceItem = (props) => {
   const commit = async () => {
     if (bridge_network === "Obyte" || !window.ethereum) return;
     try {
-      const EVM = new EVMBridgeGovernance(bridge_network, selectedAddress, voteTokenDecimals, activeWallet);
+      const EVM = new EVMBridgeGovernance(bridge_network, selectedBridgeAddress, voteTokenDecimals, activeWallet);
 
       await EVM.commit(name, contract_address, () => {
         dispatch(applyCommit(name));
