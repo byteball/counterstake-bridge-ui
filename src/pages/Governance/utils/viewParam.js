@@ -1,3 +1,4 @@
+import { BigNumber, ethers } from "ethers";
 import { isArray } from "lodash";
 
 export const viewParam = ({ name, value, network, stakeTokenDecimals, stakeTokenSymbol }) => {
@@ -12,9 +13,14 @@ export const viewParam = ({ name, value, network, stakeTokenDecimals, stakeToken
   } if ((name === "large_challenging_periods" || name === "challenging_periods") && isArray(value) && network !== "Obyte") {
     return value.map((v) => v / 3600).join(" ");
   } else if (name === "min_price" && network !== "Obyte") {
-    return Number(value) / 1e20;
+    return +ethers.utils.formatUnits(BigNumber.from(value), 20).toString();
   } else if (name === "min_stake" || name === "large_threshold") {
-    return `${value / 10 ** stakeTokenDecimals} ${stakeTokenSymbol}`
+    if (network === "Obyte" || !value) {
+      return `${value / 10 ** stakeTokenDecimals} ${stakeTokenSymbol}`
+    } else {
+      const display_units = +ethers.utils.formatUnits(BigNumber.from(value), stakeTokenDecimals).toString()
+      return `${display_units} ${stakeTokenSymbol}`
+    }
   } else {
     if (isArray(value)) {
       return value.join(" ")
