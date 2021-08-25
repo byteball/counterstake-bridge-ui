@@ -371,7 +371,7 @@ export const MainPage = () => {
 
   return (
     <>
-      <div className={`${styles.header} main_page`}>
+      <div className="main_page">
         <div className={`${styles.container} `}>
           <Helmet title="Counterstake Bridge" />
           <Title level={1} style={{ fontWeight: "bold", fontSize: width < 768 ? (width < 500 ? 46 : 72) : 100, lineHeight: "79px", textAlign: "center", marginBottom: 0, letterSpacing: "-0.05em", marginTop: width < 768 ? 10 : 20 }}>Counterstake</Title>
