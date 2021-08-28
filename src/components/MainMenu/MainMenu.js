@@ -37,6 +37,11 @@ export const MainMenu = ({ mode, pathname, onClose, width }) => {
           User guide
         </NavLink>
       </Menu.Item>
+      <Menu.Item key="/developers">
+        <NavLink to={{pathname: "https://github.com/byteball/counterstake-sdk"}} target="_blank" rel="noopener" activeClassName="selected" style={{ verticalAlign: "middle" }}>
+          Developers
+        </NavLink>
+      </Menu.Item>
       <Menu.Item key="/governance">
         <NavLink to="/governance" activeClassName="selected" style={{ verticalAlign: "middle" }}>
           Governance
