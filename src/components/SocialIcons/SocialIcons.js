@@ -1,7 +1,7 @@
 import React from "react"
 import { Typography } from "antd";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faDiscord, faWeixin, faTelegram, faMediumM, faRedditAlien, faBitcoin, faTwitter, faFacebook, faYoutube } from '@fortawesome/free-brands-svg-icons';
+import { faDiscord, faWeixin, faTelegram, faMediumM, faRedditAlien, faBitcoin, faTwitter, faFacebook, faYoutube, faGithub } from '@fortawesome/free-brands-svg-icons';
 
 const { Text } = Typography;
 
@@ -52,7 +52,12 @@ export const SocialIcons = ({size = "full", centered = false}) => { // type full
       name: "facebook",
       icon: faFacebook,
       link: "https://www.facebook.com/obyte.org"
-    }
+    },
+    {
+      name: "github",
+      icon: faGithub,
+      link: "https://github.com/byteball/counterstake-sdk"
+    },
   ];
 
 
