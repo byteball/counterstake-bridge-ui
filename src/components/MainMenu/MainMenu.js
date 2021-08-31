@@ -47,6 +47,11 @@ export const MainMenu = ({ mode, pathname, onClose, width }) => {
           Governance
         </NavLink>
       </Menu.Item>
+      <Menu.Item key="/assistants">
+        <NavLink to="/assistants" activeClassName="selected" style={{ verticalAlign: "middle" }}>
+          Assistants
+        </NavLink>
+      </Menu.Item>
       <Menu.Item key="/faq">
         <NavLink to="/faq" activeClassName="selected" style={{ verticalAlign: "middle" }}>
           F.A.Q.
