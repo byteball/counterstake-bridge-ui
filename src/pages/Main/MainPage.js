@@ -7,6 +7,8 @@ import obyte from "obyte";
 import { ethers } from "ethers";
 import { useSelector, useDispatch } from 'react-redux';
 import QRButton from "obyte-qr-button";
+import { useQuery } from "hooks/useQuery";
+import { useLocation } from "react-router-dom";
 
 import { addTransfer, updateTransferStatus } from "store/transfersSlice";
 import { selectDestAddress, setDestAddress } from "store/destAddressSlice";
@@ -26,6 +28,7 @@ import { addTokenToTracked, selectAddedTokens } from "store/addedTokensSlice";
 import { selectChainId } from "store/chainIdSlice";
 import { chainIds } from "chainIds";
 import { changeNetwork } from "utils/changeNetwork";
+import historyInstance from "historyInstance";
 
 import styles from "./MainPage.module.css";
 
@@ -58,7 +61,7 @@ export const MainPage = () => {
   const { inputs, loaded } = useSelector(selectInputs)
   let [selectedInput, setSelectedInput] = useState();
   let [selectedDestination, setSelectedDestination] = useState();
-  const [amountIn, setAmountIn] = useState(0.1);
+  const [amountIn, setAmountIn] = useState();
   const [amountOut, setAmountOut] = useState();
   const [reward, setReward] = useState(0);
   const [countAssistants, setCountAssistants] = useState(0);
@@ -77,6 +80,9 @@ export const MainPage = () => {
   const addedTokens = useSelector(selectAddedTokens);
   const max_amount = (selectedDestination && selectedDestination.max_amount && (selectedDestination.max_amount.toPrecision(4))) || 0;
   const min_decimals = selectedInput?.token && selectedDestination?.token && Math.min(selectedInput.token.decimals, selectedDestination.token.decimals);
+  const [inited, setInited] = useState(false);
+  const query = useQuery();
+  const location = useLocation();
 
   useEffect(() => {
     if (rehydrated && isOpenConnection) {
@@ -88,6 +94,29 @@ export const MainPage = () => {
     dispatch(getCoinIcons())
   }, []);
 
+  useEffect(()=>{
+    if (!inited && inputs.length !== 0 && rehydrated && selectedDestination){
+
+      const recipient = query.get("recipient");
+      const amount = query.get("amount");
+      const dst_network = query.get("dst_network");
+
+      if (recipient && dst_network && isValidRecipient(recipient, dst_network)){
+        dispatch(setDestAddress({ address: recipient, network: dst_network}))
+      }
+
+      const reg = /^[0-9.]+$/;
+      if ((reg.test(String(amount)) && f(amount) <= min_decimals) || amount === "") {
+        setAmountIn(Number(amount));
+      } else {
+        setAmountIn(0.1);
+      }
+      
+      setInited(true);
+      historyInstance.replace(location.pathname);
+    }
+  }, [inited, inputs, dispatch, selectedDestination, rehydrated])
+
   const transferRef = useRef(null);
 
   const handleAmountIn = (ev) => {
@@ -98,13 +127,13 @@ export const MainPage = () => {
     }
   };
 
-  const isValidRecipient = value => {
+  const isValidRecipient = (value, dst_network) => {
     if (!selectedDestination || !value)
       return undefined;
 
-    if (selectedDestination.token.network === "Obyte") {
+    if ((dst_network || selectedDestination.token.network) === "Obyte") {
       return obyte.utils.isValidAddress(value);
-    } else if (Object.keys(chainIds[environment]).includes(selectedDestination.token.network)) {
+    } else if (Object.keys(chainIds[environment]).includes(dst_network || selectedDestination.token.network)) {
       try {
         return ethers.utils.getAddress(value) === value;
       }
@@ -147,7 +176,7 @@ export const MainPage = () => {
 
   useEffect(() => {
     const network = selectedDestination?.token?.network;
-    if (network) {
+    if (network && inited) {
       const value = addresses[network];
       if (value) {
         const valid = isValidRecipient(value);
@@ -158,7 +187,7 @@ export const MainPage = () => {
         setRecipient({});
       }
     }
-  }, [selectedDestination]);
+  }, [selectedDestination, inited]);
 
   useEffect(() => {
     if (recipient.valid)
@@ -307,9 +336,22 @@ export const MainPage = () => {
 
   useEffect(() => {
     if (!tokenIsInitialized && inputs && inputs.length > 0) {
+      const src_network = query.get("src_network");
+      const dst_network = query.get("dst_network");
+
+      const src_token = query.get("src_token");
+      const dst_token = query.get("dst_token");
+
+      const srcIndexFromUrl = (src_network && src_token) ? inputs.findIndex((i) => (i.token.asset === src_token || i.token.symbol === src_token) && i.token.network === src_network) : -1;
+      const srcIndex = srcIndexFromUrl >= 0 ? srcIndexFromUrl : 0;
+
+      const dstIndexFromUrl = (dst_network && dst_token) ? inputs[srcIndex].destinations.findIndex((i) => (i.token.asset === dst_token || i.token.symbol === dst_token) && i.token.network === dst_network) : -1;
+      const dstIndex = dstIndexFromUrl >= 0 ? dstIndexFromUrl : 0;
+
+      setSelectedInput(inputs[srcIndex]);
+      setSelectedDestination(inputs[srcIndex].destinations[dstIndex]);
+
       setTokenIsInitialized(true);
-      setSelectedInput(inputs[0]);
-      setSelectedDestination(inputs[0].destinations[0])
     } else if (tokenIsInitialized && inputs && selectedInput && selectedDestination && inputs.length > 0) {
       const newDestinationData = inputs[selectedInput.index].destinations[selectedDestination.index];
       setSelectedDestination(newDestinationData);
