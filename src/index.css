@@ -51,3 +51,8 @@ svg .white {
 .evmHashOrAddress {
   font-family: -apple-system, Roboto, Arial, sans-serif !important;
 }
+
+.obyte-qr-code {
+  padding: 10px;
+  background: #fff;
+}
