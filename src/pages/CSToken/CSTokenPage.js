@@ -69,9 +69,10 @@ export const CSTokenPage = () => (
       <div style={{ marginBottom: 50, marginLeft: 3 }}>
         <Title level={2} style={{ fontSize: 27, marginBottom: 16.5 }}>Roadmap</Title>
         <div>
-          <Steps size="small" current={1} direction="vertical">
+          <Steps size="small" current={2} direction="vertical">
             <Step title="July 2021" description="Soft launch of the protocol" />
-            <Step description="Improvements and bugfixes" />
+            <Step title="August 2021" description="Governance" />
+            <Step description="Pooled assistants" />
             <Step description="Audits of smart contracts and autonomous agents" />
             <Step description="CS token design" />
             <Step description="CS token sale" />
