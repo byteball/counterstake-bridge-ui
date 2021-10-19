@@ -2,6 +2,7 @@ import { Input, Form, Button, Modal, Result, Alert, message, Tooltip } from "ant
 import { useEffect, useState } from "react";
 import { ethers, BigNumber, FixedNumber } from "ethers";
 import { useDispatch, useSelector } from "react-redux";
+import QRButton from "obyte-qr-button";
 
 import { selectChainId } from "store/chainIdSlice";
 import { selectDestAddress } from "store/destAddressSlice";
@@ -139,7 +140,7 @@ export const RedeemAssistantSharesModal = ({ size, assistant_aa, swap_fee, block
               setError("Negative net balance")
             }
           } else { // import
-            
+
             const bnStakeGrossBalance = FixedNumber.from(stake_balance).addUnsafe(FixedNumber.from(stake_balance_in_work));
             const bnImageGrossBalance = FixedNumber.from(image_balance).addUnsafe(FixedNumber.from(image_balance_in_work));
 
@@ -239,7 +240,7 @@ export const RedeemAssistantSharesModal = ({ size, assistant_aa, swap_fee, block
       // check address
       provider = window.ethereum && new ethers.providers.Web3Provider(window.ethereum);
       signer = window.ethereum && provider.getSigner();
-      
+
       const recipientAddress = addresses[network];
       const metaMaskAddress = await signer.getAddress();
       if (recipientAddress !== metaMaskAddress) return message.error(`The wallet address in metamask is different from the recipient. Please select the ${recipientAddress.slice(0, 10)}... account.`)
@@ -290,7 +291,7 @@ export const RedeemAssistantSharesModal = ({ size, assistant_aa, swap_fee, block
 
         {error ? <Form.Item><Alert type="error" message={error} /></Form.Item> : null}
 
-        <Button type="primary" href={link} onClick={redeemSharesFromEVM} disabled={!isValidAction}>Send {isValidAction ? <> {sharesAmount} {shares_symbol || shares_asset.slice(0, 6) + "..."}</> : ""}</Button>
+        {network === "Obyte" ? <QRButton type="primary" href={link} onClick={redeemSharesFromEVM} disabled={!isValidAction}>Send {isValidAction ? <> {sharesAmount} {shares_symbol || shares_asset.slice(0, 6) + "..."}</> : ""}</QRButton> : <Button type="primary" onClick={redeemSharesFromEVM} disabled={!isValidAction}>Send {isValidAction ? <> {sharesAmount} {shares_symbol || shares_asset.slice(0, 6) + "..."}</> : ""}</Button>}
 
       </Form> : <Result
         status="error"

@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { randomBytes } from "crypto";
 import { ethers, BigNumber, FixedNumber } from "ethers";
+import QRButton from "obyte-qr-button";
 
 import { generateLink } from "utils";
 import { generatePaymentMessage, get_shares } from "./helpers";
@@ -109,11 +110,11 @@ export const BuyAssistantSharesModal = ({ size, side, network, block, assistant_
         } else {
           const payments = [];
 
-          if (Number(stakeAmount) > 0){
+          if (Number(stakeAmount) > 0) {
             payments.push({ address: forward, amount: Math.floor(stakeAmount * 10 ** stake_asset_decimals), asset: stake_asset });
           }
-         
-          if (Number(imageAmount) > 0){
+
+          if (Number(imageAmount) > 0) {
             payments.push({ address: forward, amount: Math.floor(imageAmount * 10 ** image_asset_decimals), asset: image_asset });
           }
 
@@ -490,7 +491,7 @@ export const BuyAssistantSharesModal = ({ size, side, network, block, assistant_
           <Form.Item>
             <Input placeholder="Amount in shares" disabled={true} value={isValid ? sharesAmount : undefined} suffix={shares_symbol} />
           </Form.Item>
-          <Button type="primary" onClick={buySharesFromEVM} href={side === "export" ? linkBuySharesForExportAssistants : linkBuySharesForImportAssistants} disabled={!isValid}>Send {isValid ? <> {Number(stakeAmount) > 0 && <span>{+Number(stakeAmount).toFixed(6)} {stakeAmount && stake_asset_symbol} {Number(imageAmount) > 0 && "and"} </span>} {Number(imageAmount) > 0 && <span>{+Number(imageAmount).toFixed(6)} {imageAmount && image_asset_symbol}</span>}</> : null}</Button>
+          {network === "Obyte" ? <QRButton type="primary" href={side === "export" ? linkBuySharesForExportAssistants : linkBuySharesForImportAssistants} disabled={!isValid}>Send {isValid ? <> {Number(stakeAmount) > 0 && <span>{+Number(stakeAmount).toFixed(6)} {stakeAmount && stake_asset_symbol} {Number(imageAmount) > 0 && "and"} </span>} {Number(imageAmount) > 0 && <span>{+Number(imageAmount).toFixed(6)} {imageAmount && image_asset_symbol}</span>}</> : null} </QRButton> : <Button type="primary" onClick={buySharesFromEVM} disabled={!isValid}>Send {isValid ? <> {Number(stakeAmount) > 0 && <span>{+Number(stakeAmount).toFixed(6)} {stakeAmount && stake_asset_symbol} {Number(imageAmount) > 0 && "and"} </span>} {Number(imageAmount) > 0 && <span>{+Number(imageAmount).toFixed(6)} {imageAmount && image_asset_symbol}</span>}</> : null}</Button>}
         </Form>
       </>}
     </Modal>

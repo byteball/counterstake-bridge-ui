@@ -235,14 +235,14 @@ export const SwapTokensModal = ({ block, size, assistant_aa, network, swap_fee, 
       <Form>
         <div><b>You send:</b></div>
         <Form.Item>
-          <Input autoFocus={true} ref={sendInputRef} placeholder={`Amount ${sendToken.type} tokens`} value={sendAmount} onChange={handleChange} suffix={sendToken.symbol} />
+          <Input autoFocus={true} ref={sendInputRef} placeholder={`Amount in ${sendToken.type} tokens`} value={sendAmount} onChange={handleChange} suffix={sendToken.symbol} />
         </Form.Item>
         <div style={{ textAlign: "center" }}>
           <SwapOutlined style={{ fontSize: 24, transform: "rotate(90deg)", cursor: "pointer" }} onClick={changeDirection} />
         </div>
         <div><b>You get:</b></div>
         <Form.Item>
-          <Input placeholder={`Amount ${getToken.type} tokens`} disabled={true} value={isValidAction ? getAmount : undefined} suffix={getToken.symbol} />
+          <Input placeholder={`Amount in ${getToken.type} tokens`} disabled={true} value={isValidAction ? getAmount : undefined} suffix={getToken.symbol} />
         </Form.Item>
         {error ? <Form.Item><Alert type="error" message={error} /></Form.Item> : null}
         <div style={{ display: "flex", justifyContent: "center" }}>
