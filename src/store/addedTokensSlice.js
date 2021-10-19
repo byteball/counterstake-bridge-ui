@@ -6,10 +6,9 @@ export const addedTokensSlice = createSlice({
   reducers: {
     addTokenToTracked: (state, action) => {
       const { address, symbol, chainId } = action.payload;
-
       if (address in state) {
         if ((chainId in state[address]) && !(state[address][chainId].includes(symbol))){
-          state[address][chainId].push(symbol)
+          state[address][chainId] = [...state[address][chainId], symbol]
         } else {
           state[address][chainId] = [symbol]
         }

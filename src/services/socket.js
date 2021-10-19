@@ -8,10 +8,28 @@ import { store } from "index";
 import { closeConnection, openConnection } from "store/connectionSlice";
 import { getClaim } from "utils/getClaim";
 import { changeGovernanceState } from "store/governanceSlice";
+import { reqToCreateForward, saveForward, updateObyteAssistant } from "store/assistantsSlice";
+import { message } from "antd";
 
 const environment = process.env.REACT_APP_ENVIRONMENT;
+const forwardFactory = process.env.REACT_APP_IMPORT_FROWARD_FACTORY;
+class Client extends obyte.Client {
+  constructor(url, options) {
+    super(url, options);
+  }
 
-let client = new obyte.Client(
+  subscribe(cb1) {
+    this.client.subscribe((...msg) => {
+      cb1(...msg);
+      this.client.forward && this.client.forward(...msg);
+    });
+  }
+  forward(cb) {
+    this.client.forward = cb;
+  }
+}
+
+let client = new Client(
   environment === 'devnet' ? 'ws://localhost:6611' : `wss://obyte.org/bb${environment === 'testnet' ? "-test" : ""}`,
   {
     testnet: environment === 'testnet',
@@ -201,11 +219,49 @@ const handleEventGovernance = (result) => {
   }
 }
 
+const handleEventAssistant = (result) => {
+  const state = store.getState();
+  const { subject, body } = result[1];
+  const { aa_address, updatedStateVars, balances, unit, trigger_initial_address } = body;
+  const author = trigger_initial_address || unit?.authors?.[0]?.address;
+
+  if (subject === "light/aa_request") {
+    
+    if (state.destAddress?.Obyte && author && author === state.destAddress?.Obyte){
+      message.info("We have received your request. The interface will update after the transaction stabilizes", 5)
+    }
+  } else if (subject === "light/aa_response" && !state.assistants.forwards.includes(aa_address)){
+    let diff = {};
+
+    if (updatedStateVars) {
+      for (let var_name in updatedStateVars[aa_address]) {
+        const value =
+          updatedStateVars[aa_address][var_name].value !== false
+            ? updatedStateVars[aa_address][var_name].value
+            : undefined;
+        diff[var_name] = value;
+      }
+    }
+
+    if (!isEmpty(diff)) {
+      store.dispatch(updateObyteAssistant({ address: aa_address, diff, balances}))
+    }
+  }
+}
+
 client.onConnect(() => {
   const dispatch = store.dispatch;
   const heartbeat = setInterval(function () {
     client.api.heartbeat();
   }, 10 * 1000);
+
+  client.requestAsync = (command, params) =>
+    new Promise((resolve, reject) => {
+      client.client.request(command, params, (e, result) => {
+        if (e) return reject(e);
+        resolve(result);
+      });
+    });
 
   client.subscribe((err, result) => {
     if (err) return null;
@@ -220,6 +276,30 @@ client.onConnect(() => {
 
     if (aa_address === state.governance.activeGovernance) {
       handleEventGovernance(result)
+    } else if (forwardFactory && (aa_address === forwardFactory)) {
+      if (subject === "light/aa_request") {
+        const { messages } = body.unit;
+        const payload = getAAPayload(messages);
+        if (payload.create && payload.assistant) {
+          dispatch(reqToCreateForward(payload.assistant));
+        }
+      } else if (subject === "light/aa_response") {
+        const { updatedStateVars } = body;
+        if (updatedStateVars[forwardFactory]) {
+          const varName = Object.keys(updatedStateVars[forwardFactory])?.[0];
+          if (varName) {
+            const assistant_address = varName.split("_")[2];
+            if (obyte.utils.isValidAddress(assistant_address)) {
+              const forward = updatedStateVars[forwardFactory][varName].value;
+              if (obyte.utils.isValidAddress(forward)) {
+                dispatch(saveForward({ assistant_address, forward }));
+              }
+            }
+          }
+        }
+      }
+    } else if ([...state.assistants.obyteAssistants, ...state.assistants.forwards].includes(aa_address)) {
+      handleEventAssistant(result);
     } else {
       handleEventBridge(err, result);
     }
@@ -248,6 +328,5 @@ client.onConnect(() => {
     dispatch(closeConnection())
   });
 });
-
 
 export default client;

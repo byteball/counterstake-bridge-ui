@@ -67,7 +67,10 @@ export const updateBridges = createAsyncThunk(
         dst_bridge_aa: import_aa,
         src_token: home_token,
         dst_token: foreign_token,
-        stake_asset
+        stake_asset,
+        home_asset,
+        home_network,
+        home_symbol
       };
       directions[import_aa] = {
         bridge_id,
@@ -76,7 +79,10 @@ export const updateBridges = createAsyncThunk(
         dst_bridge_aa: export_aa,
         src_token: foreign_token,
         dst_token: home_token,
-        stake_asset
+        stake_asset,
+        home_asset,
+        home_network,
+        home_symbol
       };
       const home_input = getOrInsertInput(inputs, home_token);
       home_input.destinations.push({

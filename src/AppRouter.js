@@ -21,7 +21,10 @@ import {
 
 const AppRouter = () => {
   const dispatch = useDispatch();
-  dispatch(getBridgesParams());
+  
+  useEffect(()=>{
+    dispatch(getBridgesParams());
+  }, [])
 
   const isOpenConnection = useSelector(selectConnectionStatus);
 

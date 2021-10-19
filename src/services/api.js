@@ -29,3 +29,8 @@ export async function getTransferStatus(txid) {
   const resp_body = await request(`/transfer/?txid=${encodeURIComponent(txid)}`);
   return resp_body?.data;
 }
+
+export async function getPooledAssistants() {
+  const resp_body = await request(`/pooled_assistants`);
+  return resp_body?.data.filter(({ network }) => network === "Obyte");
+}
