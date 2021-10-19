@@ -59,3 +59,8 @@ svg .white {
 .ant-statistic-title {
   margin-bottom: 0 !important;
 }
+
+.obyte-qr-code {
+  padding: 10px;
+  background: #fff;
+}

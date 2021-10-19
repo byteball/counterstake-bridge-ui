@@ -200,7 +200,7 @@ export const ChangeParamsModal = ({ supportedValue, description, name, activeGov
       </Tooltip> : <Button type="link" style={{ padding: 0, height: "auto" }} disabled={disabled} onClick={showModal}>
         {supportedValue !== undefined ? (isMyChoice ? "add support for this value" : "vote for this value") : "suggest another value"}
       </Button>}
-      <Modal destroyOnClose width={700} title={`Change ${name.split("_").join(" ")}`} visible={isModalVisible} onOk={handleOk} onCancel={handleCancel}
+      <Modal width={700} title={`Change ${name.split("_").join(" ")}`} visible={isModalVisible} onOk={handleOk} onCancel={handleCancel}
         footer={
           <Space>
             <Button key="Cancel" onClick={handleCancel}>Close</Button>
