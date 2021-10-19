@@ -8,13 +8,13 @@ export const ShowDecimalsValue = ({ value, decimals = 0, max_decimals, network }
     if (max_decimals === undefined || (decimals < max_decimals) || String(value / 10 ** decimals).split(".")?.[1]?.length <= max_decimals) {
       return +Number(value / 10 ** decimals).toFixed(max_decimals);
     } else {
-      return <Tooltip title={+Number(value / 10 ** decimals).toFixed(max_decimals)}>{+Number(value / 10 ** decimals).toFixed(decimals)}</Tooltip>
+      return <Tooltip title={+Number(value / 10 ** decimals).toFixed(decimals)}>{+Number(value / 10 ** decimals).toPrecision(max_decimals)}</Tooltip>
     }
   } else {
     if (max_decimals === undefined || (decimals < max_decimals) || ethers.utils.formatUnits(BigNumber.from(value), decimals).split(".")[1].length <= max_decimals) {
       return +ethers.utils.formatUnits(BigNumber.from(value), decimals);
     } else {
-      return <Tooltip title={Number(+ethers.utils.formatUnits(BigNumber.from(value), decimals).toString()).toPrecision(max_decimals)}>{Number(+ethers.utils.formatUnits(BigNumber.from(value), decimals).toString()).toPrecision(max_decimals)}</Tooltip>
+      return <Tooltip title={Number(+ethers.utils.formatUnits(BigNumber.from(value), decimals).toString()).toPrecision(decimals)}>{Number(+ethers.utils.formatUnits(BigNumber.from(value), decimals).toString()).toPrecision(max_decimals)}</Tooltip>
     }
   }
 
