@@ -117,7 +117,7 @@ export const RedeemAssistantSharesModal = ({ size, assistant_aa, swap_fee, block
           if (side === "export") {
             const bnGrossBalance = FixedNumber.from(stake_balance).addUnsafe(FixedNumber.from(stake_balance_in_work));
 
-            const bnNewMf = FixedNumber.from(stake_mf).mulUnsafe(FixedNumber.from(management_fee * 1e4).divUnsafe(fn1e4)).mulUnsafe(FixedNumber.from(timestamp - ts)).divUnsafe(FixedNumber.from(360 * 24 * 3600)); //TODO: Исправить, добавить bnGrossBalance
+            const bnNewMf = FixedNumber.from(stake_mf).mulUnsafe(FixedNumber.from(management_fee * 1e4).divUnsafe(fn1e4)).mulUnsafe(FixedNumber.from(timestamp - ts)).divUnsafe(FixedNumber.from(360 * 24 * 3600));
 
             const fnNetBalance = bnGrossBalance.subUnsafe(bnNewMf).subUnsafe(FixedNumber.from(stake_profit).mulUnsafe(FixedNumber.from(success_fee * 1e4)).divUnsafe(fn1e4));
 

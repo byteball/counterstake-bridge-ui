@@ -93,7 +93,7 @@ export const BuyAssistantSharesModal = ({ size, side, network, block, assistant_
           if (stakeAmount !== undefined) {
 
             const received_stake_amount = stakeAmount * 10 ** stake_asset_decimals;
-            const gross_balance = stake_balance + stake_balance_in_work; // - received_stake_amount;
+            const gross_balance = stake_balance + stake_balance_in_work;
             const scaled_mf = (timestamp - ts) / (360 * 24 * 3600) * management_fee;
             const delta_mf = gross_balance * scaled_mf;
             const mf = stake_mf + delta_mf;
@@ -178,7 +178,7 @@ export const BuyAssistantSharesModal = ({ size, side, network, block, assistant_
 
               const bnGrossBalance = FixedNumber.from(stake_balance).addUnsafe(FixedNumber.from(stake_balance_in_work));
 
-              const bnNewMf = FixedNumber.from(stake_mf).mulUnsafe(FixedNumber.from(management_fee * 1e4).divUnsafe(fn1e4)).mulUnsafe(FixedNumber.from(timestamp - ts)).divUnsafe(FixedNumber.from(360 * 24 * 3600)); //TODO: Исправить, добавить bnGrossBalance
+              const bnNewMf = FixedNumber.from(stake_mf).mulUnsafe(FixedNumber.from(management_fee * 1e4).divUnsafe(fn1e4)).mulUnsafe(FixedNumber.from(timestamp - ts)).divUnsafe(FixedNumber.from(360 * 24 * 3600));
 
               const bnNetBalance = bnGrossBalance.subUnsafe(bnNewMf).subUnsafe(FixedNumber.from(stake_profit).mulUnsafe(FixedNumber.from(success_fee * 1e4)).divUnsafe(fn1e4));
 
@@ -295,7 +295,7 @@ export const BuyAssistantSharesModal = ({ size, side, network, block, assistant_
 
   const linkBuySharesForExportAssistants = isVisible && network === "Obyte" && side === "export" ? generateLink({ amount: stakeAmount * 10 ** stake_asset_decimals, aa: assistant_aa, asset: stake_asset, data: { buy_shares: 1 } }) : undefined;
 
-  const isValid = (shares_supply > 0 || side === "export") ? (stakeAmount && Number(stakeAmount) > 0) || (imageAmount && Number(imageAmount) > 0) : stakeAmount && Number(stakeAmount) > 0 && imageAmount && Number(imageAmount) > 0; // TODO: Исправить для EVM
+  const isValid = (!BigNumber.from(String(shares_supply)).isZero() || side === "export") ? (stakeAmount && Number(stakeAmount) > 0) || (imageAmount && Number(imageAmount) > 0) : stakeAmount && Number(stakeAmount) > 0 && imageAmount && Number(imageAmount) > 0;
 
   const openModal = (e) => {
     stopPropagation(e);

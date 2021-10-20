@@ -89,7 +89,7 @@ export const AssistantList = () => {
   }).map(([bridge, assistants]) => {
     const assistantsWithAPY = assistants.map(a => ({
       ...a,
-      APY: getAPY({ stake_balance: a.network === "Obyte" ? a.stake_balance + a.stake_balance_in_work : BigNumber.from(a.stake_balance || "0").add(a.stake_balance_in_work || "0").toString(), image_balance: a.network === "Obyte" ? a.image_balance + a.image_balance_in_work : BigNumber.from(a.image_balance || "0").add(a.image_balance_in_work || "0").toString(), shares_supply: a.shares_supply, side: a.side, network: a.network, first_claim_date: a.first_claim_date }),
+      APY: getAPY(a),
       totalBalanceInUSD: calcUsdBalance(a)
     }))
     return [bridge, assistantsWithAPY]
