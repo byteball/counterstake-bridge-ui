@@ -2,7 +2,7 @@ import { Col, Row, Tag, Form, Select, message } from "antd"
 import { isEqual } from "lodash";
 import { useDispatch, useSelector } from "react-redux";
 
-import { AssistantsFiltersModal } from "modals/AssistantsFiltersModal/AssistantsFiltersModal"
+import { AssistantFiltersModal } from "modals/AssistantFiltersModal/AssistantFiltersModal";
 import { nativeSymbols } from "nativeSymbols";
 import { selectHomeTokens } from "store/assistantsSlice";
 import { selectSortType, setAssistantsSort, addFilter as addFilterInStore, removeFilter as removeFilterInStore, selectFilters } from "store/settingsSlice";
@@ -32,7 +32,7 @@ export const AssistantFiltersAndSort = () => {
 
   return <Row style={{ marginBottom: 35 }}>
     <Col lg={{ span: 18 }} sm={{ span: 16 }} xs={{ span: 24 }}>
-      <AssistantsFiltersModal addFilter={addFilter} removeFilter={removeFilter} />
+      <AssistantFiltersModal addFilter={addFilter} removeFilter={removeFilter} />
       <div style={{ paddingTop: 10, paddingBottom: 10 }}>
         {filters.length > 0 && <>
           {filters.map(({ value, type }) => <Tag key={type + value} style={{ marginBottom: 5 }} closable onClose={() => removeFilter({ value, type })}>{type.replace("_asset", " token")}: {type === "manager" ? (value in descOfAssistants ? descOfAssistants[value].name : value) : (type === "home_asset" ? nativeSymbols[value.split("_")[1]] || homeTokens[value.split("_")[0]] || value.split("_")[0] : value)}</Tag>)}

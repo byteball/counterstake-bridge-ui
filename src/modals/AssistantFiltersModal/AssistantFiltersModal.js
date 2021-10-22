@@ -11,7 +11,7 @@ import { selectFilters } from "store/settingsSlice";
 
 // const environment = process.env.REACT_APP_ENVIRONMENT;
 
-export const AssistantsFiltersModal = ({ removeFilter, addFilter = () => { } }) => {
+export const AssistantFiltersModal = ({ removeFilter, addFilter = () => { } }) => {
   const [isVisible, setIsVisible] = useState(false);
   const refs = useRef([]);
   
