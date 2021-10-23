@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { loadAssistants } from './thunks/loadAssistants';
 import { getBalanceOfObyteWallet } from './thunks/getBalanceOfObyteWallet';
-import { updateAllEvmAssistant } from './thunks/updateAllEvmAssistant';
+import { updateAllEvmAssistants } from './thunks/updateAllEvmAssistants';
 import { updateEvmAssistant } from './thunks/updateEvmAssistant';
 
 export const assistantsSlice = createSlice({
@@ -142,7 +142,7 @@ export const assistantsSlice = createSlice({
     [getBalanceOfObyteWallet.fulfilled]: (state, { payload }) => {
       state.balanceOfMyObyteWallet = payload;
     },
-    [updateAllEvmAssistant.fulfilled]: (state, { payload: updatedInfo }) => {
+    [updateAllEvmAssistants.fulfilled]: (state, { payload: updatedInfo }) => {
       updatedInfo?.forEach(({ bridge_aa, ...u }) => {
         const assistant = state.assistants[bridge_aa]?.find((a) => a.assistant_aa === u.assistant_aa);
 

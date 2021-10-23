@@ -25,9 +25,9 @@ export const getAPY = ({ ts, stake_balance, stake_balance_in_work, stake_mf, sta
       const sf = Math.max(Math.floor(stake_profit * success_fee), 0);
       const balance = gross_balance - mf - sf;
 
-      const growPrice = balance / shares_supply;
+      const priceGrowth = balance / shares_supply;
 
-      return ((growPrice ** degree) - 1) * 100;
+      return ((priceGrowth ** degree) - 1) * 100;
     } else {
       if (stake_balance === 0 || image_balance === 0) return 0
 
@@ -57,9 +57,9 @@ export const getAPY = ({ ts, stake_balance, stake_balance_in_work, stake_mf, sta
 
       const bnNetBalance = bnGrossBalance.subUnsafe(bnNewMf).subUnsafe(FixedNumber.from(stake_profit).mulUnsafe(FixedNumber.from(success_fee * 1e4)).divUnsafe(fn1e4));
 
-      const growPrice = FixedNumber.from(bnNetBalance).divUnsafe(FixedNumber.from(bnSharesSupply.toString())).toString();
+      const priceGrowth = FixedNumber.from(bnNetBalance).divUnsafe(FixedNumber.from(bnSharesSupply.toString())).toString();
 
-      return ((Number(growPrice) ** degree) - 1) * 100
+      return ((Number(priceGrowth) ** degree) - 1) * 100
     } else {
       const bnStakeBalance = BigNumber.from(stake_balance);
       const bnImageBalance = BigNumber.from(image_balance);
@@ -78,9 +78,9 @@ export const getAPY = ({ ts, stake_balance, stake_balance_in_work, stake_mf, sta
       const bnImageNetBalance = bnImageGrossBalance.subUnsafe(bnImageNewMf).subUnsafe(FixedNumber.from(image_profit).isNegative ? FixedNumber.from("0") : FixedNumber.from(success_fee * 1e4).divUnsafe(fn1e4).mulUnsafe(FixedNumber(image_profit))).toString();
 
       const sqrtMul = sqrt(FixedNumber.from(bnStakeNetBalance).mulUnsafe(FixedNumber.from(bnImageNetBalance)).toString()).toString()
-      const growPrice = FixedNumber.from(sqrtMul).divUnsafe(FixedNumber.from(bnSharesSupply.toString())).toString();
+      const priceGrowth = FixedNumber.from(sqrtMul).divUnsafe(FixedNumber.from(bnSharesSupply.toString())).toString();
 
-      return ((growPrice ** degree) - 1) * 100;
+      return ((priceGrowth ** degree) - 1) * 100;
     }
   }
 }

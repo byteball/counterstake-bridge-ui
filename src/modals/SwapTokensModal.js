@@ -196,17 +196,17 @@ export const SwapTokensModal = ({ block, size, assistant_aa, network, swap_fee, 
       provider = window.ethereum && new ethers.providers.Web3Provider(window.ethereum);
       signer = window.ethereum && provider.getSigner();
 
-      const assistantContact = new ethers.Contract(assistant_aa, importAssistantAbi, signer);
+      const assistantContract = new ethers.Contract(assistant_aa, importAssistantAbi, signer);
 
       // send: call swapImage2Stake/swapStake2Image
       let res;
       if (typeGetToken === "stake") {
-        res = await assistantContact.swapImage2Stake(bnSendAmount);
+        res = await assistantContract.swapImage2Stake(bnSendAmount);
       } else {
         if (sendToken.asset === ethers.constants.AddressZero) {
-          res = await assistantContact.swapStake2Image(bnSendAmount, { value: bnSendAmount });
+          res = await assistantContract.swapStake2Image(bnSendAmount, { value: bnSendAmount });
         } else {
-          res = await assistantContact.swapStake2Image(bnSendAmount);
+          res = await assistantContract.swapStake2Image(bnSendAmount);
         }
       }
       await res?.wait();

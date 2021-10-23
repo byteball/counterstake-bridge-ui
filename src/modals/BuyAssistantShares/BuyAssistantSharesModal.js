@@ -32,7 +32,7 @@ export const BuyAssistantSharesModal = ({ size, side, network, block, assistant_
   const [stakeAmount, setStakeAmount] = useState();
   const [imageAmount, setImageAmount] = useState();
   const [sharesAmount, setSharesAmount] = useState();
-  const [minimizedFee, setMinimizedFee] = useState(side === "import" && !BigNumber.from(String(shares_supply)).isZero());
+  const [isProportional, setIsProportional] = useState(side === "import" && !BigNumber.from(String(shares_supply)).isZero());
   const [inFocus, setInFocus] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
   const [linkBuySharesForImportAssistants, setLinkBuySharesForImportAssistants] = useState();
@@ -247,7 +247,7 @@ export const BuyAssistantSharesModal = ({ size, side, network, block, assistant_
       if (f(ev.target.value) <= stake_asset_decimals) {
         if (!isNaN(ev.target.value) && Number(ev.target.value) <= 1e20) {
           setStakeAmount(ev.target.value);
-          if (minimizedFee) {
+          if (isProportional) {
             if (Number(ev.target.value) > 0) {
               const gross_stake_balance = Number(stake_balance) + Number(stake_balance_in_work);
               const gross_image_balance = Number(image_balance) + Number(image_balance_in_work);
@@ -271,7 +271,7 @@ export const BuyAssistantSharesModal = ({ size, side, network, block, assistant_
       if (f(ev.target.value) <= image_asset_decimals) {
         if (!isNaN(ev.target.value) && Number(ev.target.value) <= 1e20) {
           setImageAmount((ev.target.value));
-          if (minimizedFee) {
+          if (isProportional) {
             if (Number(ev.target.value) > 0) {
               const gross_stake_balance = Number(stake_balance) + Number(stake_balance_in_work);
               const gross_image_balance = Number(image_balance) + Number(image_balance_in_work);
@@ -414,22 +414,22 @@ export const BuyAssistantSharesModal = ({ size, side, network, block, assistant_
       }
 
       // send: create contact
-      const assistantContact = new ethers.Contract(assistant_aa, side === "export" ? exportAssistantAbi : importAssistantAbi, signer);
+      const assistantContract = new ethers.Contract(assistant_aa, side === "export" ? exportAssistantAbi : importAssistantAbi, signer);
 
       // send: call buyShares
 
       let res;
       if (side === "export") {
         if (stake_asset === ethers.constants.AddressZero) {
-          res = await assistantContact.buyShares(bnStakeAmount, { value: bnStakeAmount });
+          res = await assistantContract.buyShares(bnStakeAmount, { value: bnStakeAmount });
         } else {
-          res = await assistantContact.buyShares(bnStakeAmount);
+          res = await assistantContract.buyShares(bnStakeAmount);
         }
       } else {
         if (stake_asset === ethers.constants.AddressZero) {
-          res = await assistantContact.buyShares(bnStakeAmount, bnImageAmount, { value: bnStakeAmount });
+          res = await assistantContract.buyShares(bnStakeAmount, bnImageAmount, { value: bnStakeAmount });
         } else {
-          res = await assistantContact.buyShares(bnStakeAmount, bnImageAmount);
+          res = await assistantContract.buyShares(bnStakeAmount, bnImageAmount);
         }
       }
       await res?.wait();
@@ -447,8 +447,8 @@ export const BuyAssistantSharesModal = ({ size, side, network, block, assistant_
     }
   }
 
-  const changeChecked = (e) => {
-    setMinimizedFee(e.target.checked);
+  const proportionalCheckboxChanged = (e) => {
+    setIsProportional(e.target.checked);
     const gross_stake_balance = Number(stake_balance) + Number(stake_balance_in_work);
     const gross_image_balance = Number(image_balance) + Number(image_balance_in_work);
 
@@ -485,7 +485,7 @@ export const BuyAssistantSharesModal = ({ size, side, network, block, assistant_
             <Input placeholder="Amount in imported tokens" onChange={imageHandleChange} value={imageAmount} suffix={image_asset_symbol} />
           </Form.Item>}
 
-          {side === "import" && !BigNumber.from(String(shares_supply)).isZero() && <div style={{ marginBottom: 20 }}><Checkbox checked={minimizedFee} onChange={changeChecked}>Proportional amounts</Checkbox></div>}
+          {side === "import" && !BigNumber.from(String(shares_supply)).isZero() && <div style={{ marginBottom: 20 }}><Checkbox checked={isProportional} onChange={proportionalCheckboxChanged}>Proportional amounts</Checkbox></div>}
 
           <div><b>You get:</b></div>
           <Form.Item>

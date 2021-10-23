@@ -252,11 +252,11 @@ export const RedeemAssistantSharesModal = ({ size, assistant_aa, swap_fee, block
 
       // send: create contact
       signer = window.ethereum && provider.getSigner();
-      const assistantContact = new ethers.Contract(assistant_aa, side === "export" ? exportAssistantAbi : importAssistantAbi, signer);
+      const assistantContract = new ethers.Contract(assistant_aa, side === "export" ? exportAssistantAbi : importAssistantAbi, signer);
 
       // send: call redeemShares
 
-      const res = await assistantContact.redeemShares(bnSharesAmount);
+      const res = await assistantContract.redeemShares(bnSharesAmount);
       await res?.wait();
       dispatch(updateEvmAssistant(assistant_aa));
     } catch (e) {

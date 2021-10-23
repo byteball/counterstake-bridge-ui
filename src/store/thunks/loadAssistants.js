@@ -38,7 +38,7 @@ export const loadAssistants = createAsyncThunk(
       balanceOfMyObyteWallet = await obyte.api.getBalances([destAddress.Obyte]).then((b) => b?.[destAddress.Obyte]);
     }
 
-    const getObyteAssistantsSharesDecimals = [];
+    const shareDecimalsGetters = [];
     const newWatches = [];
     const forwards = [];
 
@@ -69,7 +69,7 @@ export const loadAssistants = createAsyncThunk(
       }
 
       if (a.network === "Obyte") {
-        getObyteAssistantsSharesDecimals.push(getDecimals(a.shares_asset, "Obyte").then((decimals) => a.shares_decimals = decimals))
+        shareDecimalsGetters.push(getDecimals(a.shares_asset, "Obyte").then((decimals) => a.shares_decimals = decimals))
         newWatches.push(obyte.justsaying("light/new_aa_to_watch", { aa: a.assistant_aa }))
       }
 
@@ -92,17 +92,17 @@ export const loadAssistants = createAsyncThunk(
 
     // get assistants state vars
     const obyteAssistantsStateVars = {};
-    const getObyteAssistantsStateVars = obyteAssistants.map(address => obyte.api.getAaStateVars({ address }).then(state => obyteAssistantsStateVars[address] = state));
+    const obyteAssistantsStateVarsGetters = obyteAssistants.map(address => obyte.api.getAaStateVars({ address }).then(state => obyteAssistantsStateVars[address] = state));
 
     // get assistants params
     const obyteAssistantsParams = {};
-    const getObyteAssistantsParams = obyteAssistants.map(address => obyte.api.getDefinition(address).then(definition => obyteAssistantsParams[address] = definition[1].params));
+    const obyteAssistantsParamsGetters = obyteAssistants.map(address => obyte.api.getDefinition(address).then(definition => obyteAssistantsParams[address] = definition[1].params));
 
 
 
     // get evm assistants info
     const evmAssistantInfo = {};
-    const getInfoEVM = evm_contracts.map(({ assistant_aa, network, side, stake_asset, image_asset, shares_asset, home_network, home_asset }) => {
+    const infoEVMGetters = evm_contracts.map(({ assistant_aa, network, side, stake_asset, image_asset, shares_asset, home_network, home_asset }) => {
 
       const assistant_contract = new ethers.Contract(assistant_aa, side === "import" ? importAssistantAbi : exportAssistantAbi, providers[network]);
 
@@ -125,13 +125,13 @@ export const loadAssistants = createAsyncThunk(
     })
 
     const stakeRates = {}
-    const getStakeRates = assistantsList.map((a) => fetchExchangeRateInUSD(a.network, a.stake_asset, true).then(rate => stakeRates[a.assistant_aa] = rate));
+    const stakeRatesGetters = assistantsList.map((a) => fetchExchangeRateInUSD(a.network, a.stake_asset, true).then(rate => stakeRates[a.assistant_aa] = rate));
 
     const imageRates = {}
-    const getImageRates = assistantsList.map((a) => fetchExchangeRateInUSD(a.home_network, a.home_asset, true).then(rate => imageRates[a.assistant_aa] = rate));
+    const ImageRatesGetters = assistantsList.map((a) => fetchExchangeRateInUSD(a.home_network, a.home_asset, true).then(rate => imageRates[a.assistant_aa] = rate));
 
 
-    const [obyteAssistantsBalances] = await Promise.all([obyte.api.getBalances(obyteAssistants), ...getInfoEVM, ...getObyteAssistantsParams, ...getObyteAssistantsStateVars, ...getObyteAssistantsSharesDecimals, ...newWatches, ...getStakeRates, ...getImageRates]);
+    const [obyteAssistantsBalances] = await Promise.all([obyte.api.getBalances(obyteAssistants), ...infoEVMGetters, ...obyteAssistantsParamsGetters, ...obyteAssistantsStateVarsGetters, ...shareDecimalsGetters, ...newWatches, ...stakeRatesGetters, ...ImageRatesGetters]);
 
     assistantsList.forEach(async (a) => {
       
@@ -223,10 +223,10 @@ export const loadAssistants = createAsyncThunk(
     })
 
     //  get stake decimals and symbol
-    const getStakeAssetAndDecimals = [];
+    const stakeAssetAndDecimalsGetters = [];
     assistantsList.forEach((a) => {
       if (a.side === "import" && a.stake_asset_symbol === null && a.stake_asset_decimals === null) {
-        getStakeAssetAndDecimals.push(Promise.all([
+        stakeAssetAndDecimalsGetters.push(Promise.all([
           getSymbol(a.stake_asset, a.network),
           getDecimals(a.stake_asset, a.network)
         ]).then(([symbol, decimals]) => {
@@ -236,7 +236,7 @@ export const loadAssistants = createAsyncThunk(
       }
     })
 
-    await Promise.all(getStakeAssetAndDecimals);
+    await Promise.all(stakeAssetAndDecimalsGetters);
 
     const assistants = groupBy(assistantsList, "bridge_aa");
 

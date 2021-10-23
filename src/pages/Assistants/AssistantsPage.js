@@ -11,7 +11,7 @@ import { loadAssistants } from "store/thunks/loadAssistants";
 import { getBalanceOfObyteWallet } from "store/thunks/getBalanceOfObyteWallet";
 import { AssistantList } from "./AssistantList";
 import styles from "./AssistantsPage.module.css";
-import { updateAllEvmAssistant } from "store/thunks/updateAllEvmAssistant";
+import { updateAllEvmAssistants } from "store/thunks/updateAllEvmAssistants";
 import { selectAssistants } from "store/assistantsSlice";
 
 const { Title } = Typography;
@@ -49,7 +49,7 @@ export const AssistantsPage = () => {
   useEffect(() => {
     let intervalId;
     if (inited && Object.keys(assistants).length > 0) {
-      intervalId = setInterval(() => dispatch(updateAllEvmAssistant()), 1000 * 60 * 3)
+      intervalId = setInterval(() => dispatch(updateAllEvmAssistants()), 1000 * 60 * 3)
     }
     return () => {
       if (intervalId) clearInterval(intervalId);

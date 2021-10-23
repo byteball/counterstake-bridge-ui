@@ -5,8 +5,8 @@ import { isArray } from "lodash";
 import { providers } from "services/evm";
 import { getBalance } from "utils/getBalance";
 
-export const updateAllEvmAssistant = createAsyncThunk(
-  'update/updateAllEvmAssistant',
+export const updateAllEvmAssistants = createAsyncThunk(
+  'update/updateAllEvmAssistants',
   async (_, { getState }) => {
     const { assistants: { assistants }, destAddress } = getState();
 
