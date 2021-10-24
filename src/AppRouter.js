@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Router, Route } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -17,9 +17,13 @@ import {
   GovernancePage,
   AssistantsPage
 } from "./pages";
+import { loadAssistants } from "store/thunks/loadAssistants";
+import { selectDirections } from "store/directionsSlice";
 
 
 const AppRouter = () => {
+  const [inited, setInited] = useState(false);
+  
   const dispatch = useDispatch();
   
   useEffect(()=>{
@@ -27,6 +31,18 @@ const AppRouter = () => {
   }, [])
 
   const isOpenConnection = useSelector(selectConnectionStatus);
+  const directions = useSelector(selectDirections);
+
+  useEffect(() => {
+    if (Object.keys(directions).length > 0 && !inited) {
+      dispatch(loadAssistants())
+      setInited(true);
+    }
+  }, [directions]);
+
+  useEffect(() => {
+    setInited(false);
+  }, [isOpenConnection])
 
   useEffect(() => {
     dispatch(getChainId());

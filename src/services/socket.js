@@ -224,11 +224,23 @@ const handleEventAssistant = (result) => {
   const state = store.getState();
   const dispatch = store.dispatch;
 
+  const transfers = state.transfers;
   const { subject, body } = result[1];
   const { aa_address, updatedStateVars, balances, unit, trigger_initial_address } = body;
   const author = trigger_initial_address || unit?.authors?.[0]?.address;
 
   if (subject === "light/aa_request") {
+    if (body?.unit?.messages) {
+      const payload = getAAPayload(body?.unit?.messages);
+      if (payload.txid && payload.txts && payload.sender_address) {
+        const transfer = transfers.find(t => t.txid === payload.txid);
+        if (transfer){
+          dispatch(updateTransferStatus({ txid: payload.txid, status: 'claimed', claim_txid: unit?.unit, claimant_address: body.aa_address }));
+        } else {
+          console.log(`claim of somebody else's transfer ${payload.txid} in ${unit?.unit}`)
+        }
+      }
+    }
     if (state.destAddress?.Obyte && author && author === state.destAddress?.Obyte) {
       message.info("We have received your request. The interface will update after the transaction stabilizes", 5)
     }
@@ -249,7 +261,7 @@ const handleEventAssistant = (result) => {
       store.dispatch(updateObyteAssistant({ address: aa_address, diff, balances }))
     }
 
-    if (state.destAddress?.Obyte && body.trigger_initial_address === state.destAddress?.Obyte){
+    if (state.destAddress?.Obyte && body.trigger_initial_address === state.destAddress?.Obyte) {
       dispatch(getBalanceOfObyteWallet())
     }
   }
