@@ -1,6 +1,7 @@
 import { addTransfer, claimMyself, updateTransferStatus, withdrawalConfirmed } from "store/transfersSlice";
 import obyte from "obyte";
 import { isEmpty } from "lodash";
+import { message } from "antd";
 
 import { startWatchingDestinationBridge } from "./watch";
 import { sendTransferToGA } from "./transfer";
@@ -9,7 +10,7 @@ import { closeConnection, openConnection } from "store/connectionSlice";
 import { getClaim } from "utils/getClaim";
 import { changeGovernanceState } from "store/governanceSlice";
 import { reqToCreateForward, saveForward, updateObyteAssistant } from "store/assistantsSlice";
-import { message } from "antd";
+import { getBalanceOfObyteWallet } from "store/thunks/getBalanceOfObyteWallet";
 
 const environment = process.env.REACT_APP_ENVIRONMENT;
 const forwardFactory = process.env.REACT_APP_IMPORT_FROWARD_FACTORY;
@@ -221,16 +222,17 @@ const handleEventGovernance = (result) => {
 
 const handleEventAssistant = (result) => {
   const state = store.getState();
+  const dispatch = store.dispatch;
+
   const { subject, body } = result[1];
   const { aa_address, updatedStateVars, balances, unit, trigger_initial_address } = body;
   const author = trigger_initial_address || unit?.authors?.[0]?.address;
 
   if (subject === "light/aa_request") {
-    
-    if (state.destAddress?.Obyte && author && author === state.destAddress?.Obyte){
+    if (state.destAddress?.Obyte && author && author === state.destAddress?.Obyte) {
       message.info("We have received your request. The interface will update after the transaction stabilizes", 5)
     }
-  } else if (subject === "light/aa_response" && !state.assistants.forwards.includes(aa_address)){
+  } else if (subject === "light/aa_response" && !state.assistants.forwards.includes(aa_address)) {
     let diff = {};
 
     if (updatedStateVars) {
@@ -244,7 +246,11 @@ const handleEventAssistant = (result) => {
     }
 
     if (!isEmpty(diff)) {
-      store.dispatch(updateObyteAssistant({ address: aa_address, diff, balances}))
+      store.dispatch(updateObyteAssistant({ address: aa_address, diff, balances }))
+    }
+
+    if (state.destAddress?.Obyte && body.trigger_initial_address === state.destAddress?.Obyte){
+      dispatch(getBalanceOfObyteWallet())
     }
   }
 }
@@ -265,13 +271,18 @@ client.onConnect(() => {
 
   client.subscribe((err, result) => {
     if (err) return null;
+
+    const state = store.getState();
+
     const { subject, body } = result[1];
 
     if (!subject || !trackedSubjects.includes(subject)) {
+      if (subject === "joint" && state.destAddress?.Obyte) {
+        dispatch(getBalanceOfObyteWallet())
+      }
       return null;
     }
 
-    const state = store.getState();
     const aa_address = body?.aa_address;
 
     if (aa_address === state.governance.activeGovernance) {

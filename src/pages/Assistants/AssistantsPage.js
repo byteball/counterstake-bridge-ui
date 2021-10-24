@@ -8,11 +8,11 @@ import { selectDestAddress } from "store/destAddressSlice";
 import { selectDirections } from "store/directionsSlice";
 import { WhatIsAssistant } from "components/WhatIsAssistant/WhatIsAssistant";
 import { loadAssistants } from "store/thunks/loadAssistants";
-import { getBalanceOfObyteWallet } from "store/thunks/getBalanceOfObyteWallet";
 import { AssistantList } from "./AssistantList";
 import styles from "./AssistantsPage.module.css";
 import { updateAllEvmAssistants } from "store/thunks/updateAllEvmAssistants";
 import { selectAssistants } from "store/assistantsSlice";
+import client from "services/socket";
 
 const { Title } = Typography;
 
@@ -37,14 +37,10 @@ export const AssistantsPage = () => {
   }, [isOpenConnection])
 
   useEffect(() => {
-    let intervalId;
-    if (addresses.Obyte) {
-      intervalId = setInterval(() => dispatch(getBalanceOfObyteWallet()), 1000 * 60 * 5)
+    if (addresses?.Obyte && isOpenConnection){
+      client.justsaying("light/new_address_to_watch", addresses?.Obyte)
     }
-    return () => {
-      if (intervalId) clearInterval(intervalId);
-    }
-  }, [addresses.Obyte]);
+  }, [addresses.Obyte, isOpenConnection]);
 
   useEffect(() => {
     let intervalId;

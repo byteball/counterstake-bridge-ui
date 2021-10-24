@@ -33,7 +33,7 @@ export const AssistantItem = memo((props) => {
 
   useCollapsible(ref, isOpen);
 
-  const mySharesBalance = (network !== "Obyte" ? my_balance_of_shares : balanceOfObyteWallet?.[shares_asset]?.stable) || 0;
+  const mySharesBalance = (network !== "Obyte" ? my_balance_of_shares : balanceOfObyteWallet?.[shares_asset]?.total) || 0;
 
   const SHProps = {
     network,
