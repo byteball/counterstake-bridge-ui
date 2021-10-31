@@ -11,15 +11,11 @@ export const assistantsSlice = createSlice({
     assistants: {},
     forwards: [],
     obyteAssistants: [],
-    invite: null,
     balanceOfMyObyteWallet: {},
     homeTokens: {},
     managers: []
   },
   reducers: {
-    setInvite: (state, action) => {
-      state.invite = action.payload;
-    },
     reqToCreateForward: (state, action) => {
       const assistant_address = action.payload;
       const bridges = Object.keys(state.assistants);
@@ -155,10 +151,9 @@ export const assistantsSlice = createSlice({
   }
 });
 
-export const { setInvite, reqToCreateForward, saveForward, updateObyteAssistant } = assistantsSlice.actions;
+export const { reqToCreateForward, saveForward, updateObyteAssistant } = assistantsSlice.actions;
 
 export const selectAssistants = state => state.assistants.assistants;
-export const selectInvite = state => state.assistants.invite;
 export const selectBalanceOfObyteWallet = state => state.assistants.balanceOfMyObyteWallet;
 export const selectHomeTokens = state => state.assistants.homeTokens;
 export const selectManagers = state => state.assistants.managers;

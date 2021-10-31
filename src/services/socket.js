@@ -14,23 +14,8 @@ import { getBalanceOfObyteWallet } from "store/thunks/getBalanceOfObyteWallet";
 
 const environment = process.env.REACT_APP_ENVIRONMENT;
 const forwardFactory = process.env.REACT_APP_IMPORT_FROWARD_FACTORY;
-class Client extends obyte.Client {
-  constructor(url, options) {
-    super(url, options);
-  }
 
-  subscribe(cb1) {
-    this.client.subscribe((...msg) => {
-      cb1(...msg);
-      this.client.forward && this.client.forward(...msg);
-    });
-  }
-  forward(cb) {
-    this.client.forward = cb;
-  }
-}
-
-let client = new Client(
+let client = new obyte.Client(
   environment === 'devnet' ? 'ws://localhost:6611' : `wss://obyte.org/bb${environment === 'testnet' ? "-test" : ""}`,
   {
     testnet: environment === 'testnet',
@@ -272,14 +257,6 @@ client.onConnect(() => {
   const heartbeat = setInterval(function () {
     client.api.heartbeat();
   }, 10 * 1000);
-
-  client.requestAsync = (command, params) =>
-    new Promise((resolve, reject) => {
-      client.client.request(command, params, (e, result) => {
-        if (e) return reject(e);
-        resolve(result);
-      });
-    });
 
   client.subscribe((err, result) => {
     if (err) return null;

@@ -1,14 +1,11 @@
 import { Button, Form, Input, Typography, Modal, message, Tooltip, Checkbox } from "antd"
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { randomBytes } from "crypto";
 import { ethers, BigNumber, FixedNumber } from "ethers";
 import QRButton from "obyte-qr-button";
 
 import { generateLink } from "utils";
-import { generatePaymentMessage, get_shares } from "./helpers";
-import texto from "utils/texto";
-import { selectInvite } from "store/assistantsSlice";
+import { get_shares } from "./helpers";
 import { CreateForward } from "./components/CreateForward";
 import { changeNetwork } from "utils/changeNetwork";
 import { selectChainId } from "store/chainIdSlice";
@@ -19,6 +16,7 @@ import { addTokenToTracked, selectAddedTokens } from "store/addedTokensSlice";
 import { sqrt } from "pages/Assistants/helpers/sqrt.js";
 import { ChangeAddressModal } from "modals/ChangeAddressModal";
 import { updateEvmAssistant } from "store/thunks/updateEvmAssistant";
+import browserChatInstance from "utils/browserChat";
 
 const { Paragraph } = Typography;
 const f = (x) => (~(x + "").indexOf(".") ? (x + "").split(".")[1].length : 0);
@@ -28,7 +26,7 @@ const environment = process.env.REACT_APP_ENVIRONMENT;
 const MAX_UINT256 = ethers.BigNumber.from(2).pow(256).sub(1);
 const fn1e4 = FixedNumber.from(1e4);
 
-export const BuyAssistantSharesModal = ({ size, side, network, block, assistant_aa, forward, forward_status, shares_decimals, shares_supply = 0, shares_symbol, shares_asset, exponent = 1, stake_balance = 0, stake_asset_symbol = "STAKE", stake_asset_decimals, stake_balance_in_work = 0, stake_asset, image_asset, image_asset_decimals, image_balance = 0, image_asset_symbol = "IMPORTED", image_balance_in_work = 0, stake_mf = 0, stake_sf = 0, ts, success_fee, management_fee, stake_profit = 0, image_profit = 0, image_mf = 0, image_sf = 0, stake_share }) => {
+export default ({ size, side, network, block, assistant_aa, forward, forward_status, shares_decimals, shares_supply = 0, shares_symbol, shares_asset, exponent = 1, stake_balance = 0, stake_asset_symbol = "STAKE", stake_asset_decimals, stake_balance_in_work = 0, stake_asset, image_asset, image_asset_decimals, image_balance = 0, image_asset_symbol = "IMPORTED", image_balance_in_work = 0, stake_mf = 0, stake_sf = 0, ts, success_fee, management_fee, stake_profit = 0, image_profit = 0, image_mf = 0, image_sf = 0, stake_share }) => {
   const [stakeAmount, setStakeAmount] = useState();
   const [imageAmount, setImageAmount] = useState();
   const [sharesAmount, setSharesAmount] = useState();
@@ -36,12 +34,10 @@ export const BuyAssistantSharesModal = ({ size, side, network, block, assistant_
   const [inFocus, setInFocus] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
   const [linkBuySharesForImportAssistants, setLinkBuySharesForImportAssistants] = useState();
-
   const [pendingTokens, setPendingTokens] = useState({});
   const stakeInputRef = useRef(null);
   const dispatch = useDispatch();
 
-  const invite = useSelector(selectInvite);
   const chainId = useSelector(selectChainId);
   const addresses = useSelector(selectDestAddress);
   const addedTokens = useSelector(selectAddedTokens);
@@ -140,17 +136,11 @@ export const BuyAssistantSharesModal = ({ size, side, network, block, assistant_
 
           setSharesAmount(amountPurchasedShares);
 
-          const paymentJsonBase64 = generatePaymentMessage({ payments });
+          const paymentJsonBase64 = browserChatInstance.generatePaymentString({ payments });
 
           const message = `Buy ≈${amountPurchasedShares} ${shares_symbol || "shares"} \n[buy-shares](payment:${paymentJsonBase64})`;
 
-          const requestId = randomBytes(32).toString('base64');
-
-          texto.on('pairing', msg => {
-            if (msg.body.pairing_secret === requestId) msg.reply(message);
-          });
-
-          setLinkBuySharesForImportAssistants(`${invite}#${requestId}`);
+          setLinkBuySharesForImportAssistants(browserChatInstance.sendMessageAfterPairing(message));
         }
       } else {
         const bnStakeAmount = (stakeAmount && Number(stakeAmount)) ? ethers.utils.parseUnits(Number(stakeAmount).toFixed(stake_asset_decimals), stake_asset_decimals) : 0;
@@ -223,7 +213,6 @@ export const BuyAssistantSharesModal = ({ size, side, network, block, assistant_
 
             const bnStakeNewMf = FixedNumber.from(stake_mf).addUnsafe(bnStakeGrossBalance.mulUnsafe(FixedNumber.from(management_fee * 1e4)).divUnsafe(fn1e4).mulUnsafe(FixedNumber.from(timestamp - ts)).divUnsafe(FixedNumber.from(360 * 24 * 3600)));
             const bnImageNewMf = FixedNumber.from(image_mf).addUnsafe(bnImageGrossBalance.mulUnsafe(FixedNumber.from(management_fee * 1e4)).divUnsafe(fn1e4).mulUnsafe(FixedNumber.from(timestamp - ts)).divUnsafe(FixedNumber.from(360 * 24 * 3600)));
-
 
             const bnStakeNetBalance = bnStakeGrossBalance.subUnsafe(bnStakeNewMf).subUnsafe(FixedNumber.from(stake_profit).isNegative ? FixedNumber.from("0") : FixedNumber.from(success_fee * 1e4).divUnsafe(fn1e4).mulUnsafe(FixedNumber(stake_profit)));
             const bnImageNetBalance = bnImageGrossBalance.subUnsafe(bnImageNewMf).subUnsafe(FixedNumber.from(image_profit).isNegative ? FixedNumber.from("0") : FixedNumber.from(success_fee * 1e4).divUnsafe(fn1e4).mulUnsafe(FixedNumber(image_profit)));
@@ -491,7 +480,7 @@ export const BuyAssistantSharesModal = ({ size, side, network, block, assistant_
           <Form.Item>
             <Input placeholder="Amount in shares" disabled={true} value={isValid ? sharesAmount : undefined} suffix={shares_symbol} />
           </Form.Item>
-          {network === "Obyte" ? <QRButton type="primary" href={side === "export" ? linkBuySharesForExportAssistants : linkBuySharesForImportAssistants} disabled={!isValid}>Send {isValid ? <> {Number(stakeAmount) > 0 && <span>{+Number(stakeAmount).toFixed(6)} {stakeAmount && stake_asset_symbol} {Number(imageAmount) > 0 && "and"} </span>} {Number(imageAmount) > 0 && <span>{+Number(imageAmount).toFixed(6)} {imageAmount && image_asset_symbol}</span>}</> : null} </QRButton> : <Button type="primary" onClick={buySharesFromEVM} disabled={!isValid}>Send {isValid ? <> {Number(stakeAmount) > 0 && <span>{+Number(stakeAmount).toFixed(6)} {stakeAmount && stake_asset_symbol} {Number(imageAmount) > 0 && "and"} </span>} {Number(imageAmount) > 0 && <span>{+Number(imageAmount).toFixed(6)} {imageAmount && image_asset_symbol}</span>}</> : null}</Button>}
+          {network === "Obyte" ? <QRButton type="primary" href={side === "export" ? linkBuySharesForExportAssistants : linkBuySharesForImportAssistants} disabled={!isValid}>Send&nbsp;{isValid ? <> {Number(stakeAmount) > 0 && <span>{+Number(stakeAmount).toFixed(6)} {stakeAmount && stake_asset_symbol} {Number(imageAmount) > 0 && "and"} </span>} {Number(imageAmount) > 0 && <span>{+Number(imageAmount).toFixed(6)} {imageAmount && image_asset_symbol}</span>}</> : null} </QRButton> : <Button type="primary" onClick={buySharesFromEVM} disabled={!isValid}>Send {isValid ? <> {Number(stakeAmount) > 0 && <span>{+Number(stakeAmount).toFixed(6)} {stakeAmount && stake_asset_symbol} {Number(imageAmount) > 0 && "and"} </span>} {Number(imageAmount) > 0 && <span>{+Number(imageAmount).toFixed(6)} {imageAmount && image_asset_symbol}</span>}</> : null}</Button>}
         </Form>
       </>}
     </Modal>

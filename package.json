@@ -8,7 +8,6 @@
     "@fortawesome/fontawesome-svg-core": "^1.2.35",
     "@fortawesome/free-brands-svg-icons": "^5.15.3",
     "@fortawesome/react-fontawesome": "^0.1.14",
-    "@obyte/ocore": "0.2.93",
     "@reduxjs/toolkit": "^1.5.1",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
@@ -17,7 +16,8 @@
     "craco-less": "^1.17.1",
     "ethers": "^5.2.0",
     "lodash": "^4.17.21",
-    "obyte": "^0.1.14",
+    "obyte": "^0.1.18",
+    "obyte-browser-chat": "^0.0.5",
     "obyte-qr-button": "^0.0.10",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
@@ -29,9 +29,7 @@
     "react-scripts": "4.0.3",
     "redux": "^4.1.0",
     "redux-persist": "^6.0.0",
-    "secp256k1": "3.8.0",
-    "web-vitals": "^1.0.1",
-    "wif": "2.0.6"
+    "web-vitals": "^1.0.1"
   },
   "scripts": {
     "start": "craco start",

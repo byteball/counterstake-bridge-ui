@@ -1,14 +1,13 @@
 import { ArrowDownOutlined, ArrowUpOutlined, EditOutlined } from "@ant-design/icons";
 import { BigNumber, FixedNumber } from "@ethersproject/bignumber";
-import { Card, Col, Row, Space, Statistic, Grid, Tooltip } from "antd";
-import { memo, useRef, useState } from "react";
+import { Card, Col, Row, Space, Statistic, Grid, Tooltip, Button } from "antd";
+import { memo, useRef, useState, lazy, Suspense } from "react";
 import useCollapsible from "react-hook-collapse";
 import { useSelector } from "react-redux";
 
 import { InfoTooltip } from "components/InfoTooltip/InfoTooltip";
 import { ShowDecimalsValue } from "components/ShowDecimalsValue/ShowDecimalsValue";
 import { useWindowSize } from "hooks/useWindowSize";
-import { BuyAssistantSharesModal } from "modals/BuyAssistantShares/BuyAssistantSharesModal";
 import { RedeemAssistantSharesModal } from "modals/RedeemAssistantShares/RedeemAssistantSharesModal";
 import { descOfAssistants } from "./descOfAssistants";
 import { AssistantManagerModal } from "modals/AssistantManagerModal";
@@ -17,6 +16,8 @@ import { getExplorerLink } from "utils/getExplorerLink";
 import { selectDestAddress } from "store/destAddressSlice";
 import { selectBalanceOfObyteWallet } from "store/assistantsSlice";
 import { ChangeAddressModal } from "modals/ChangeAddressModal";
+
+const BuyAssistantSharesModal = lazy(() => import('modals/BuyAssistantShares/BuyAssistantSharesModal'));
 
 const max_display_decimals = 5;
 
@@ -48,9 +49,9 @@ export const AssistantItem = memo((props) => {
       imagePrice = Number(image_balance) !== 0 && Number(image_balance) !== 0 ? (image_balance / (stake_balance + stake_balance_in_work)) * 10 ** (stake_asset_decimals - image_asset_decimals) : 0;
       stakePrice = Number(image_balance) !== 0 && Number(image_balance) !== 0 ? (stake_balance / (image_balance + image_balance_in_work)) * 10 ** (image_asset_decimals - stake_asset_decimals) : 0;
     } else {
-      const fnImageBalance = FixedNumber.from(image_balance); 
+      const fnImageBalance = FixedNumber.from(image_balance);
       const fnStakeBalance = FixedNumber.from(stake_balance);
-      imagePrice = !fnImageBalance.isZero() && !fnStakeBalance.isZero() ? fnImageBalance.divUnsafe(fnStakeBalance.addUnsafe(FixedNumber.from(stake_balance_in_work))).mulUnsafe(FixedNumber.from(String(10 ** (stake_asset_decimals - image_asset_decimals)))).toString(): "0";
+      imagePrice = !fnImageBalance.isZero() && !fnStakeBalance.isZero() ? fnImageBalance.divUnsafe(fnStakeBalance.addUnsafe(FixedNumber.from(stake_balance_in_work))).mulUnsafe(FixedNumber.from(String(10 ** (stake_asset_decimals - image_asset_decimals)))).toString() : "0";
       stakePrice = !fnImageBalance.isZero() && !fnStakeBalance.isZero() ? fnStakeBalance.divUnsafe(fnImageBalance.addUnsafe(FixedNumber.from(image_balance_in_work))).mulUnsafe(FixedNumber.from(String(10 ** (image_asset_decimals - stake_asset_decimals)))).toString() : "0";
     }
   }
@@ -105,7 +106,9 @@ export const AssistantItem = memo((props) => {
             <Col lg={{ span: 5 }} md={{ span: 8 }} sm={{ span: 24 }} xs={{ span: 24 }}>
               <div style={{ display: "flex", justifyContent: screens.xs ? "center" : "flex-end", marginTop: width < 768 ? 15 : 0 }}>
                 <Space direction={"vertical"} style={{ width: "100%" }}>
-                  <BuyAssistantSharesModal block={!screens.xs} size={width < 400 ? "small" : "medium"} {...props} />
+                  <Suspense fallback={<Button block={!screens.xs} size={width < 400 ? "small" : "medium"} disabled={true}>Buy shares</Button>}>
+                    <BuyAssistantSharesModal block={!screens.xs} size={width < 400 ? "small" : "medium"} {...props} />
+                  </Suspense>
                   <RedeemAssistantSharesModal block={!screens.xs} size={width < 400 ? "small" : "medium"} {...props} />
                   {side === "import" && <SwapTokensModal block={!screens.xs} size={width < 400 ? "small" : "medium"} {...props} />}
                 </Space>

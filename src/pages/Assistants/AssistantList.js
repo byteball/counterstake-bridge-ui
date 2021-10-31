@@ -7,6 +7,7 @@ import { useSelector } from "react-redux"
 import { useLocation } from "react-router";
 
 import { selectAssistants } from "store/assistantsSlice"
+import { selectConnectionStatus } from "store/connectionSlice";
 import { selectDirections } from "store/directionsSlice";
 import { selectFilters, selectSortType } from "store/settingsSlice";
 import { AssistantFiltersAndSort } from "./AssistantFiltersAndSort";
@@ -19,6 +20,7 @@ export const AssistantList = () => {
   const assistants = useSelector(selectAssistants);
   const directions = useSelector(selectDirections);
   const sortingType = useSelector(selectSortType);
+  const isOpenConnection = useSelector(selectConnectionStatus);
   const filters = useSelector(selectFilters);
   const [currentAssistant, setCurrentAssistant] = useState();
 
@@ -59,7 +61,7 @@ export const AssistantList = () => {
     }
   }, [location.hash, currentAssistant, assistants]);
 
-  if (Object.keys(directions).length === 0 || Object.keys(assistants).length === 0) return <div style={{ display: "flex", justifyContent: "center", alignItems: "center", margin: 50, flexDirection: "column" }}>
+  if (Object.keys(directions).length === 0 || Object.keys(assistants).length === 0 || !isOpenConnection) return <div style={{ display: "flex", justifyContent: "center", alignItems: "center", margin: 50, flexDirection: "column" }}>
     <Spin size="large" style={{ transform: "scale(1.5)" }} />
     <div style={{ padding: 10, fontSize: 16 }}>Loading...</div>
   </div>

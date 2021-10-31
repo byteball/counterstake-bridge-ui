@@ -25,8 +25,8 @@ const AppRouter = () => {
   const [inited, setInited] = useState(false);
   
   const dispatch = useDispatch();
-  
-  useEffect(()=>{
+
+  useEffect(() => {
     dispatch(getBridgesParams());
   }, [])
 

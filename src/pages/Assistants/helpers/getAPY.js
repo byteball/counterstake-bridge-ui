@@ -5,11 +5,13 @@ import { sqrt } from "./sqrt";
 
 const fn1e4 = FixedNumber.from(1e4);
 
-export const getAPY = ({ ts, stake_balance, stake_balance_in_work, stake_mf, stake_profit, image_balance, image_balance_in_work, image_profit, image_mf, shares_supply, side, network, first_claim_date, management_fee, success_fee }) => {
+export const getAPY = ({ ts, stake_balance = 0, stake_balance_in_work = 0, stake_mf = 0, stake_profit = 0, image_balance = 0, image_balance_in_work = 0, image_profit = 0, image_mf = 0, shares_supply = 0, side, network, first_claim_date, management_fee, success_fee }) => {
   if (!first_claim_date) return 0;
 
-  const timestamp = Number(Date.now() / 1000).toFixed(0);
-  const t = moment.unix(+timestamp).diff(moment.utc(first_claim_date), "seconds");
+  const timestamp = moment.utc().unix();
+  const first_claim_date_in_unix = moment.utc(first_claim_date).unix();
+  const t = timestamp - first_claim_date_in_unix;
+
   const T = 31536000;
   const degree = T / t;
 
