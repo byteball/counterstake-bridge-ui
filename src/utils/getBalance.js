@@ -7,7 +7,7 @@ import obyte from "services/socket";
 export const getBalance = async (address, asset, network) => {
   try {
     if (network === "Obyte") {
-      return await obyte.api.getBalances([address]).then((b) => b?.[address]?.[asset]?.stable) || 0;
+      return await obyte.api.getBalances([address]).then((b) => b?.[address]?.[asset]?.total) || 0;
     } else {
       if (asset === ethers.constants.AddressZero) {
         return await providers[network].getBalance(address).then(value => BigNumber.from(value).toString());

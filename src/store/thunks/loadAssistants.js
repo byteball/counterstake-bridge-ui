@@ -147,10 +147,10 @@ export const loadAssistants = createAsyncThunk(
         a.shares_supply = obyteAssistantsStateVars[a.assistant_aa]?.shares_supply || 0;
         a.exponent = a.cacheParams?.exponent || 1;
 
-        a.stake_balance = a.cacheBalance?.[a.stake_asset]?.stable || 0;
-        a.image_balance = a.cacheBalance?.[a.image_asset]?.stable || 0;
+        a.stake_balance = a.cacheBalance?.[a.stake_asset]?.total || 0;
+        a.image_balance = a.cacheBalance?.[a.image_asset]?.total || 0;
 
-        a.stakeRateInUSD = stakeRates[a.assistant_aa]; //21//await fetchExchangeRateInUSD(a.network, a.stake_asset, true);
+        a.stakeRateInUSD = stakeRates[a.assistant_aa];
 
         if (a.side === "import") {
 
