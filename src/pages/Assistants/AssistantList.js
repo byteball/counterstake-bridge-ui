@@ -1,6 +1,4 @@
-import { BigNumber, FixedNumber } from "@ethersproject/bignumber";
 import { Spin, Typography } from "antd";
-import { ethers } from "ethers";
 import { flattenDepth, groupBy } from "lodash";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux"
@@ -109,7 +107,7 @@ export const AssistantList = () => {
       }
       return <div key={bridge + "-" + i}>
         {sortingType === "bridge" && assistantsByBridge.length > 0 && <Title level={4}>{bridge_label}</Title>}
-        {assistantsByBridge.map((info, index) => {
+        {assistantsByBridge.map((info) => {
           return <div key={info.assistant_aa}>
             {sortingType !== "bridge" && <Title level={5}>{bridge_label}</Title>}
             <AssistantItem  {...info} />
@@ -150,17 +148,17 @@ const calcUsdBalance = (a) => {
     }
   } else {
     if (side === "export") {
-      const grossBalanceInSmallestUnits = BigNumber.from(a.stake_balance).add(a.stake_balance_in_work).toString()
-      const grossBalanceInFullUnits = ethers.utils.formatUnits(grossBalanceInSmallestUnits, a.stake_asset_decimals);
-      return FixedNumber.from(grossBalanceInFullUnits).mulUnsafe(FixedNumber.from(String(stakeRateInUSD))).toString();
+      const grossBalanceInSmallestUnits = Number(a.stake_balance) + Number(a.stake_balance_in_work);
+      const grossBalanceInFullUnits = grossBalanceInSmallestUnits / 10 ** a.stake_asset_decimals;
+      return grossBalanceInFullUnits * stakeRateInUSD;
     } else {
-      const stakeGrossBalanceInSmallestUnits = BigNumber.from(a.stake_balance).add(a.stake_balance_in_work).toString()
-      const stakeGrossBalanceInFullUnits = ethers.utils.formatUnits(stakeGrossBalanceInSmallestUnits, a.stake_asset_decimals);
+      const stakeGrossBalanceInSmallestUnits = Number(a.stake_balance) + Number(a.stake_balance_in_work);
+      const stakeGrossBalanceInFullUnits = stakeGrossBalanceInSmallestUnits / 10 ** a.stake_asset_decimals;
 
-      const imageGrossBalanceInSmallestUnits = BigNumber.from(a.image_balance).add(a.image_balance_in_work).toString()
-      const imageGrossBalanceInFullUnits = ethers.utils.formatUnits(imageGrossBalanceInSmallestUnits, a.image_asset_decimals);
+      const imageGrossBalanceInSmallestUnits = Number(a.image_balance) + Number(a.image_balance_in_work);
+      const imageGrossBalanceInFullUnits = imageGrossBalanceInSmallestUnits / 10 ** a.image_asset_decimals;
 
-      return FixedNumber.from(stakeGrossBalanceInFullUnits).mulUnsafe(FixedNumber.from(String(stakeRateInUSD))).addUnsafe(FixedNumber.from(imageGrossBalanceInFullUnits).mulUnsafe(FixedNumber.from(String(imageRateInUSD)))).toString()
+      return stakeGrossBalanceInFullUnits * stakeRateInUSD + imageGrossBalanceInFullUnits * imageRateInUSD;
     }
   }
 }

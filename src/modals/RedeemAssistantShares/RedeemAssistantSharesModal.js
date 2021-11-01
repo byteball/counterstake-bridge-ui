@@ -1,6 +1,6 @@
 import { Input, Form, Button, Modal, Result, Alert, message, Tooltip } from "antd";
 import { useEffect, useState } from "react";
-import { ethers, BigNumber, FixedNumber } from "ethers";
+import { ethers, BigNumber } from "ethers";
 import { useDispatch, useSelector } from "react-redux";
 import QRButton from "obyte-qr-button";
 
@@ -18,9 +18,8 @@ const f = (x) => (~(x + "").indexOf(".") ? (x + "").split(".")[1].length : 0);
 const environment = process.env.REACT_APP_ENVIRONMENT;
 
 const MAX_UINT256 = ethers.BigNumber.from(2).pow(256).sub(1);
-const fn1e4 = FixedNumber.from(1e4);
 
-export const RedeemAssistantSharesModal = ({ size, assistant_aa, swap_fee, block, side, network, exponent = 1, ts, management_fee, success_fee, shares_asset, shares_supply = 0, shares_symbol, shares_decimals, stake_profit = 0, stake_mf = 0, stake_asset, stake_asset_symbol, stake_asset_decimals, stake_balance = 0, stake_balance_in_work = 0, stake_sf, image_asset, image_asset_symbol, image_asset_decimals, image_balance = 0, image_balance_in_work = 0, image_mf = 0, image_sf = 0, image_profit }) => {
+export const RedeemAssistantSharesModal = ({ size, assistant_aa, swap_fee, block, side, network, exponent = 1, ts, management_fee, success_fee, shares_asset, shares_supply = 0, shares_symbol, shares_decimals = 0, stake_profit = 0, stake_mf = 0, stake_asset, stake_asset_symbol, stake_asset_decimals = 0, stake_balance = 0, stake_balance_in_work = 0, stake_sf = 0, image_asset, image_asset_symbol, image_asset_decimals = 0, image_balance = 0, image_balance_in_work = 0, image_mf = 0, image_sf = 0, image_profit = 0 }) => {
   const [stakeAmount, setStakeAmount] = useState();
   const [imageAmount, setImageAmount] = useState();
   const [sharesAmount, setSharesAmount] = useState();
@@ -70,120 +69,43 @@ export const RedeemAssistantSharesModal = ({ size, assistant_aa, swap_fee, block
 
   useEffect(() => {
     if (isVisible && Number(sharesAmount)) {
-      if (network === "Obyte") {
-        const share_of_shares = (sharesAmount * 10 ** shares_decimals) / shares_supply;
-        const remaining_share_of_shares = 1 - share_of_shares;
-        const remaining_share_of_assets = remaining_share_of_shares ** exponent;
-        const share_of_assets = 1 - remaining_share_of_assets;
+      const share_of_shares = (sharesAmount * 10 ** Number(shares_decimals)) / Number(shares_supply);
+      const remaining_share_of_shares = 1 - share_of_shares;
+      const remaining_share_of_assets = remaining_share_of_shares ** Number(exponent);
+      const share_of_assets = 1 - remaining_share_of_assets;
 
-        if (sharesAmount * 10 ** shares_decimals < shares_supply) {
-          if (side === "export") {
-            const gross_balance = stake_balance + stake_balance_in_work; // - received_stake_amount;
-            const scaled_mf = (timestamp - ts) / (360 * 24 * 3600) * management_fee;
-            const delta_mf = gross_balance * scaled_mf;
-            const mf = stake_mf + delta_mf;
-            const sf = Math.max(Math.floor(stake_profit * success_fee), 0);
-            const balance = gross_balance - mf - sf;
-            const risk_free_balance = balance - stake_balance_in_work;
-            const stake_amount = Math.floor(share_of_assets * risk_free_balance);
+      if (sharesAmount * 10 ** shares_decimals < shares_supply) {
+        if (side === "export") {
+          const gross_balance = Number(stake_balance) + Number(stake_balance_in_work);
+          const scaled_mf = (timestamp - Number(ts)) / (360 * 24 * 3600) * Number(management_fee);
+          const delta_mf = gross_balance * scaled_mf;
+          const mf = Number(stake_mf) + delta_mf;
+          const sf = Math.max(Math.floor(Number(stake_profit) * Number(success_fee)), 0);
+          const balance = gross_balance - mf - sf;
+          const risk_free_balance = Number(balance) - Number(stake_balance_in_work);
+          const stake_amount = Math.floor(share_of_assets * risk_free_balance);
 
-            setStakeAmount(+Number(stake_amount / 10 ** stake_asset_decimals).toFixed(stake_asset_decimals));
-          } else {
-            const gross_stake_balance = (stake_balance - (stake_asset === "base" ? 1e4 : 0)) + stake_balance_in_work;
-            const gross_image_balance = image_balance + image_balance_in_work;
-
-            const sBalance = gross_stake_balance - stake_mf - stake_sf;
-            const iBalance = gross_image_balance - image_mf - image_sf;
-
-            const risk_free_stake_balance = sBalance - stake_balance_in_work;
-            const risk_free_image_balance = iBalance - image_balance_in_work;
-
-            const stake_amount = Math.floor(share_of_assets * risk_free_stake_balance * (1 - swap_fee));
-            const image_amount = Math.floor(share_of_assets * risk_free_image_balance * (1 - swap_fee));
-
-            setStakeAmount(+Number(stake_amount / 10 ** stake_asset_decimals).toFixed(stake_asset_decimals));
-            setImageAmount(+Number(image_amount / 10 ** image_asset_decimals).toFixed(image_asset_decimals));
-          }
-
-          setError();
+          setStakeAmount(+Number(stake_amount / 10 ** stake_asset_decimals).toFixed(stake_asset_decimals));
         } else {
-          setError("The quantity will exceed the issued")
+          const gross_stake_balance = (Number(stake_balance) - (stake_asset === "base" ? 1e4 : 0)) + Number(stake_balance_in_work);
+          const gross_image_balance = Number(image_balance) + Number(image_balance_in_work);
+
+          const sBalance = gross_stake_balance - Number(stake_mf) - Number(stake_sf);
+          const iBalance = gross_image_balance - Number(image_mf) - Number(image_sf);
+
+          const risk_free_stake_balance = sBalance - Number(stake_balance_in_work);
+          const risk_free_image_balance = iBalance - Number(image_balance_in_work);
+
+          const stake_amount = Math.floor(share_of_assets * risk_free_stake_balance * (1 - Number(swap_fee)));
+          const image_amount = Math.floor(share_of_assets * risk_free_image_balance * (1 - Number(swap_fee)));
+
+          setStakeAmount(+Number(stake_amount / 10 ** stake_asset_decimals).toFixed(stake_asset_decimals));
+          setImageAmount(+Number(image_amount / 10 ** image_asset_decimals).toFixed(image_asset_decimals));
         }
-      } else { // EVM NETWORK
-        const bnSharesAmount = (sharesAmount && Number(sharesAmount)) ? ethers.utils.parseUnits(Number(sharesAmount).toFixed(shares_decimals), shares_decimals) : BigNumber.from("0");
 
-        if (!(sharesAmount && Number(sharesAmount)) || bnSharesAmount.lt(BigNumber.from(shares_supply))) {
-
-          if (side === "export") {
-            const bnGrossBalance = FixedNumber.from(stake_balance).addUnsafe(FixedNumber.from(stake_balance_in_work));
-
-            const bnNewMf = FixedNumber.from(stake_mf).mulUnsafe(FixedNumber.from(management_fee * 1e4).divUnsafe(fn1e4)).mulUnsafe(FixedNumber.from(timestamp - ts)).divUnsafe(FixedNumber.from(360 * 24 * 3600));
-
-            const fnNetBalance = bnGrossBalance.subUnsafe(bnNewMf).subUnsafe(FixedNumber.from(stake_profit).mulUnsafe(FixedNumber.from(success_fee * 1e4)).divUnsafe(fn1e4));
-
-            const intNetBalance = fnNetBalance.ceiling().toString().split(".")[0];
-
-            if (!fnNetBalance.isNegative()) {
-              if (BigNumber.from(intNetBalance).gt(stake_balance_in_work)) {
-
-                const bnAmount = fnNetBalance.subUnsafe(FixedNumber.from(stake_balance_in_work)).mulUnsafe(FixedNumber.from(BigNumber.from(shares_supply).pow(exponent).toString()).subUnsafe(FixedNumber.from(BigNumber.from(shares_supply).sub(bnSharesAmount.toString()).pow(String(exponent)).toString()))).divUnsafe(FixedNumber.from(BigNumber.from(shares_supply).pow(exponent).toString()))
-                const intAmount = bnAmount.ceiling().toString().split(".")[0];
-
-                const bigSharesAmount = ethers.utils.formatUnits(BigNumber.from(intAmount), stake_asset_decimals);
-                setStakeAmount(bigSharesAmount);
-              } else {
-                setError("Negative risk-free net balance")
-              }
-
-              setError();
-            } else {
-              setError("Negative net balance")
-            }
-          } else { // import
-
-            const bnStakeGrossBalance = FixedNumber.from(stake_balance).addUnsafe(FixedNumber.from(stake_balance_in_work));
-            const bnImageGrossBalance = FixedNumber.from(image_balance).addUnsafe(FixedNumber.from(image_balance_in_work));
-
-            const bnStakeNewMf = FixedNumber.from(stake_mf).addUnsafe(bnStakeGrossBalance.mulUnsafe(FixedNumber.from(management_fee * 1e4)).divUnsafe(fn1e4).mulUnsafe(FixedNumber.from(timestamp - ts)).divUnsafe(FixedNumber.from(360 * 24 * 3600)));
-            const bnImageNewMf = FixedNumber.from(image_mf).addUnsafe(bnImageGrossBalance.mulUnsafe(FixedNumber.from(management_fee * 1e4)).divUnsafe(fn1e4).mulUnsafe(FixedNumber.from(timestamp - ts)).divUnsafe(FixedNumber.from(360 * 24 * 3600)));
-
-            const bnStakeNetBalance = bnStakeGrossBalance.subUnsafe(bnStakeNewMf).subUnsafe(FixedNumber.from(stake_profit).isNegative ? FixedNumber.from("0") : FixedNumber.from(success_fee * 1e4).divUnsafe(fn1e4).mulUnsafe(FixedNumber(stake_profit)));
-            const bnImageNetBalance = bnImageGrossBalance.subUnsafe(bnImageNewMf).subUnsafe(FixedNumber.from(image_profit).isNegative ? FixedNumber.from("0") : FixedNumber.from(success_fee * 1e4).divUnsafe(fn1e4).mulUnsafe(FixedNumber(image_profit)));
-
-            if (!bnStakeNetBalance.isNegative()) {
-              if (!bnImageNetBalance.isNegative()) {
-                if (BigNumber.from(bnStakeNetBalance).gt(stake_balance_in_work)) {
-                  if (BigNumber.from(bnImageNetBalance).gt(image_balance_in_work)) {
-
-                    let bnStakeAssetAmount = bnStakeNetBalance.subUnsafe(FixedNumber.from(stake_balance_in_work)).mulUnsafe(FixedNumber.from(BigNumber.from(shares_supply).pow(exponent).toString()).subUnsafe(FixedNumber.from(BigNumber.from(shares_supply).sub(bnSharesAmount.toString()).pow(String(exponent)).toString()))).divUnsafe(FixedNumber.from(BigNumber.from(shares_supply).pow(exponent).toString()))
-                    bnStakeAssetAmount = bnStakeAssetAmount.subUnsafe(bnStakeAssetAmount.mulUnsafe(FixedNumber.from(String(swap_fee)))).ceiling().toString().split(".")[0];
-
-                    let bnImageAssetAmount = bnImageNetBalance.subUnsafe(FixedNumber.from(image_balance_in_work)).mulUnsafe(FixedNumber.from(BigNumber.from(shares_supply).pow(exponent).toString()).subUnsafe(FixedNumber.from(BigNumber.from(shares_supply).sub(bnSharesAmount.toString()).pow(String(exponent)).toString()))).divUnsafe(FixedNumber.from(BigNumber.from(shares_supply).pow(exponent).toString()))
-                    bnImageAssetAmount = bnImageAssetAmount.subUnsafe(bnImageAssetAmount.mulUnsafe(FixedNumber.from(String(swap_fee)))).ceiling().toString().split(".")[0];
-
-                    const bnStakeAmountInBig = ethers.utils.formatUnits(BigNumber.from(bnStakeAssetAmount), stake_asset_decimals).toString();
-                    const bnImageAmountInBig = ethers.utils.formatUnits(BigNumber.from(bnImageAssetAmount), image_asset_decimals).toString();
-
-                    setStakeAmount(bnStakeAmountInBig);
-                    setImageAmount(bnImageAmountInBig);
-                    setError();
-                  } else {
-                    setError("Negative risk-free net balance in imported asset")
-                  }
-                } else {
-                  setError("Negative risk-free net balance in stake asset")
-                }
-              } else {
-                setError("Negative net balance in imported asset")
-              }
-            } else {
-              setError("Negative net balance in stake asset")
-            }
-          }
-
-        } else {
-          setError("The quantity will exceed the issued")
-        }
+        setError();
+      } else {
+        setError("The quantity will exceed the issued")
       }
     }
   }, [sharesAmount, stake_mf, stake_sf, image_mf, image_sf, stake_balance, image_balance, stake_profit, image_profit]);
@@ -291,7 +213,7 @@ export const RedeemAssistantSharesModal = ({ size, assistant_aa, swap_fee, block
 
         {error ? <Form.Item><Alert type="error" message={error} /></Form.Item> : null}
 
-        {network === "Obyte" ? <QRButton type="primary" href={link} onClick={redeemSharesFromEVM} disabled={!isValidAction}>Send {isValidAction ? <> {sharesAmount} {shares_symbol || shares_asset.slice(0, 6) + "..."}</> : ""}</QRButton> : <Button type="primary" onClick={redeemSharesFromEVM} disabled={!isValidAction}>Send {isValidAction ? <> {sharesAmount} {shares_symbol || shares_asset.slice(0, 6) + "..."}</> : ""}</Button>}
+        {network === "Obyte" ? <QRButton type="primary" href={link} onClick={redeemSharesFromEVM} disabled={!isValidAction}>Send{isValidAction ? <>&nbsp;{sharesAmount} {shares_symbol || shares_asset.slice(0, 6) + "..."}</> : ""}</QRButton> : <Button type="primary" onClick={redeemSharesFromEVM} disabled={!isValidAction}>Send{isValidAction ? <>&nbsp;{sharesAmount} {shares_symbol || shares_asset.slice(0, 6) + "..."}</> : ""}</Button>}
 
       </Form> : <Result
         status="error"

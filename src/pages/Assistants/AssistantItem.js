@@ -1,5 +1,4 @@
 import { ArrowDownOutlined, ArrowUpOutlined, EditOutlined } from "@ant-design/icons";
-import { BigNumber, FixedNumber } from "@ethersproject/bignumber";
 import { Card, Col, Row, Space, Statistic, Grid, Tooltip, Button } from "antd";
 import { memo, useRef, useState, lazy, Suspense } from "react";
 import useCollapsible from "react-hook-collapse";
@@ -45,15 +44,8 @@ export const AssistantItem = memo((props) => {
   let stakePrice;
 
   if (side === "import") {
-    if (network === "Obyte") {
-      imagePrice = Number(image_balance) !== 0 && Number(image_balance) !== 0 ? (image_balance / (stake_balance + stake_balance_in_work)) * 10 ** (stake_asset_decimals - image_asset_decimals) : 0;
-      stakePrice = Number(image_balance) !== 0 && Number(image_balance) !== 0 ? (stake_balance / (image_balance + image_balance_in_work)) * 10 ** (image_asset_decimals - stake_asset_decimals) : 0;
-    } else {
-      const fnImageBalance = FixedNumber.from(image_balance);
-      const fnStakeBalance = FixedNumber.from(stake_balance);
-      imagePrice = !fnImageBalance.isZero() && !fnStakeBalance.isZero() ? fnImageBalance.divUnsafe(fnStakeBalance.addUnsafe(FixedNumber.from(stake_balance_in_work))).mulUnsafe(FixedNumber.from(String(10 ** (stake_asset_decimals - image_asset_decimals)))).toString() : "0";
-      stakePrice = !fnImageBalance.isZero() && !fnStakeBalance.isZero() ? fnStakeBalance.divUnsafe(fnImageBalance.addUnsafe(FixedNumber.from(image_balance_in_work))).mulUnsafe(FixedNumber.from(String(10 ** (image_asset_decimals - stake_asset_decimals)))).toString() : "0";
-    }
+    imagePrice = Number(image_balance) !== 0 && Number(image_balance) !== 0 ? (Number(image_balance) / (Number(stake_balance) + Number(stake_balance_in_work))) * 10 ** (stake_asset_decimals - image_asset_decimals) : 0;
+    stakePrice = Number(image_balance) !== 0 && Number(image_balance) !== 0 ? (Number(stake_balance) / (Number(image_balance) + Number(image_balance_in_work))) * 10 ** (image_asset_decimals - stake_asset_decimals) : 0;
   }
 
   const padding = 24;
@@ -87,7 +79,7 @@ export const AssistantItem = memo((props) => {
             </Col>
             <Col lg={{ span: 6 }} md={{ span: 8 }} sm={{ span: 12 }} xs={{ span: 24 }} style={{ marginBottom: width < 576 ? 15 : 0 }}>
               <Statistic
-                value={<><ShowDecimalsValue value={network === "Obyte" ? stake_balance + stake_balance_in_work : BigNumber.from(stake_balance).add(stake_balance_in_work).toString()} decimals={stake_asset_decimals} {...SHProps} /> <span style={{ fontSize: 12 }}>{stake_asset_symbol}</span> {side === "import" && <span><br /> <ShowDecimalsValue value={network === "Obyte" ? image_balance + image_balance_in_work : BigNumber.from(image_balance).add(image_balance_in_work).toString()} decimals={image_asset_decimals} {...SHProps} /> <span style={{ fontSize: 12 }}>{image_asset_symbol}</span></span>}</>}
+                value={<><ShowDecimalsValue value={Number(stake_balance) + Number(stake_balance_in_work)} decimals={stake_asset_decimals} {...SHProps} /> <span style={{ fontSize: 12 }}>{stake_asset_symbol}</span> {side === "import" && <span><br /> <ShowDecimalsValue value={Number(image_balance) + Number(image_balance_in_work)} decimals={image_asset_decimals} {...SHProps} /> <span style={{ fontSize: 12 }}>{image_asset_symbol}</span></span>}</>}
                 formatter={formatter}
                 title={<span style={{ fontWeight: 200 }}>Balances {(totalBalanceInUSD && Number(totalBalanceInUSD) >= 0.01) ? <span style={{ opacity: 0.7 }}>≈${Number(totalBalanceInUSD).toFixed(2)}</span> : null} <InfoTooltip title="The full capital contributed to the pool. Larger capital allows the pool to claim larger transfers." /></span>}
                 valueStyle={{ overflow: "hidden", width: "100%" }}

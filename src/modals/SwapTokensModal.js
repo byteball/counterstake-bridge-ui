@@ -2,7 +2,7 @@ import { SwapOutlined } from "@ant-design/icons";
 import { Alert, Button, Form, Input, message, Modal, Tooltip } from "antd";
 import QRButton from "obyte-qr-button";
 import { chainIds } from "chainIds";
-import { ethers, BigNumber, FixedNumber } from "ethers";
+import { ethers, BigNumber } from "ethers";
 import { isEmpty } from "lodash";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -17,7 +17,6 @@ import { updateEvmAssistant } from "store/thunks/updateEvmAssistant";
 
 const f = (x) => (~(x + "").indexOf(".") ? (x + "").split(".")[1].length : 0);
 const MAX_UINT256 = BigNumber.from(2).pow(256).sub(1);
-const fn1e4 = FixedNumber.from(1e4);
 
 const environment = process.env.REACT_APP_ENVIRONMENT;
 
@@ -40,8 +39,8 @@ export const SwapTokensModal = ({ block, size, assistant_aa, network, swap_fee, 
   const dispatch = useDispatch();
 
   useEffect(() => {
-    setImageToken({ type: "image", asset: image_asset, decimals: image_asset_decimals, symbol: image_asset_symbol, balance: image_balance, balance_in_work: image_balance_in_work, share: image_share, mf: image_mf, sf: image_sf, profit: image_profit });
-    setStakeToken({ type: "stake", asset: stake_asset, decimals: stake_asset_decimals, symbol: stake_asset_symbol, balance: stake_balance, balance_in_work: stake_balance_in_work, share: stake_share, mf: stake_mf, sf: stake_sf, profit: stake_profit });
+    setImageToken({ type: "image", asset: image_asset, decimals: Number(image_asset_decimals), symbol: image_asset_symbol, balance: Number(image_balance), balance_in_work: Number(image_balance_in_work), share: Number(image_share), mf: Number(image_mf), sf: Number(image_sf), profit: Number(image_profit) });
+    setStakeToken({ type: "stake", asset: stake_asset, decimals: Number(stake_asset_decimals), symbol: stake_asset_symbol, balance: Number(stake_balance), balance_in_work: Number(stake_balance_in_work), share: Number(stake_share), mf: Number(stake_mf), sf: Number(stake_sf), profit: Number(stake_profit) });
   }, [image_balance, stake_balance, image_balance_in_work, stake_balance_in_work, image_share, stake_share, image_mf, stake_mf, image_sf, stake_sf, image_profit, stake_profit])
 
   const sendToken = typeGetToken === "image" ? stakeToken : imageToken;
@@ -84,36 +83,31 @@ export const SwapTokensModal = ({ block, size, assistant_aa, network, swap_fee, 
         const risk_free_balance = getToken.balance - getToken.balance_in_work;
 
         const gross_balance = sendToken.balance + sendToken.balance_in_work;
-        const scaled_mf = (Math.trunc(Date.now() / 1000) - ts) / (360 * 24 * 3600) * management_fee;
+        const scaled_mf = (Math.trunc(Date.now() / 1000) - Number(ts)) / (360 * 24 * 3600) * Number(management_fee);
         const delta_mf = gross_balance * scaled_mf;
         const mf = sendToken.mf + delta_mf;
-        const sf = Math.max(Math.floor(sendToken.profit * success_fee), 0);
+        const sf = Math.max(Math.floor(sendToken.profit * Number(success_fee)), 0);
         const net_balance = gross_balance - mf - sf;
 
-        const amount = Math.floor(risk_free_balance * (1 - (net_balance / (net_balance + (sendAmount || 0) * 10 ** sendToken.decimals)) ** (sendToken.share / getToken.share)) * net_of_swap_fee);
-
+        const amount = Math.floor(risk_free_balance * (1 - (net_balance / (net_balance + (Number(sendAmount) || 0) * 10 ** sendToken.decimals)) ** (sendToken.share / getToken.share)) * net_of_swap_fee);
         setGetAmount(+Number(amount / 10 ** getToken.decimals).toFixed(getToken.decimals));
       } else { // EVM network
 
-        const bnSendGrossBalance = FixedNumber.from(sendToken.balance).addUnsafe(FixedNumber.from(sendToken.balance_in_work));
-        const bnGetGrossBalance = FixedNumber.from(getToken.balance).addUnsafe(FixedNumber.from(getToken.balance_in_work));
+        const sendGrossBalance = sendToken.balance + sendToken.balance_in_work;
+        const getGrossBalance = getToken.balance + getToken.balance_in_work;
 
-        const bnSendNewMf = FixedNumber.from(sendToken.mf).addUnsafe(bnSendGrossBalance.mulUnsafe(FixedNumber.from(management_fee * 1e4)).divUnsafe(fn1e4).mulUnsafe(FixedNumber.from(timestamp - ts)).divUnsafe(FixedNumber.from(360 * 24 * 3600)));
-        const bnGetNewMf = FixedNumber.from(getToken.mf).addUnsafe(bnGetGrossBalance.mulUnsafe(FixedNumber.from(management_fee * 1e4)).divUnsafe(fn1e4).mulUnsafe(FixedNumber.from(timestamp - ts)).divUnsafe(FixedNumber.from(360 * 24 * 3600)));
+        const sendNewMf = sendToken.mf + (sendGrossBalance * Number(management_fee) * (timestamp - Number(ts)) / (360 * 24 * 3600));
+        const getNewMf = getToken.mf + (getGrossBalance * Number(management_fee) * (timestamp - Number(ts)) / (360 * 24 * 3600));
 
-        const bnSendNetBalance = bnSendGrossBalance.subUnsafe(bnSendNewMf).subUnsafe(FixedNumber.from(sendToken.profit).isNegative ? FixedNumber.from("0") : FixedNumber.from(success_fee * 1e4).divUnsafe(fn1e4).mulUnsafe(FixedNumber(sendToken.profit)));
-        const bnGetNetBalance = bnGetGrossBalance.subUnsafe(bnGetNewMf).subUnsafe(FixedNumber.from(getToken.profit).isNegative ? FixedNumber.from("0") : FixedNumber.from(success_fee * 1e4).divUnsafe(fn1e4).mulUnsafe(FixedNumber(getToken.profit)));
+        const sendNetBalance = sendGrossBalance - sendNewMf - Math.max(sendToken.profit * success_fee, 0)
+        const getNetBalance = getGrossBalance - getNewMf - Math.max(getToken.profit * success_fee, 0)
 
+        if (sendNetBalance > 0) {
+          if (getNetBalance > 0) {
+            let getTokenAmount = (getNetBalance - getToken.balance_in_work) * (sendAmount * 10 ** sendToken.decimals) / (sendNetBalance + sendAmount * 10 ** sendToken.decimals)
+            getTokenAmount -= getTokenAmount * swap_fee;
 
-        if (!bnSendNetBalance.isNegative()) {
-          if (!bnGetNetBalance.isNegative()) {
-            const bnSendAmount = sendAmount && Number(sendAmount) > 0 ? ethers.utils.parseUnits(Number(sendAmount).toFixed(sendToken.decimals), sendToken.decimals) : BigNumber.from("0");
-
-            let bnGetTokenAmount = bnGetNetBalance.subUnsafe(FixedNumber.from(getToken.balance_in_work)).mulUnsafe(FixedNumber.from(bnSendAmount)).divUnsafe(bnSendNetBalance.addUnsafe(FixedNumber.from(bnSendAmount)));
-
-            bnGetTokenAmount = bnGetTokenAmount.subUnsafe(bnGetTokenAmount.mulUnsafe(FixedNumber.from(swap_fee * 1e4).divUnsafe(fn1e4))).ceiling().toString().split(".")[0];
-
-            setGetAmount(ethers.utils.formatUnits(bnGetTokenAmount.toString(), getToken.decimals, getToken.decimals))
+            setGetAmount(Number(getTokenAmount).toFixed(getToken.decimals) / 10 ** getToken.decimals)
 
             setError();
           } else {
@@ -246,8 +240,8 @@ export const SwapTokensModal = ({ block, size, assistant_aa, network, swap_fee, 
         </Form.Item>
         {error ? <Form.Item><Alert type="error" message={error} /></Form.Item> : null}
         <div style={{ display: "flex", justifyContent: "center" }}>
-          {network === "Obyte" ? <QRButton type="primary" href={link} onClick={swap} disabled={!isValidAction || Number(getAmount) <= 0}>Send{isValidAction ? <> {sendAmount} {sendToken.symbol}</> : ""}</QRButton>
-            : <Button type="primary" href={link} onClick={swap} disabled={!isValidAction || Number(getAmount) <= 0}>Send{isValidAction ? <> {sendAmount} {sendToken.symbol}</> : ""}</Button>}
+          {network === "Obyte" ? <QRButton type="primary" href={link} onClick={swap} disabled={!isValidAction || Number(getAmount) <= 0}>Send{isValidAction ? <>&nbsp;{sendAmount} {sendToken.symbol}</> : ""}</QRButton>
+            : <Button type="primary" href={link} onClick={swap} disabled={!isValidAction || Number(getAmount) <= 0}>Send{isValidAction ? <>&nbsp;{sendAmount} {sendToken.symbol}</> : ""}</Button>}
         </div>
       </Form>
     </Modal>
