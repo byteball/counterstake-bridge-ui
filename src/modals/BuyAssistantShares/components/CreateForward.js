@@ -13,7 +13,7 @@ export const CreateForward = ({ assistant_aa, forward_status }) => {
         create: 1,
         assistant: assistant_aa
       },
-      aa: process.env.REACT_APP_IMPORT_FROWARD_FACTORY
+      aa: process.env.REACT_APP_IMPORT_FORWARD_FACTORY
     });
   }
 

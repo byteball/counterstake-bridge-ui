@@ -11,10 +11,10 @@ import { getDecimals, getSymbol } from "utils";
 import { fetchExchangeRateInUSD } from "utils/fetchExchangeRateInUSD";
 import { getBalance } from "utils/getBalance";
 
-const forward_factory = process.env.REACT_APP_IMPORT_FROWARD_FACTORY;
+const forward_factory = process.env.REACT_APP_IMPORT_FORWARD_FACTORY;
 
 if (!forward_factory) {
-  console.error("env 'REACT_APP_IMPORT_FROWARD_FACTORY' not found")
+  console.error("env 'REACT_APP_IMPORT_FORWARD_FACTORY' not found")
 }
 
 export const loadAssistants = createAsyncThunk(
@@ -25,10 +25,10 @@ export const loadAssistants = createAsyncThunk(
 
     const assistantsList = await getPooledAssistants();
 
-    if (process.env.REACT_APP_IMPORT_FROWARD_FACTORY) {
-      forwardAAs = await obyte.api.getAaStateVars({ address: process.env.REACT_APP_IMPORT_FROWARD_FACTORY });
+    if (process.env.REACT_APP_IMPORT_FORWARD_FACTORY) {
+      forwardAAs = await obyte.api.getAaStateVars({ address: process.env.REACT_APP_IMPORT_FORWARD_FACTORY });
       await obyte.justsaying("light/new_aa_to_watch", {
-        aa: process.env.REACT_APP_IMPORT_FROWARD_FACTORY
+        aa: process.env.REACT_APP_IMPORT_FORWARD_FACTORY
       });
     }
 

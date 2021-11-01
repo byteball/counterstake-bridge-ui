@@ -13,7 +13,7 @@ import { reqToCreateForward, saveForward, updateObyteAssistant } from "store/ass
 import { getBalanceOfObyteWallet } from "store/thunks/getBalanceOfObyteWallet";
 
 const environment = process.env.REACT_APP_ENVIRONMENT;
-const forwardFactory = process.env.REACT_APP_IMPORT_FROWARD_FACTORY;
+const forwardFactory = process.env.REACT_APP_IMPORT_FORWARD_FACTORY;
 
 let client = new obyte.Client(
   environment === 'devnet' ? 'ws://localhost:6611' : `wss://obyte.org/bb${environment === 'testnet' ? "-test" : ""}`,
