@@ -211,8 +211,8 @@ const handleEventAssistant = (result) => {
 
   const transfers = state.transfers;
   const { subject, body } = result[1];
-  const { aa_address, updatedStateVars, balances, unit, trigger_initial_address } = body;
-  const author = trigger_initial_address || unit?.authors?.[0]?.address;
+  const { aa_address, updatedStateVars, balances, unit } = body;
+  const author = unit?.authors?.[0]?.address;
 
   if (subject === "light/aa_request") {
     if (body?.unit?.messages) {
