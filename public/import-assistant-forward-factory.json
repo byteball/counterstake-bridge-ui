@@ -1,0 +1,10 @@
+{
+	"version": "1.0",
+	"description": "A factory that creates forwarder AAs for Counterstake assistants.",
+	"homepage_url": "https://counterstake.org",
+	"source_url": "https://github.com/byteball/counterstake-bridge",
+	"field_descriptions": {
+		"assistant": "Address of the assistant to create a forwarder for",
+		"create": "Set to 1 to create a forwarder"
+	}
+}
