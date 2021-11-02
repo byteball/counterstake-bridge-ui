@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Router, Route } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -14,15 +14,35 @@ import {
   CSTokenPage,
   FaqPage,
   MainPage,
-  GovernancePage
+  GovernancePage,
+  AssistantsPage
 } from "./pages";
+import { loadAssistants } from "store/thunks/loadAssistants";
+import { selectDirections } from "store/directionsSlice";
 
 
 const AppRouter = () => {
+  const [inited, setInited] = useState(false);
+  
   const dispatch = useDispatch();
-  dispatch(getBridgesParams());
+
+  useEffect(() => {
+    dispatch(getBridgesParams());
+  }, [])
 
   const isOpenConnection = useSelector(selectConnectionStatus);
+  const directions = useSelector(selectDirections);
+
+  useEffect(() => {
+    if (Object.keys(directions).length > 0 && !inited) {
+      dispatch(loadAssistants())
+      setInited(true);
+    }
+  }, [directions]);
+
+  useEffect(() => {
+    setInited(false);
+  }, [isOpenConnection])
 
   useEffect(() => {
     dispatch(getChainId());
@@ -55,6 +75,7 @@ const AppRouter = () => {
         <Route path="/cs-token" component={CSTokenPage} />
         <Route path="/faq" component={FaqPage} />
         <Route path="/governance/:address?" component={GovernancePage} />
+        <Route path="/assistants" component={AssistantsPage} />
         <Route path="/" component={MainPage} exact />
       </MainLayout>
     </Router>

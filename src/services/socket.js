@@ -1,6 +1,7 @@
 import { addTransfer, claimMyself, updateTransferStatus, withdrawalConfirmed } from "store/transfersSlice";
 import obyte from "obyte";
 import { isEmpty } from "lodash";
+import { message } from "antd";
 
 import { startWatchingDestinationBridge } from "./watch";
 import { sendTransferToGA } from "./transfer";
@@ -8,8 +9,11 @@ import { store } from "index";
 import { closeConnection, openConnection } from "store/connectionSlice";
 import { getClaim } from "utils/getClaim";
 import { changeGovernanceState } from "store/governanceSlice";
+import { reqToCreateForward, saveForward, updateObyteAssistant } from "store/assistantsSlice";
+import { getBalanceOfObyteWallet } from "store/thunks/getBalanceOfObyteWallet";
 
 const environment = process.env.REACT_APP_ENVIRONMENT;
+const forwardFactory = process.env.REACT_APP_IMPORT_FORWARD_FACTORY;
 
 let client = new obyte.Client(
   environment === 'devnet' ? 'ws://localhost:6611' : `wss://obyte.org/bb${environment === 'testnet' ? "-test" : ""}`,
@@ -201,6 +205,53 @@ const handleEventGovernance = (result) => {
   }
 }
 
+const handleEventAssistant = (result) => {
+  const state = store.getState();
+  const dispatch = store.dispatch;
+
+  const transfers = state.transfers;
+  const { subject, body } = result[1];
+  const { aa_address, updatedStateVars, balances, unit, trigger_initial_address } = body;
+  const author = trigger_initial_address || unit?.authors?.[0]?.address;
+
+  if (subject === "light/aa_request") {
+    if (body?.unit?.messages) {
+      const payload = getAAPayload(body?.unit?.messages);
+      if (payload.txid && payload.txts && payload.sender_address) {
+        const transfer = transfers.find(t => t.txid === payload.txid);
+        if (transfer){
+          dispatch(updateTransferStatus({ txid: payload.txid, status: 'claimed', claim_txid: unit?.unit, claimant_address: body.aa_address }));
+        } else {
+          console.log(`claim of somebody else's transfer ${payload.txid} in ${unit?.unit}`)
+        }
+      }
+    }
+    if (state.destAddress?.Obyte && author && author === state.destAddress?.Obyte) {
+      message.info("We have received your request. The interface will update after the transaction stabilizes", 5)
+    }
+  } else if (subject === "light/aa_response" && !state.assistants.forwards.includes(aa_address)) {
+    let diff = {};
+
+    if (updatedStateVars) {
+      for (let var_name in updatedStateVars[aa_address]) {
+        const value =
+          updatedStateVars[aa_address][var_name].value !== false
+            ? updatedStateVars[aa_address][var_name].value
+            : undefined;
+        diff[var_name] = value;
+      }
+    }
+
+    if (!isEmpty(diff)) {
+      store.dispatch(updateObyteAssistant({ address: aa_address, diff, balances }))
+    }
+
+    if (state.destAddress?.Obyte && body.trigger_initial_address === state.destAddress?.Obyte) {
+      dispatch(getBalanceOfObyteWallet())
+    }
+  }
+}
+
 client.onConnect(() => {
   const dispatch = store.dispatch;
   const heartbeat = setInterval(function () {
@@ -209,17 +260,46 @@ client.onConnect(() => {
 
   client.subscribe((err, result) => {
     if (err) return null;
+
+    const state = store.getState();
+
     const { subject, body } = result[1];
 
     if (!subject || !trackedSubjects.includes(subject)) {
+      if (subject === "joint" && state.destAddress?.Obyte) {
+        dispatch(getBalanceOfObyteWallet())
+      }
       return null;
     }
 
-    const state = store.getState();
     const aa_address = body?.aa_address;
 
     if (aa_address === state.governance.activeGovernance) {
       handleEventGovernance(result)
+    } else if (forwardFactory && (aa_address === forwardFactory)) {
+      if (subject === "light/aa_request") {
+        const { messages } = body.unit;
+        const payload = getAAPayload(messages);
+        if (payload.create && payload.assistant) {
+          dispatch(reqToCreateForward(payload.assistant));
+        }
+      } else if (subject === "light/aa_response") {
+        const { updatedStateVars } = body;
+        if (updatedStateVars[forwardFactory]) {
+          const varName = Object.keys(updatedStateVars[forwardFactory])?.[0];
+          if (varName) {
+            const assistant_address = varName.split("_")[2];
+            if (obyte.utils.isValidAddress(assistant_address)) {
+              const forward = updatedStateVars[forwardFactory][varName].value;
+              if (obyte.utils.isValidAddress(forward)) {
+                dispatch(saveForward({ assistant_address, forward }));
+              }
+            }
+          }
+        }
+      }
+    } else if ([...state.assistants.obyteAssistants, ...state.assistants.forwards].includes(aa_address)) {
+      handleEventAssistant(result);
     } else {
       handleEventBridge(err, result);
     }
@@ -248,6 +328,5 @@ client.onConnect(() => {
     dispatch(closeConnection())
   });
 });
-
 
 export default client;

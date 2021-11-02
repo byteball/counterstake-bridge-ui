@@ -21,6 +21,8 @@ import inputsSlice from './inputsSlice';
 import addedTokensSlice from './addedTokensSlice';
 import bridgeAAParamsSlice from './bridgeAAParamsSlice';
 import chainIdSlice from './chainIdSlice';
+import assistantsSlice from './assistantsSlice';
+import settingsSlice from './settingsSlice';
 
 const rootReducer = combineReducers({
   transfers: transfersReducer,
@@ -32,14 +34,16 @@ const rootReducer = combineReducers({
   inputs: inputsSlice,
   addedTokens: addedTokensSlice,
   bridgeAAParams: bridgeAAParamsSlice,
-  chainId: chainIdSlice
+  chainId: chainIdSlice,
+  settings: settingsSlice,
+  assistants: assistantsSlice
 });
 
 const persistConfig = {
   key: 'root',
   version: 1,
   storage,
-  whitelist: ['transfers', 'destAddress', 'addedTokens'],
+  whitelist: ['transfers', 'destAddress', 'addedTokens', 'settings'],
 }
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

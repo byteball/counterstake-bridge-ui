@@ -2,7 +2,7 @@ import React from "react";
 import { Menu } from "antd";
 import { NavLink } from "react-router-dom";
 
-export const MainMenu = ({ mode, pathname, onClose, width }) => {
+export const MainMenu = ({ mode, pathname, onClose }) => {
 
   const getPathnameForMenu = () => {
     if (pathname.startsWith("/user-guide"))
@@ -45,6 +45,11 @@ export const MainMenu = ({ mode, pathname, onClose, width }) => {
       <Menu.Item key="/governance">
         <NavLink to="/governance" activeClassName="selected" style={{ verticalAlign: "middle" }}>
           Governance
+        </NavLink>
+      </Menu.Item>
+      <Menu.Item key="/assistants">
+        <NavLink to="/assistants" activeClassName="selected" style={{ verticalAlign: "middle" }}>
+          Pooled assistants
         </NavLink>
       </Menu.Item>
       <Menu.Item key="/faq">

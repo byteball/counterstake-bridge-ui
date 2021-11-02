@@ -52,6 +52,14 @@ svg .white {
   font-family: -apple-system, Roboto, Arial, sans-serif !important;
 }
 
+.ant-back-top svg {
+  fill: #141414;
+}
+
+.ant-statistic-title {
+  margin-bottom: 0 !important;
+}
+
 .obyte-qr-code {
   padding: 10px;
   background: #fff;
