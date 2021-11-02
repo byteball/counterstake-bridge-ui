@@ -33,7 +33,7 @@ const logoList = [
   {
     name: "BSC",
     icon: <BSCLogo />,
-    href: "https://www.binance.com/en"
+    href: "https://www.binance.org/en/smartChain"
   },
   {
     name: "EOS",
@@ -43,7 +43,7 @@ const logoList = [
   {
     name: "Hyperledger Fabric",
     icon: <HyperledgerFabricLogo />,
-    href: "https://www.hyperledger.org/"
+    href: "https://www.hyperledger.org/use/fabric"
   }
 ]
 
