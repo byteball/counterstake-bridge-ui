@@ -49,7 +49,7 @@ export const MainLayout = ({ children }) => {
           <NavLink to="/" className={styles.navLink}>
             <img className={styles.logo} src="/logo.svg" alt="Counterstake Bridge" />
 
-            {width > 440 && <div style={{ paddingLeft: 10 }}>
+            {width > 1090 && <div style={{ paddingLeft: 10 }}>
               <span style={{ color: "#fff" }}>Counterstake Bridge</span>
             </div>}
           </NavLink>
