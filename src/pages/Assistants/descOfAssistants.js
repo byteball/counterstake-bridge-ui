@@ -2,7 +2,14 @@ const environment = process.env.REACT_APP_ENVIRONMENT;
 
 export const descOfAssistants = environment === "mainnet"
   ? {
-
+    KUNNTFAD3G55IWXSNKTDRKH222E4DF7R: {
+      name: "tonych (Obyte)",
+      desc: "Founder of Obyte"
+    },
+    "0x05CF60Df7ad9BBc89cE591c4DBcA4BD58135f166": {
+      name: "tonych (EVM)",
+      desc: "Founder of Obyte"
+    }
   }
   : {
     TNM2YRTJOANVGXMCFOH2FBVC3KYHZ4O6: {
