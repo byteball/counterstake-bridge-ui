@@ -6,7 +6,7 @@ import { AssistantFiltersModal } from "modals/AssistantFiltersModal/AssistantFil
 import { nativeSymbols } from "nativeSymbols";
 import { selectHomeTokens } from "store/assistantsSlice";
 import { selectSortType, setAssistantsSort, addFilter as addFilterInStore, removeFilter as removeFilterInStore, selectFilters } from "store/settingsSlice";
-import { descOfAssistants } from "./descOfAssistants";
+import { descOfManagers } from "./descOfManagers";
 
 
 export const AssistantFiltersAndSort = () => {
@@ -35,7 +35,7 @@ export const AssistantFiltersAndSort = () => {
       <AssistantFiltersModal addFilter={addFilter} removeFilter={removeFilter} />
       <div style={{ paddingTop: 10, paddingBottom: 10 }}>
         {filters.length > 0 && <>
-          {filters.map(({ value, type }) => <Tag key={type + value} style={{ marginBottom: 5 }} closable onClose={() => removeFilter({ value, type })}>{type.replace("_asset", " token")}: {type === "manager" ? (value in descOfAssistants ? descOfAssistants[value].name : value) : (type === "home_asset" ? nativeSymbols[value.split("_")[1]] || homeTokens[value.split("_")[0]] || value.split("_")[0] : value)}</Tag>)}
+          {filters.map(({ value, type }) => <Tag key={type + value} style={{ marginBottom: 5 }} closable onClose={() => removeFilter({ value, type })}>{type.replace("_asset", " token")}: {type === "manager" ? (value in descOfManagers ? descOfManagers[value].name : value) : (type === "home_asset" ? nativeSymbols[value.split("_")[1]] || homeTokens[value.split("_")[0]] || value.split("_")[0] : value)}</Tag>)}
         </>}
       </div>
     </Col>

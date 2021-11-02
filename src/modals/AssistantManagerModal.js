@@ -1,5 +1,5 @@
 import { Button, Modal } from "antd"
-import { descOfAssistants } from "pages/Assistants/descOfAssistants";
+import { descOfManagers } from "pages/Assistants/descOfManagers";
 import { useState } from "react"
 import { getExplorerLink } from "utils/getExplorerLink";
 
@@ -20,7 +20,7 @@ export const AssistantManagerModal = ({ children, network, manager }) => {
 
   const explorerLink = getExplorerLink(network, manager, "address")
 
-  const { name, desc } = (descOfAssistants[manager] || {});
+  const { name, desc } = (descOfManagers[manager] || {});
 
   return <div onClick={(e) => {
     e.nativeEvent.stopImmediatePropagation();

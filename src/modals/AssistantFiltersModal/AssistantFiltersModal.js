@@ -6,7 +6,7 @@ import { FilterOutlined } from "@ant-design/icons";
 
 // import { chainIds } from "chainIds";
 import { selectHomeTokens, selectManagers } from "store/assistantsSlice";
-import { descOfAssistants } from "pages/Assistants/descOfAssistants";
+import { descOfManagers } from "pages/Assistants/descOfManagers";
 import { selectFilters } from "store/settingsSlice";
 
 // const environment = process.env.REACT_APP_ENVIRONMENT;
@@ -46,7 +46,7 @@ export const AssistantFiltersModal = ({ removeFilter, addFilter = () => { } }) =
 
       <div style={{ marginTop: 20 }}><b>Manager:</b></div>
       <Select mode="multiple" ref={el => refs.current[2] = el} value={filters.filter((f) => f.type === "manager").map(({ value }) => value)} style={{ width: "100%" }} placeholder="Select a manager" onChange={(all) => { filters.filter((f) => f.type === "manager").length < all.length ? addFilter({ type: "manager", value: all[all.length - 1] }) : removeFilter(filters.filter((f) => f.type === "manager" && !all.includes(f.value))?.[0]); refs.current[2]?.blur(); }}>
-        {managers.map((manager, i) => <Select.Option key={"manager" + manager} value={manager}>{manager in descOfAssistants ? descOfAssistants[manager].name : manager}</Select.Option>)}
+        {managers.map((manager, i) => <Select.Option key={"manager" + manager} value={manager}>{manager in descOfManagers ? descOfManagers[manager].name : manager}</Select.Option>)}
       </Select>
  
       <div style={{ marginTop: 20 }}><b>Token:</b></div>

@@ -8,7 +8,7 @@ import { InfoTooltip } from "components/InfoTooltip/InfoTooltip";
 import { ShowDecimalsValue } from "components/ShowDecimalsValue/ShowDecimalsValue";
 import { useWindowSize } from "hooks/useWindowSize";
 import { RedeemAssistantSharesModal } from "modals/RedeemAssistantShares/RedeemAssistantSharesModal";
-import { descOfAssistants } from "./descOfAssistants";
+import { descOfManagers } from "./descOfManagers";
 import { AssistantManagerModal } from "modals/AssistantManagerModal";
 import { SwapTokensModal } from "modals/SwapTokensModal";
 import { getExplorerLink } from "utils/getExplorerLink";
@@ -71,7 +71,7 @@ export const AssistantItem = memo((props) => {
           <Row gutter={10} align="middle">
             <Col lg={{ span: 8 }} md={{ span: 24 }} sm={{ span: 24 }} style={{ marginBottom: width < 768 ? 15 : 0 }}>
               <Statistic
-                value={<AssistantManagerModal network={network} manager={manager}>{(manager in descOfAssistants ? descOfAssistants[manager]?.name : manager.slice(0, 20) + "...")}</AssistantManagerModal>}
+                value={<AssistantManagerModal network={network} manager={manager}>{(manager in descOfManagers ? descOfManagers[manager]?.name : manager.slice(0, 20) + "...")}</AssistantManagerModal>}
                 formatter={formatter}
                 title={<span style={{ fontWeight: 200 }}>Manager <InfoTooltip title="The pool’s manager who is responsible for claiming transfers and challenging fraudulent claims on behalf of the pool." /></span>}
                 valueStyle={{ overflow: "hidden", width: "100%" }}
