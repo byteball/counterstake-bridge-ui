@@ -157,7 +157,7 @@ export const loadAssistants = createAsyncThunk(
 
         if (a.side === "import") {
 
-          a.swap_fee = a.cacheParams.swap_fee || 0.003;
+          a.swap_fee = a.cacheState.swap_fee || a.cacheParams.swap_fee || 0.003;
           // mf
           a.stake_mf = a.cacheState.mf.stake;
           a.image_mf = a.cacheState.mf.image;

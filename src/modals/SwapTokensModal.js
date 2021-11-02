@@ -6,6 +6,7 @@ import { ethers, BigNumber } from "ethers";
 import { isEmpty } from "lodash";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import moment from "moment";
 
 import { ERC20Abi, importAssistantAbi } from "abi";
 import { selectChainId } from "store/chainIdSlice";
@@ -29,7 +30,7 @@ export const SwapTokensModal = ({ block, size, assistant_aa, network, swap_fee, 
   const [imageToken, setImageToken] = useState({});
   const [stakeToken, setStakeToken] = useState({});
 
-  const timestamp = Math.trunc(Date.now() / 1000);
+  const timestamp = moment.utc().unix();
 
   const chainId = useSelector(selectChainId);
   const addresses = useSelector(selectDestAddress);
@@ -80,16 +81,27 @@ export const SwapTokensModal = ({ block, size, assistant_aa, network, swap_fee, 
     if (!isEmpty(inToken) && !isEmpty(outToken) && amountIn && Number(amountIn)) {
       if (network === "Obyte") {
         const net_of_swap_fee = 1 - swap_fee;
-        const risk_free_balance = outToken.balance - outToken.balance_in_work;
+        
+        const inGrossBalance = inToken.balance + inToken.balance_in_work;
+        const outGrossBalance = outToken.balance + outToken.balance_in_work;
 
-        const gross_balance = inToken.balance + inToken.balance_in_work;
-        const scaled_mf = (Math.trunc(Date.now() / 1000) - Number(ts)) / (360 * 24 * 3600) * Number(management_fee);
-        const delta_mf = gross_balance * scaled_mf;
-        const mf = inToken.mf + delta_mf;
-        const sf = Math.max(Math.floor(inToken.profit * Number(success_fee)), 0);
-        const net_balance = gross_balance - mf - sf;
+        const scaled_mf = (timestamp - Number(ts)) / (360 * 24 * 3600) * Number(management_fee);
 
-        const amount = Math.floor(risk_free_balance * (1 - (net_balance / (net_balance + (Number(amountIn) || 0) * 10 ** inToken.decimals)) ** (inToken.share / outToken.share)) * net_of_swap_fee);
+        const inDeltaMf = inGrossBalance * scaled_mf;
+        const outDeltaMf = outGrossBalance * scaled_mf;
+
+        const inMf = inToken.mf + inDeltaMf;
+        const outMf = outToken.mf + outDeltaMf;
+
+        const inSf = Math.max(Math.floor(inToken.profit * Number(success_fee)), 0);
+        const outSf = Math.max(Math.floor(outToken.profit * Number(success_fee)), 0);
+
+        const inNetBalance = inGrossBalance - inMf - inSf;
+        const outNetBalance = outGrossBalance - outMf - outSf;
+
+        const risk_free_balance = outNetBalance - outToken.balance_in_work;
+
+        const amount = Math.floor(risk_free_balance * (1 - (inNetBalance / (inNetBalance + (Number(amountIn) || 0) * 10 ** inToken.decimals)) ** (inToken.share / outToken.share)) * net_of_swap_fee);
         setAmountOut(+Number(amount / 10 ** outToken.decimals).toFixed(outToken.decimals));
       } else { // EVM network
 
