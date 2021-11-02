@@ -9,6 +9,7 @@ import { providers } from "services/evm";
 import obyte from "services/socket";
 import { getDecimals, getSymbol } from "utils";
 import { fetchExchangeRateInUSD } from "utils/fetchExchangeRateInUSD";
+import { getAaBalances } from "utils/getAaBalances";
 import { getBalance } from "utils/getBalance";
 
 const forward_factory = process.env.REACT_APP_IMPORT_FORWARD_FACTORY;
@@ -130,8 +131,10 @@ export const loadAssistants = createAsyncThunk(
     const imageRates = {}
     const ImageRatesGetters = assistantsList.map((a) => fetchExchangeRateInUSD(a.home_network, a.home_asset, true).then(rate => imageRates[a.assistant_aa] = rate));
 
+    let obyteAssistantsBalances = {}
+    const obyteAssistantsBalancesGetter = obyteAssistants.map((address) => getAaBalances(address).then(balances => obyteAssistantsBalances[address] = balances));
 
-    const [obyteAssistantsBalances] = await Promise.all([obyte.api.getBalances(obyteAssistants), ...infoEVMGetters, ...obyteAssistantsParamsGetters, ...obyteAssistantsStateVarsGetters, ...shareDecimalsGetters, ...newWatches, ...stakeRatesGetters, ...ImageRatesGetters]);
+    await Promise.all([obyteAssistantsBalancesGetter, ...infoEVMGetters, ...obyteAssistantsParamsGetters, ...obyteAssistantsStateVarsGetters, ...shareDecimalsGetters, ...newWatches, ...stakeRatesGetters, ...ImageRatesGetters]);
 
     assistantsList.forEach(async (a) => {
       
@@ -147,8 +150,8 @@ export const loadAssistants = createAsyncThunk(
         a.shares_supply = obyteAssistantsStateVars[a.assistant_aa]?.shares_supply || 0;
         a.exponent = a.cacheParams?.exponent || 1;
 
-        a.stake_balance = a.cacheBalance?.[a.stake_asset]?.total || 0;
-        a.image_balance = a.cacheBalance?.[a.image_asset]?.total || 0;
+        a.stake_balance = a.cacheBalance?.[a.stake_asset] || 0;
+        a.image_balance = a.cacheBalance?.[a.image_asset] || 0;
 
         a.stakeRateInUSD = stakeRates[a.assistant_aa];
 
