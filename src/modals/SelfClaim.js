@@ -139,21 +139,25 @@ export const SelfClaim = ({ txid, amount, dst_token, sender_address, reward, dst
       if (!contract)
         throw Error(`no contract by bridge AA ${dst_bridge_aa}`);
 
-      const tokenContract = new ethers.Contract(
-        stake.asset,
-        ERC20Abi,
-        signer
-      );
-
-      const allowance = await tokenContract.allowance(metaMaskAddress, dst_bridge_aa);
-
-      if (allowance.lt(bnAmount)) {
-        const approval_res = await tokenContract.approve(
-          dst_bridge_aa,
-          MAX_UINT256
+      if (stake.asset !== ethers.constants.AddressZero) {
+        const tokenContract = new ethers.Contract(
+          stake.asset,
+          ERC20Abi,
+          signer
         );
 
-        await approval_res.wait();
+        const allowance = await tokenContract.allowance(metaMaskAddress, dst_bridge_aa);
+
+        if (allowance.lt(bnAmount)) {
+          const approval_res = await tokenContract.approve(
+            dst_bridge_aa,
+            MAX_UINT256
+          );
+
+          message.info("After the approval gets mined, MetaMask will pop up again and request you to confirm the actual claim", 6);
+
+          await approval_res.wait();
+        }
       }
 
       await contract.claim(txid, stake.txts, bnAmount, bnReward, stakeValue, sender_address, dest_address, data, (stake.asset === ethers.constants.AddressZero) ? { value: stakeValue } : { value: 0 })
