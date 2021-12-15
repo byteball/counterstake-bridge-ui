@@ -38,6 +38,6 @@ export const getAPY = ({ ts, stake_balance = 0, stake_balance_in_work = 0, stake
     const stakeNetBalance = gross_stake_balance - (Number(stake_mf) + delta_stake_mf) - Math.max(Math.floor(Number(stake_profit) * Number(success_fee)), 0);
     const imageNetBalance = gross_image_balance - (Number(image_mf) + delta_image_mf) - Math.max(Math.floor(Number(image_profit) * Number(success_fee)), 0);
 
-    return (((Math.sqrt(stakeNetBalance * imageNetBalance) / shares_supply) ** degree) - 1) * 100;
+    return ((((Math.sqrt(stakeNetBalance * imageNetBalance) / shares_supply) / (first_claim_date === "2021-12-08 13:58:40" ? 1.3250266839 : 1)) ** degree) - 1) * 100;
   }
 }
