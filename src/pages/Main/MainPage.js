@@ -417,7 +417,7 @@ export const MainPage = () => {
         <div className={`${styles.container} `}>
           <Helmet title="Counterstake Bridge" />
           <Title level={1} style={{ fontWeight: "bold", fontSize: width < 768 ? (width < 500 ? 46 : 72) : 100, lineHeight: "79px", textAlign: "center", marginBottom: 0, letterSpacing: "-0.05em", marginTop: width < 768 ? 10 : 20 }}>Counterstake</Title>
-          <Title level={2} style={{ textAlign: "center", marginTop: 20 }}>A cross-chain bridge</Title>
+          <Title level={2} style={{ textAlign: "center", marginTop: 20 }}>A cross-chain bridge. Unstoppable and permissionless.</Title>
 
           <Paragraph style={{ fontSize: 20, textAlign: "center", fontStyle: "italic", fontWeight: 200 }}>This is new, untested, unaudited software, use with care.</Paragraph>
           <div style={{ position: "relative" }}>
