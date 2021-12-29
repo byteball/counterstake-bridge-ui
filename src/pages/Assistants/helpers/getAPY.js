@@ -1,7 +1,12 @@
 import moment from "moment";
 
-export const getAPY = ({ ts, stake_balance = 0, stake_balance_in_work = 0, stake_mf = 0, stake_profit = 0, image_balance = 0, image_balance_in_work = 0, image_profit = 0, image_mf = 0, shares_supply = 0, side, network, first_claim_date, management_fee, success_fee }) => {
+const eth_import_special = "IHK32W2GVDKBS4DU5YUFE2EQ53EZWGIZ";
+
+export const getAPY = ({ ts, stake_balance = 0, stake_balance_in_work = 0, stake_mf = 0, stake_profit = 0, image_balance = 0, image_balance_in_work = 0, image_profit = 0, image_mf = 0, shares_supply = 0, side, network, first_claim_date, management_fee, success_fee, assistant_aa, creation_date }) => {
   if (!first_claim_date) return 0;
+
+  if (creation_date && creation_date < first_claim_date && assistant_aa !== eth_import_special)
+    first_claim_date = creation_date;
 
   const timestamp = moment.utc().unix();
   const first_claim_date_in_unix = moment.utc(first_claim_date).unix();
@@ -38,6 +43,6 @@ export const getAPY = ({ ts, stake_balance = 0, stake_balance_in_work = 0, stake
     const stakeNetBalance = gross_stake_balance - (Number(stake_mf) + delta_stake_mf) - Math.max(Math.floor(Number(stake_profit) * Number(success_fee)), 0);
     const imageNetBalance = gross_image_balance - (Number(image_mf) + delta_image_mf) - Math.max(Math.floor(Number(image_profit) * Number(success_fee)), 0);
 
-    return ((((Math.sqrt(stakeNetBalance * imageNetBalance) / shares_supply) / (first_claim_date === "2021-12-08 13:58:40" ? 1.3250266839 : 1)) ** degree) - 1) * 100;
+    return ((((Math.sqrt(stakeNetBalance * imageNetBalance) / shares_supply) / (assistant_aa === eth_import_special ? 1.3250266839 : 1)) ** degree) - 1) * 100;
   }
 }
