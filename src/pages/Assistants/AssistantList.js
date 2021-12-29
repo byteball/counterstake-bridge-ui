@@ -101,9 +101,9 @@ export const AssistantList = () => {
     {sortingType === "bridge" && filteredAssistants.map(([bridge, assistantsByBridge], i) => {
       let bridge_label;
       if (directions[bridge].type === "expatriation") {
-        bridge_label = `${directions[bridge].src_token.symbol}: ${directions[bridge].src_token.network} -> ${directions[bridge].dst_token.network} (export)`
+        bridge_label = `${directions[bridge].src_token.symbol}: ${directions[bridge].src_token.network} -> ${directions[bridge].dst_token.network} (export, assists with repatriations)`
       } else {
-        bridge_label = `${directions[bridge].dst_token.symbol}: ${directions[bridge].dst_token.network} -> ${directions[bridge].src_token.network} (import)`
+        bridge_label = `${directions[bridge].dst_token.symbol}: ${directions[bridge].dst_token.network} -> ${directions[bridge].src_token.network} (import, assists with expatriations)`
       }
       return <div key={bridge + "-" + i}>
         {sortingType === "bridge" && assistantsByBridge.length > 0 && <Title level={4}>{bridge_label}</Title>}
