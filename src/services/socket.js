@@ -269,7 +269,7 @@ const handleEventAssistantFactory = async (result) => {
       if (order.network === "Obyte") {
         const payload = getAAPayload(body.unit.messages);
 
-        if (payload && payload.manager === order.manager && payload.bridge_aa === order.bridge_aa && order.factoryAddress === aa_address) { //&& (!order.author || order.author === author)
+        if (payload && payload.manager === order.manager && payload.bridge_aa === order.bridge_aa && order.factoryAddress === aa_address) {
           dispatch(updateAssistantOrderStatus({ status: "sent", txid: unit.unit }))
         }
       }
@@ -281,13 +281,13 @@ const handleEventAssistantFactory = async (result) => {
 
       if (order.assistants_will_be_created && (!order.home_assistant_request || !order.foreign_assistant_request)) {
         if (order.home_network === "Obyte" && payload.bridge_aa === order.home_address && payload.manager === order.home_manager_address) {
-          // req reg home assistant
+          // req create home assistant
           dispatch(updateBridgeOrder({
             home_assistant_request: unit.unit
           }))
 
         } else if (order.foreign_network === "Obyte" && payload.bridge_aa === order.foreign_address && payload.manager === order.foreign_manager_address) {
-          // req reg foreign assistant
+          // req create foreign assistant
           dispatch(updateBridgeOrder({
             foreign_assistant_request: unit.unit
           }))
