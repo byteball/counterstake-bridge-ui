@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+
 import { loadAssistants } from './thunks/loadAssistants';
 import { getBalanceOfObyteWallet } from './thunks/getBalanceOfObyteWallet';
 import { updateAllEvmAssistants } from './thunks/updateAllEvmAssistants';
@@ -13,7 +14,8 @@ export const assistantsSlice = createSlice({
     obyteAssistants: [],
     balanceOfMyObyteWallet: {},
     homeTokens: {},
-    managers: []
+    managers: [],
+    sharesSymbols: []
   },
   reducers: {
     reqToCreateForward: (state, action) => {
@@ -116,6 +118,7 @@ export const assistantsSlice = createSlice({
       state.forwards = action.payload.forwards;
       state.homeTokens = action.payload.homeTokens;
       state.managers = action.payload.managers;
+      state.sharesSymbols = action.payload.shares_symbols;
       state.loaded = true;
     },
     [updateEvmAssistant.fulfilled]: (state, action) => {
@@ -157,5 +160,6 @@ export const selectAssistants = state => state.assistants.assistants;
 export const selectBalanceOfObyteWallet = state => state.assistants.balanceOfMyObyteWallet;
 export const selectHomeTokens = state => state.assistants.homeTokens;
 export const selectManagers = state => state.assistants.managers;
+export const selectSharesSymbols = state => state.assistants.sharesSymbols;
 
 export default assistantsSlice.reducer;

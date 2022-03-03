@@ -23,6 +23,7 @@ import bridgeAAParamsSlice from './bridgeAAParamsSlice';
 import chainIdSlice from './chainIdSlice';
 import assistantsSlice from './assistantsSlice';
 import settingsSlice from './settingsSlice';
+import tokenRegistrySlice from './tokenRegistrySlice';
 
 const rootReducer = combineReducers({
   transfers: transfersReducer,
@@ -36,7 +37,8 @@ const rootReducer = combineReducers({
   bridgeAAParams: bridgeAAParamsSlice,
   chainId: chainIdSlice,
   settings: settingsSlice,
-  assistants: assistantsSlice
+  assistants: assistantsSlice,
+  tokenRegistryState: tokenRegistrySlice
 });
 
 const persistConfig = {

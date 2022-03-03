@@ -96,7 +96,7 @@ export const fetchObyteTokenPrices = async () => {
 
 
 const fetchERC20ExchangeRateCached = cachify(fetchERC20ExchangeRate, 3)
-const fetchCryptocompareExchangeRateCached = cachify(fetchCryptocompareExchangeRate, 2)
+export const fetchCryptocompareExchangeRateCached = cachify(fetchCryptocompareExchangeRate, 2)
 const fetchObyteTokenPricesCached = cachify(fetchObyteTokenPrices, 0)
 
 const coingeckoChainIds = {

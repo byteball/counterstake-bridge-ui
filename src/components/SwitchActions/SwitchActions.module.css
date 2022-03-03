@@ -1,0 +1,32 @@
+.switch {
+  user-select: none;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.switchItem {
+  padding: 5px 15px;
+  border-radius: 10px;
+  margin-right: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  margin-bottom: 10px;
+  border: 1px solid #303030;
+  box-sizing: border-box;
+}
+
+.switchItem:hover {
+  background-color: #1e1e1e;
+  transition: .5s;
+}
+
+.switchActive {
+  background-color: #303030;
+  border: #303030;
+}
+
+.switchActive:hover {
+  background-color: #303030;
+}

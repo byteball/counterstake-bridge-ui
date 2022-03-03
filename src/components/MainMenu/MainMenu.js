@@ -2,6 +2,8 @@ import React from "react";
 import { Menu } from "antd";
 import { NavLink } from "react-router-dom";
 
+import { useWindowSize } from "hooks/useWindowSize";
+
 export const MainMenu = ({ mode, pathname, onClose }) => {
 
   const getPathnameForMenu = () => {
@@ -10,13 +12,15 @@ export const MainMenu = ({ mode, pathname, onClose }) => {
     return pathname;
   };
 
+  const [width] = useWindowSize();
+
+  const styles = mode === "horizontal" ? { width: mode === "horizontal" ? (width > 1090 ? width - 300 : width - 250) : "auto", display: "flex", justifyContent: "flex-end" } : {};
+
   return (
     <Menu
       mode={mode === "horizontal" ? "horizontal" : "vertical"}
-      breakpoint="lg"
       overflowedIndicator=". . ."
-      collapsedWidth="0"
-      style={{ border: "none" }}
+      style={{ border: "none", ...styles }}
       selectedKeys={pathname !== "/" ? [getPathnameForMenu()] : []}
       onOpenChange={() => {
         onClose && onClose();
@@ -38,7 +42,7 @@ export const MainMenu = ({ mode, pathname, onClose }) => {
         </NavLink>
       </Menu.Item>
       <Menu.Item key="/developers">
-        <NavLink to={{pathname: "https://github.com/byteball/counterstake-sdk"}} target="_blank" rel="noopener" activeClassName="selected" style={{ verticalAlign: "middle" }}>
+        <NavLink to={{ pathname: "https://github.com/byteball/counterstake-sdk" }} target="_blank" rel="noopener" activeClassName="selected" style={{ verticalAlign: "middle" }}>
           Developers
         </NavLink>
       </Menu.Item>
@@ -50,6 +54,11 @@ export const MainMenu = ({ mode, pathname, onClose }) => {
       <Menu.Item key="/assistants">
         <NavLink to="/assistants" activeClassName="selected" style={{ verticalAlign: "middle" }}>
           Pooled assistants
+        </NavLink>
+      </Menu.Item>
+      <Menu.Item key="/create">
+        <NavLink to="/create" activeClassName="selected" style={{ verticalAlign: "middle" }}>
+          Create
         </NavLink>
       </Menu.Item>
       <Menu.Item key="/faq">

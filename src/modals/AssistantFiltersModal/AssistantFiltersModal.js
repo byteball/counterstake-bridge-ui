@@ -50,11 +50,11 @@ export const AssistantFiltersModal = ({ removeFilter, addFilter = () => { } }) =
       </Select>
  
       <div style={{ marginTop: 20 }}><b>Token:</b></div>
-      <Select mode="multiple" ref={el => refs.current[3] = el} value={filters.filter((f) => f.type === "home_asset").map(({ value }) => value)} style={{ width: "100%" }} placeholder="Select a token" onChange={(all) => { filters.filter((f) => f.type === "home_asset").length < all.length ? addFilter({ type: "home_asset", value: all[all.length - 1] }) : removeFilter(filters.filter((f) => f.type === "home_asset" && !all.includes(f.value))?.[0]); refs.current[2]?.blur(); }}>
+      <Select optionFilterProp="label" mode="multiple" ref={el => refs.current[3] = el} value={filters.filter((f) => f.type === "home_asset").map(({ value }) => value)} style={{ width: "100%" }} placeholder="Select a token" onChange={(all) => { filters.filter((f) => f.type === "home_asset").length < all.length ? addFilter({ type: "home_asset", value: all[all.length - 1] }) : removeFilter(filters.filter((f) => f.type === "home_asset" && !all.includes(f.value))?.[0]); refs.current[2]?.blur(); }}>
         {/* <Select.Option key="MATIC-ADDRESS" value={ethers.constants.AddressZero + "_Polygon"}>MATIC</Select.Option>
         <Select.Option key="ETH-ADDRESS" value={ethers.constants.AddressZero + "_Ethereum"}>ETH</Select.Option>
         <Select.Option key="BNB-ADDRESS" value={ethers.constants.AddressZero + "_BSC"}>BNB</Select.Option> */}
-        {Object.keys(homeTokens).filter((a) => a !== ethers.constants.AddressZero).map((home_token_asset, i) => <Select.Option key={"token" + home_token_asset} value={home_token_asset}>{homeTokens[home_token_asset]}</Select.Option>)}
+        {Object.keys(homeTokens).filter((a) => a !== ethers.constants.AddressZero).map((home_token_asset, i) => <Select.Option key={"token" + home_token_asset} value={home_token_asset} label={homeTokens[home_token_asset]}>{homeTokens[home_token_asset]}</Select.Option>)}
       </Select>
     </Modal>
   </>
