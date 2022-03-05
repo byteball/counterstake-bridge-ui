@@ -1,13 +1,12 @@
-import { assistantFactoryAbi } from "abi";
 import { ethers } from "ethers";
+
+import { assistantFactoryAbi } from "abi";
 import { changeNetwork } from "utils/changeNetwork";
 
-const environment = process.env.REACT_APP_ENVIRONMENT;
-
 export const evmAssistantFactories = {
-  Ethereum: environment === "mainnet" ? "0x12d40AA1861f32a08508ecE504269a1f12759F72" : "0x39F9CC0a70a5327e129B1Aab6b3B265fA0C03C01",
-  BSC: environment === "mainnet" ? "0xd634330ca14524A43d193E1c2e92cbaB72952896" : "0x426D200d3572febdc2C154A58043bF9f857fb7E6",
-  Polygon: environment === "mainnet" ? "0xE740C62aC78bB2666Fa9465052D0a292D7C27A11" : "0xd8BF89335214Caf4724739F52621bC6D70eF87bF"
+  Ethereum: process.env.REACT_APP_ETHEREUM_ASSISTANT_FACTORY,
+  BSC: process.env.REACT_APP_BSC_ASSISTANT_FACTORY,
+  Polygon: process.env.REACT_APP_POLYGON_ASSISTANT_FACTORY
 }
 
 export const createPooledAssistantOnEVM = async ({ type, network, bridge_aa, manager, management_fee, success_fee, swap_fee, exponent, symbol, bridgeSymbol, onRequest, onCreate }) => {
@@ -21,7 +20,7 @@ export const createPooledAssistantOnEVM = async ({ type, network, bridge_aa, man
   if (type !== "import" && type !== "export") {
     throw Error("unknown type");
   }
-  
+
   let provider;
   let signer;
 

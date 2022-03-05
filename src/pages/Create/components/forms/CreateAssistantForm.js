@@ -107,7 +107,7 @@ export const CreateAssistantForm = () => {
     }
   };
 
-  const handleRecipientChange = (value) => {
+  const handleChangeManager = (value) => {
     const valid = isValidManager(value);
     setManager({ value, valid });
   };
@@ -142,7 +142,7 @@ export const CreateAssistantForm = () => {
     }));
   }
 
-  const paramsIsValid = currentParams ? (Object.keys(currentParams).findIndex((paramName) => !currentParams[paramName].valid) < 0) : false;
+  const paramsAreValid = currentParams ? (Object.keys(currentParams).findIndex((paramName) => !currentParams[paramName].valid) < 0) : false;
 
   const checkSharesSymbol = async () => {
     setSymbol(s => ({ ...s, isLoading: true }));
@@ -179,7 +179,7 @@ export const CreateAssistantForm = () => {
             spellCheck="false"
             value={manager.value}
             placeholder={`${currentSide.network} address`}
-            onChange={(ev) => handleRecipientChange(ev.target.value)}
+            onChange={(ev) => handleChangeManager(ev.target.value)}
           />
         </Form.Item>
 
@@ -217,7 +217,7 @@ export const CreateAssistantForm = () => {
 
 
         <Form.Item>
-          <Button type="primary" disabled={!paramsIsValid || !manager.valid || symbol?.isTaken === true || symbol?.isTaken === null} onClick={addCreateAssistantOrder}>Create</Button>
+          <Button type="primary" disabled={!paramsAreValid || !manager.valid || symbol?.isTaken === true || symbol?.isTaken === null} onClick={addCreateAssistantOrder}>Create</Button>
         </Form.Item>
       </>}
     </Form>

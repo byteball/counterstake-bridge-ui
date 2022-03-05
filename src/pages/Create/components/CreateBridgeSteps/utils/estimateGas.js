@@ -19,13 +19,23 @@ export const estimateGasForCreationBridge = async ({ home_network, foreign_netwo
     const provider = providers[foreign_network];
 
     const contractAddress = getFactoryContractAddressByNetwork(foreign_network);
-    console.log("contractAddress", contractAddress)
+    
     const contract = new ethers.Contract(contractAddress, counterstakeFactoryAbi, provider);
     const oracles = oracleAddresses[foreign_network];
 
     const challenging_periods = getParameterList(foreign_network).challenging_periods.initValue.map((v) => BigNumber.from(String(Number(v * 3600))));
     const large_challenging_periods = getParameterList(foreign_network).large_challenging_periods.initValue.map((v) => BigNumber.from(String(Number(v * 3600))));
-    const estimateGas = await contract.estimateGas.createImport(home_network, "0x9ACECb31B2511d9ED421d50F55a7cFCACb04D885", "foreign_description", "ESTIMATE", ethers.constants.AddressZero, oracles, 150, 100, "10000000000000000000", challenging_periods, large_challenging_periods);
+    let fakeToken = "0x9ACECb31B2511d9ED421d50F55a7cFCACb04D885";
+
+    if (foreign_network === "BSC"){
+      fakeToken = environment === "testnet" ? "0xc3cE345f751Ca60da7aFc6F83fcFA3B1b2600959" : "0x8C9827Cd430d945aE5A5c3cfdc522f8D342334B9";
+    } else if (foreign_network === "Ethereum") {
+      fakeToken = environment === "testnet" ? "0xfB5bF83Fd8ff6bf4b5408336F65707644E8F6dD9" : "0xCfef8857E9C80e3440A823971420F7Fa5F62f020";
+    } else if (foreign_network === "Polygon") {
+      fakeToken = environment === "testnet" ? "0x0F2656e068b77cdA65213Ef25705B728d5C73340" : "0xfe4546feFe124F30788c4Cc1BB9AA6907A7987F9";
+    }
+
+    const estimateGas = await contract.estimateGas.createImport(home_network, fakeToken, "foreign_description", "ESTIMATE", ethers.constants.AddressZero, oracles, 150, 100, "10000000000000000000", challenging_periods, large_challenging_periods);
 
     const gasPrice = await provider.getGasPrice();
     const currentNativeSymbol = nativeSymbols[foreign_network];
