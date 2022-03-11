@@ -419,7 +419,7 @@ export const MainPage = () => {
           <Title level={1} style={{ fontWeight: "bold", fontSize: width < 768 ? (width < 500 ? 46 : 72) : 100, lineHeight: "79px", textAlign: "center", marginBottom: 0, letterSpacing: "-0.05em", marginTop: width < 768 ? 10 : 20 }}>Counterstake</Title>
           <Title level={2} style={{ textAlign: "center", marginTop: 20 }}>A cross-chain bridge. Unstoppable and permissionless.</Title>
 
-          <Paragraph style={{ fontSize: 20, textAlign: "center", fontStyle: "italic", fontWeight: 200 }}>This is new, untested, unaudited software, use with care.</Paragraph>
+          <Paragraph style={{ fontSize: 20, textAlign: "center", fontStyle: "italic", fontWeight: 200 }}>This is new<sup>*</sup>, untested<sup>**</sup>, unaudited<sup>***</sup> software, use with care.</Paragraph>
           <div style={{ position: "relative" }}>
             <Row style={{ marginTop: 70, opacity: inputs.length !== 0 ? 1 : 0.35 }}>
               <Col xs={{ span: 24, offset: 0 }} md={{ span: 11 }}>
@@ -654,6 +654,9 @@ export const MainPage = () => {
 
       <div className={`${styles.container}`}>
         <Paragraph style={{ fontSize: 13, marginTop: 20, paddingTop: 10, fontWeight: 200 }}>Counterstake is a fully decentralized cross-chain transfer protocol. There are no admins, no central operators, no owners, no custodians. Participation in the protocol is open, there are no designated multisig participants, federated signers, or threshold signatures. All transfers are direct, there are no central hubs or relays. No token is required to use the protocol. There are no protocol fees. The code is immutable, not upgradable, unstoppable. There are no access controls, no gatekeepers, no KYC, no your customer.</Paragraph>
+        <Paragraph style={{ fontSize: 13, marginTop: 20, paddingTop: 10, fontWeight: 200 }}><sup>*</sup> Since July 2021.</Paragraph>
+        <Paragraph style={{ fontSize: 13, fontWeight: 200 }}><sup>**</sup> Only $450,000 have been transferred so far.</Paragraph>
+        <Paragraph style={{ fontSize: 13, fontWeight: 200 }}><sup>***</sup> Only Ethereum, BSC, and Polygon contracts have been <a href="https://github.com/byteball/counterstake-bridge/blob/master/audits/Counterstake-audit-by-Dedaub.pdf" target="_blank" rel="noopener">audited</a>.</Paragraph>
       </div>
     </>
   );
