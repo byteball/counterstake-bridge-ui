@@ -61,7 +61,6 @@ export const GovernanceItem = (props) => {
   }));
 
   const commitLink = bridge_network === "Obyte" ? generateLink({
-    asset: voteTokenAddress,
     amount: 1e4,
     data: {
       name, commit: 1
@@ -72,7 +71,6 @@ export const GovernanceItem = (props) => {
   }) : undefined;
 
   const linkRemoveSupport = bridge_network === "Obyte" ? generateLink({
-    asset: voteTokenAddress,
     amount: 1e4,
     data: {
       name
