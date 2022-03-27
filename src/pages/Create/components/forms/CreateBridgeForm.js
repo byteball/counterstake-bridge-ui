@@ -54,7 +54,7 @@ export const CreateBridgeForm = () => {
     }
   }, [homeNetwork, foreignNetwork, tokenAddress, assistantsWillBeCreated]);
 
-  const importedTokensByNetwork = importedTokens[homeNetwork.value]?.[foreignNetwork.value] || [];
+  const importedTokensByNetwork = importedTokens?.[homeNetwork.value]?.[foreignNetwork.value] || [];
   // handles
   const handleChangeHomeNetwork = (value) => {
     setHomeNetwork({ value, valid: true });
