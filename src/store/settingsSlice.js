@@ -11,7 +11,7 @@ export const settingsSlice = createSlice({
       assistant: null,
       bridge: null
     },
-    importedTokens: {
+    exportedTokens: {
 
     }
   },
@@ -69,8 +69,8 @@ export const settingsSlice = createSlice({
       state.creationOrders.assistant.shares_symbol = action.payload;
       state.creationOrders.assistant.status = "success";
     },
-    updateImportedTokens: (state, action) => {
-      state.importedTokens = action.payload;
+    updateExportedTokens: (state, action) => {
+      state.exportedTokens = action.payload;
     }
   }
 });
@@ -85,7 +85,7 @@ export const {
   registerSymbolForPooledAssistant,
   configureBridge,
   updateBridgeOrder,
-  updateImportedTokens
+  updateExportedTokens
 } = settingsSlice.actions;
 
 
@@ -99,4 +99,4 @@ export const selectSortType = state => state.settings.assistants.sortType;
 export const selectFilters = state => state.settings.assistants.filters;
 export const selectAssistantCreationOrder = state => state.settings.creationOrders?.assistant || null;
 export const selectBridgeCreationOrder = state => state.settings.creationOrders?.bridge || null;
-export const selectImportedTokens = state => state.settings.importedTokens; 
+export const selectExportedTokens = state => state.settings.exportedTokens; 

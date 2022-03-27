@@ -7,7 +7,7 @@ import { isEmpty } from "lodash";
 import { nativeSymbols } from "nativeSymbols";
 import { chainIds } from "chainIds";
 import { getDecimals, getSymbol } from "utils";
-import { addCreationOrder, selectImportedTokens } from "store/settingsSlice";
+import { addCreationOrder, selectExportedTokens } from "store/settingsSlice";
 
 import { ReactComponent as ObyteNetwork } from "pages/Main/img/networks/obyte.svg";
 import { ReactComponent as BscNetwork } from "pages/Main/img/networks/bsc.svg";
@@ -41,7 +41,7 @@ export const CreateBridgeForm = () => {
   const [estimateGas, setEstimateGas] = useState({ value: 0, loading: false, error: false });
 
   const tokenRegistryState = useSelector(selectTokenRegistryState);
-  const importedTokens = useSelector(selectImportedTokens);
+  const exportedTokens = useSelector(selectExportedTokens);
 
 
   useEffect(async () => {
@@ -54,7 +54,7 @@ export const CreateBridgeForm = () => {
     }
   }, [homeNetwork, foreignNetwork, tokenAddress, assistantsWillBeCreated]);
 
-  const importedTokensByNetwork = importedTokens?.[homeNetwork.value]?.[foreignNetwork.value] || [];
+  const exportedTokensByNetwork = exportedTokens?.[homeNetwork.value]?.[foreignNetwork.value] || [];
   // handles
   const handleChangeHomeNetwork = (value) => {
     setHomeNetwork({ value, valid: true });
@@ -227,7 +227,7 @@ export const CreateBridgeForm = () => {
   if (tokenAddress.value !== "" && !homeSymbol.loading && !homeDecimals.loading) {
     if (!tokenAddress.valid && homeNetwork.value !== "Obyte") {
       tokenHelp = <p style={{ color: "red" }}>Token address isn't valid</p>
-    } else if (importedTokensByNetwork.includes(tokenAddress.equal_asset || tokenAddress.value)) {
+    } else if (exportedTokensByNetwork.includes(tokenAddress.equal_asset || tokenAddress.value)) {
       tokenHelp = <p style={{ color: "red" }}>Bridge already exists</p>
     } else if (!homeSymbol.value || !homeDecimals.valid || !tokenAddress.valid) {
       if (homeNetwork.value === "Obyte") {
@@ -348,7 +348,7 @@ export const CreateBridgeForm = () => {
 
       <Row>
         <Form.Item>
-          <Button type="primary" onClick={createOrder} disabled={foreignSymbol.isTaken || !foreignSymbol.valid || !tokenAddress.valid || (!foreignDecimals.valid && foreignNetwork.value === "Obyte") || !foreignSymbol.valid || !foreignDescription.valid || !homeDecimals.valid || !homeSymbol.valid || importedTokensByNetwork.includes(tokenAddress.equal_asset || tokenAddress.value)}>Continue: configure bridge</Button>
+          <Button type="primary" onClick={createOrder} disabled={foreignSymbol.isTaken || !foreignSymbol.valid || !tokenAddress.valid || (!foreignDecimals.valid && foreignNetwork.value === "Obyte") || !foreignSymbol.valid || !foreignDescription.valid || !homeDecimals.valid || !homeSymbol.valid || exportedTokensByNetwork.includes(tokenAddress.equal_asset || tokenAddress.value)}>Continue: configure bridge</Button>
         </Form.Item>
       </Row>
     </Form>

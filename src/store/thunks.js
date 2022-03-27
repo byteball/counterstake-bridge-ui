@@ -4,7 +4,7 @@ import { getOrInsertInput } from "utils";
 import { setDirections } from "./directionsSlice";
 import obyte from "../services/socket";
 import { setGovernanceList } from "./governanceSlice";
-import { updateImportedTokens } from "./settingsSlice";
+import { updateExportedTokens } from "./settingsSlice";
 
 const { createAsyncThunk } = require("@reduxjs/toolkit")
 
@@ -139,7 +139,7 @@ export const updateBridges = createAsyncThunk(
     }
 
     thunkAPI.dispatch(setDirections(directions));
-    thunkAPI.dispatch(updateImportedTokens(imported_tokens));
+    thunkAPI.dispatch(updateExportedTokens(imported_tokens));
     return inputs.map((i, index) => ({ index, ...i, destinations: i.destinations.map((d, id) => ({ ...d, index: id })) }));
   }
 );
