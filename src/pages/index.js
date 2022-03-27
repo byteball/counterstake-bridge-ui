@@ -5,3 +5,4 @@ export { FaqPage } from "./Faq/FaqPage";
 export { MainPage } from "./Main/MainPage";
 export { GovernancePage } from "./Governance/GovernancePage";
 export { AssistantsPage } from "./Assistants/AssistantsPage";
+export { CreatePage } from "./Create/CreatePage";

@@ -1,4 +1,5 @@
 import { ethers } from "ethers";
+import { isNaN } from "lodash";
 import obyte from "obyte";
 
 const environment = process.env.REACT_APP_ENVIRONMENT;
@@ -91,14 +92,17 @@ export const is_valid_challenging_periods_string = (value) => {
   let prev = -1;
 
   valueFormatted?.forEach((period) => {
+    if (isNaN(Number(period))) return isError = true;
+
     const nPeriod = Number(period);
 
-    if (nPeriod <= 0 || (nPeriod * 3600) > 3 * 365 * 24) isError = true
+    if (nPeriod <= 0 || (nPeriod > 3 * 365 * 24)) isError = true
 
     if (nPeriod < prev) return isError = true
 
     prev = nPeriod;
-  })
+  });
+  
   return !isError
 }
 

@@ -19,7 +19,6 @@ const request = async (endpoint, options) => {
   return await response.json();
 }
 
-
 export async function getBridges() {
   const resp_body = await request(`/bridges`);
   return resp_body;
@@ -32,5 +31,5 @@ export async function getTransferStatus(txid) {
 
 export async function getPooledAssistants() {
   const resp_body = await request(`/pooled_assistants`);
-  return resp_body?.data.filter(({ network }) => network === "Obyte");
+  return resp_body;
 }

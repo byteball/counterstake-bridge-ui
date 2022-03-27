@@ -24,7 +24,11 @@ export const loadAssistants = createAsyncThunk(
     const { directions, destAddress } = getState();
     let forwardAAs;
 
-    const assistantsList = await getPooledAssistants();
+    let assistantsList = await getPooledAssistants();
+    const shares_symbols = [];
+
+    assistantsList?.data.forEach(({ shares_symbol }) => shares_symbol && shares_symbols.push(shares_symbol));
+    assistantsList = assistantsList?.data.filter(({ network }) => network === "Obyte");
 
     if (process.env.REACT_APP_IMPORT_FORWARD_FACTORY) {
       forwardAAs = await obyte.api.getAaStateVars({ address: process.env.REACT_APP_IMPORT_FORWARD_FACTORY });
@@ -249,6 +253,7 @@ export const loadAssistants = createAsyncThunk(
       forwards,
       balanceOfMyObyteWallet,
       managers,
-      homeTokens
+      homeTokens,
+      shares_symbols
     }
   })

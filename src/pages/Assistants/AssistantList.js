@@ -100,6 +100,7 @@ export const AssistantList = () => {
 
     {sortingType === "bridge" && filteredAssistants.map(([bridge, assistantsByBridge], i) => {
       let bridge_label;
+      if (!directions[bridge]) return null
       if (directions[bridge].type === "expatriation") {
         bridge_label = `${directions[bridge].src_token.symbol}: ${directions[bridge].src_token.network} -> ${directions[bridge].dst_token.network} (export, assists with repatriations)`
       } else {
@@ -118,6 +119,7 @@ export const AssistantList = () => {
 
     {sortingType !== "bridge" && flattenDepth(filteredAssistants.map(([_, assistantsByBridge], i) => assistantsByBridge)).sort(sortingType === "apy" ? (a, b) => b.APY - a.APY : (a, b) => b.totalBalanceInUSD - a.totalBalanceInUSD).map(({ bridge_aa, ...info }, index) => {
       let bridge_label;
+      if (!directions[bridge_aa]) return null
       if (directions[bridge_aa].type === "expatriation") {
         bridge_label = `${directions[bridge_aa].src_token.symbol}: ${directions[bridge_aa].src_token.network} -> ${directions[bridge_aa].dst_token.network} (export)`
       } else {

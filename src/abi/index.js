@@ -5,4 +5,6 @@ export { votedValueUintAbi } from "./votedValueUintAbi";
 export { votedValueUintArrayAbi } from "./votedValueUintArrayAbi";
 export { exportAssistantAbi } from "./exportAssistantAbi";
 export { importAssistantAbi } from "./importAssistantAbi";
+export { assistantFactoryAbi } from "./assistantFactoryAbi";
+export { counterstakeFactoryAbi } from "./counterstakeFactoryAbi";
 export { ERC20Abi } from "./ERC20Abi"

@@ -11,6 +11,8 @@ import { getClaim } from "utils/getClaim";
 import { changeGovernanceState } from "store/governanceSlice";
 import { reqToCreateForward, saveForward, updateObyteAssistant } from "store/assistantsSlice";
 import { getBalanceOfObyteWallet } from "store/thunks/getBalanceOfObyteWallet";
+import { registerSymbolForPooledAssistant, updateAssistantOrderStatus, updateBridgeOrder } from "store/settingsSlice";
+import { checkCreatedOrders } from "store/thunks/checkCreatedOrders";
 
 const environment = process.env.REACT_APP_ENVIRONMENT;
 const forwardFactory = process.env.REACT_APP_IMPORT_FORWARD_FACTORY;
@@ -219,7 +221,7 @@ const handleEventAssistant = (result) => {
       const payload = getAAPayload(body?.unit?.messages);
       if (payload.txid && payload.txts && payload.sender_address) {
         const transfer = transfers.find(t => t.txid === payload.txid);
-        if (transfer){
+        if (transfer) {
           dispatch(updateTransferStatus({ txid: payload.txid, status: 'claimed', claim_txid: unit?.unit, claimant_address: body.aa_address }));
         } else {
           console.log(`claim of somebody else's transfer ${payload.txid} in ${unit?.unit}`)
@@ -248,6 +250,176 @@ const handleEventAssistant = (result) => {
 
     if (state.destAddress?.Obyte && body.trigger_initial_address === state.destAddress?.Obyte) {
       dispatch(getBalanceOfObyteWallet())
+    }
+  }
+}
+
+const handleEventAssistantFactory = async (result) => {
+  const state = store.getState();
+  const dispatch = store.dispatch;
+
+  const { subject, body } = result[1];
+  const { aa_address, updatedStateVars, unit, response, trigger_initial_unit } = body;
+  const responseVars = response?.responseVars || {};
+
+  if (subject === "light/aa_request") {
+    if (body?.unit?.messages && state?.settings?.creationOrders?.assistant) {
+      const order = state.settings.creationOrders.assistant;
+
+      if (order.network === "Obyte") {
+        const payload = getAAPayload(body.unit.messages);
+
+        if (payload && payload.manager === order.manager && payload.bridge_aa === order.bridge_aa && order.factoryAddress === aa_address) {
+          dispatch(updateAssistantOrderStatus({ status: "sent", txid: unit.unit }))
+        }
+      }
+    }
+
+    if (body?.unit?.messages && state?.settings?.creationOrders?.bridge) {
+      const order = state.settings.creationOrders.bridge;
+      const payload = getAAPayload(body.unit.messages);
+
+      if (order.assistants_will_be_created && (!order.home_assistant_request || !order.foreign_assistant_request)) {
+        if (order.home_network === "Obyte" && payload.bridge_aa === order.home_address && payload.manager === order.home_manager_address) {
+          // req create home assistant
+          dispatch(updateBridgeOrder({
+            home_assistant_request: unit.unit
+          }))
+
+        } else if (order.foreign_network === "Obyte" && payload.bridge_aa === order.foreign_address && payload.manager === order.foreign_manager_address) {
+          // req create foreign assistant
+          dispatch(updateBridgeOrder({
+            foreign_assistant_request: unit.unit
+          }))
+        }
+      }
+    }
+  } else if (subject === "light/aa_response") {
+    if (state?.settings?.creationOrders?.assistant) {
+      const { address } = responseVars;
+      const order = state.settings.creationOrders.assistant;
+
+      if (address && trigger_initial_unit === order.txid) {
+        const shares_asset = updatedStateVars[address]?.shares_asset?.value;
+        dispatch(updateAssistantOrderStatus({ status: "created", address, shares_asset }));
+      }
+    }
+
+    if (state?.settings?.creationOrders?.bridge) {
+      const order = state.settings.creationOrders.bridge;
+      const assistantAddress = responseVars.address;
+
+      if (assistantAddress && order.assistants_will_be_created && ((order.home_network === "Obyte" && !order.home_assistant_shares_asset) || (order.foreign_network === "Obyte" && !order.foreign_assistant_shares_asset))) {
+
+        const assistantShares = updatedStateVars[assistantAddress]?.shares_asset?.value;
+
+        const bridge_aa = updatedStateVars[aa_address]?.[`assistant_${assistantAddress}`]?.value?.bridge_aa;
+
+        if (order.home_network === "Obyte" && bridge_aa === order.home_address) {
+          dispatch(updateBridgeOrder({
+            home_assistant_address: assistantAddress,
+            home_assistant_shares_asset: assistantShares
+          }));
+        } else if (order.foreign_network === "Obyte" && bridge_aa === order.foreign_address) {
+          dispatch(updateBridgeOrder({
+            foreign_assistant_address: assistantAddress,
+            foreign_assistant_shares_asset: assistantShares
+          }));
+        }
+      }
+    }
+  }
+}
+
+const handleEventTokenRegistry = (result) => {
+  const state = store.getState();
+  const dispatch = store.dispatch;
+
+  const { subject, body } = result[1];
+
+  if (subject === "light/aa_request") {
+    if (body?.unit?.messages && state?.settings?.creationOrders?.assistant) {
+      const order = state?.settings?.creationOrders?.assistant;
+      const payload = getAAPayload(body.unit.messages);
+
+      if (order.shares_asset === payload.asset) {
+        dispatch(registerSymbolForPooledAssistant(payload.symbol))
+      }
+    }
+
+    if (body?.unit?.messages && state?.settings?.creationOrders?.bridge) {
+      const order = state?.settings?.creationOrders?.bridge;
+      const payload = getAAPayload(body.unit.messages);
+
+      if (order.home_assistant_shares_asset && order.home_assistant_shares_asset === payload.asset) {
+        dispatch(updateBridgeOrder({
+          home_assistant_symbol_request: true
+        }));
+      }
+
+      if (order.foreign_assistant_shares_asset && order.foreign_assistant_shares_asset === payload.asset) {
+        dispatch(updateBridgeOrder({
+          foreign_assistant_symbol_request: true,
+          status: "successful"
+        }));
+      }
+
+      if (order.status === "created" && order.foreign_network === "Obyte" && order.foreign_asset === payload.asset) {
+        dispatch(updateBridgeOrder({
+          status: "symbol_created"
+        }));
+      }
+    }
+  }
+}
+
+const handleEventBridgeFactory = async (result) => {
+  const state = store.getState();
+  const dispatch = store.dispatch;
+
+  if (state.settings?.creationOrders?.bridge) {
+    const order = state?.settings?.creationOrders?.bridge;
+    const { subject, body } = result[1];
+    const { aa_address, unit } = body;
+
+    if (subject === "light/aa_request") {
+      const payload = getAAPayload(body.unit.messages);
+
+      if (payload.home_asset && payload.stake_asset && aa_address === process.env.REACT_APP_OBYTE_IMPORT_FACTORY) { // create import bridge
+        if (order.home_asset && order.home_asset === payload.home_asset) {
+          dispatch(updateBridgeOrder({
+            foreign_bridge_request: unit.unit
+          }))
+        }
+      } else if (payload.foreign_asset === order.foreign_asset && aa_address === process.env.REACT_APP_OBYTE_EXPORT_FACTORY) { // create export bridge
+        dispatch(updateBridgeOrder({
+          home_bridge_request: unit.unit
+        }))
+      }
+
+    } else if (subject === "light/aa_response") {
+      if (order.foreign_bridge_request && order.foreign_network === "Obyte" && order.status === "configured") {
+        const responses = await client.api.getAaResponseChain({ trigger_unit: order.foreign_bridge_request });
+        const address = responses.find((res) => (res?.response?.responseVars) && ("address" in res.response.responseVars))?.response.responseVars.address || null;
+        const asset = responses.find((res) => (res?.response?.responseVars) && ("asset" in res.response.responseVars))?.response.responseVars.asset || null;
+
+        if (address && asset) {
+          dispatch(updateBridgeOrder({
+            foreign_address: address,
+            foreign_asset: asset
+          }))
+        }
+      } else if (order.home_bridge_request && order.home_network === "Obyte" && order.status === "configured") {
+        const responses = await client.api.getAaResponseChain({ trigger_unit: order.home_bridge_request });
+        const address = responses.find((res) => (res?.response?.responseVars) && ("address" in res.response.responseVars))?.response.responseVars.address || null;
+
+        if (address) {
+          dispatch(updateBridgeOrder({
+            home_address: address,
+            status: "created"
+          }));
+        }
+      }
     }
   }
 }
@@ -300,12 +472,19 @@ client.onConnect(() => {
       }
     } else if ([...state.assistants.obyteAssistants, ...state.assistants.forwards].includes(aa_address)) {
       handleEventAssistant(result);
+    } else if (aa_address === process.env.REACT_APP_OBYTE_ASSISTANT_IMPORT_FACTORY || aa_address === process.env.REACT_APP_OBYTE_ASSISTANT_EXPORT_FACTORY) {
+      handleEventAssistantFactory(result);
+    } else if (aa_address === process.env.REACT_APP_TOKEN_REGISTRY) {
+      handleEventTokenRegistry(result);
+    } else if (aa_address === process.env.REACT_APP_OBYTE_IMPORT_FACTORY || aa_address === process.env.REACT_APP_OBYTE_EXPORT_FACTORY) {
+      handleEventBridgeFactory(result);
     } else {
       handleEventBridge(err, result);
     }
   });
 
-  dispatch(openConnection())
+  dispatch(openConnection());
+  dispatch(checkCreatedOrders());
 
   if (process.env.REACT_APP_OBYTE_IMPORT_BASE_AA) {
     client.justsaying("light/new_aa_to_watch", {
@@ -322,6 +501,26 @@ client.onConnect(() => {
   } else {
     console.error("Please specify ENV: REACT_APP_OBYTE_EXPORT_BASE_AA")
   }
+
+  client.justsaying("light/new_aa_to_watch", {
+    aa: process.env.REACT_APP_OBYTE_ASSISTANT_IMPORT_FACTORY
+  });
+
+  client.justsaying("light/new_aa_to_watch", {
+    aa: process.env.REACT_APP_OBYTE_ASSISTANT_EXPORT_FACTORY
+  });
+
+  client.justsaying("light/new_aa_to_watch", {
+    aa: process.env.REACT_APP_TOKEN_REGISTRY
+  });
+
+  client.justsaying("light/new_aa_to_watch", {
+    aa: process.env.REACT_APP_OBYTE_IMPORT_FACTORY
+  });
+
+  client.justsaying("light/new_aa_to_watch", {
+    aa: process.env.REACT_APP_OBYTE_EXPORT_FACTORY
+  });
 
   client.client.ws.addEventListener("close", () => {
     clearInterval(heartbeat);

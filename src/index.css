@@ -64,3 +64,11 @@ svg .white {
   padding: 10px;
   background: #fff;
 }
+
+.createAssistant .ant-form-item-label {
+  padding: 2px !important;
+}
+
+.createAssistant .ant-form-item-label label {
+  font-weight: 300;
+}

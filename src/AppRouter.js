@@ -15,7 +15,8 @@ import {
   FaqPage,
   MainPage,
   GovernancePage,
-  AssistantsPage
+  AssistantsPage,
+  CreatePage
 } from "./pages";
 import { loadAssistants } from "store/thunks/loadAssistants";
 import { selectDirections } from "store/directionsSlice";
@@ -76,6 +77,7 @@ const AppRouter = () => {
         <Route path="/faq" component={FaqPage} />
         <Route path="/governance/:address?" component={GovernancePage} />
         <Route path="/assistants" component={AssistantsPage} />
+        <Route path="/create" component={CreatePage} />
         <Route path="/" component={MainPage} exact />
       </MainLayout>
     </Router>
