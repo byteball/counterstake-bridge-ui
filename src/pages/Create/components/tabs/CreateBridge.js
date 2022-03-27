@@ -59,7 +59,7 @@ export const CreateBridge = () => {
         okText="Yes"
         cancelText="No"
       >
-        <Button type="link" danger>Cancel creation</Button>
+        <Button type="link" danger>Cancel and start over</Button>
       </Popconfirm>
     </div>}
   </div>

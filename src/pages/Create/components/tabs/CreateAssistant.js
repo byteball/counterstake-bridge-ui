@@ -73,7 +73,7 @@ export const CreateAssistant = ({ orderData = {} }) => {
         okText="Yes"
         cancelText="No"
       >
-        <Button type="link" danger>Cancel creation</Button>
+        <Button type="link" danger>Cancel and start over</Button>
       </Popconfirm>
     </div>}
   </div>
@@ -103,7 +103,7 @@ export const CreateAssistantStep = ({ network, manager, params, factoryAddress, 
 
   return <div>
     <Result
-      title={`Create assistant's ${network === "Obyte" ? "AA" : "contract"} on ${network}`}
+      title={`Create assistant ${network === "Obyte" ? "AA" : "contract"} on ${network}`}
       subTitle={label}
       extra={network === "Obyte" ? <QRButton type="primary" href={link}>Create</QRButton> : <Button type="primary" onClick={createEVMAssistant}>Create</Button>}
       icon={<AssistantIcon network={network} />}
