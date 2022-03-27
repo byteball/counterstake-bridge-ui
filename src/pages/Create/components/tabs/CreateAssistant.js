@@ -127,6 +127,6 @@ const Success = () => {
   return <Result
     title={`Assistant created successfully`}
     icon={<CheckCircleOutlined style={{ color: "#fff" }} />}
-    extra={<Button type="primary" onClick={() => dispatch(removeCreationOrder({ orderType: "assistant" }))}>Back to creation form</Button>}
+    extra={<Button type="primary" onClick={() => dispatch(removeCreationOrder({ orderType: "assistant" }))}>Create another bridge or assistant</Button>}
   />
 }
