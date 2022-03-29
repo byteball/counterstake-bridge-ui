@@ -5,9 +5,9 @@ import { changeNetwork } from "utils/changeNetwork";
 import config from "appConfig";
 
 export const evmAssistantFactories = {
-  Ethereum: config.ETHEREUM_ASSISTANT_FACTORY[config.ETHEREUM_ASSISTANT_FACTORY.length - 1],
-  BSC: config.BSC_ASSISTANT_FACTORY[config.BSC_ASSISTANT_FACTORY.length - 1],
-  Polygon: config.POLYGON_ASSISTANT_FACTORY[config.POLYGON_ASSISTANT_FACTORY.length - 1]
+  Ethereum: config.ETHEREUM_ASSISTANT_FACTORY,
+  BSC: config.BSC_ASSISTANT_FACTORY,
+  Polygon: config.POLYGON_ASSISTANT_FACTORY
 }
 
 export const createPooledAssistantOnEVM = async ({ type, network, bridge_aa, manager, management_fee, success_fee, swap_fee, exponent, symbol, oracle, bridgeSymbol, onRequest, onCreate }) => {

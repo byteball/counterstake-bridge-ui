@@ -386,13 +386,13 @@ const handleEventBridgeFactory = async (result) => {
     if (subject === "light/aa_request") {
       const payload = getAAPayload(body.unit.messages);
 
-      if (payload.home_asset && payload.stake_asset && config.OBYTE_IMPORT_FACTORY.includes(aa_address)) { // create import bridge
+      if (payload.home_asset && payload.stake_asset && config.OBYTE_IMPORT_FACTORY === aa_address) { // create import bridge
         if (order.home_asset && order.home_asset === payload.home_asset) {
           dispatch(updateBridgeOrder({
             foreign_bridge_request: unit.unit
           }))
         }
-      } else if (payload.foreign_asset === order.foreign_asset && config.OBYTE_EXPORT_FACTORY.includes(aa_address)) { // create export bridge
+      } else if (payload.foreign_asset === order.foreign_asset && config.OBYTE_EXPORT_FACTORY === aa_address) { // create export bridge
         dispatch(updateBridgeOrder({
           home_bridge_request: unit.unit
         }))
@@ -473,11 +473,11 @@ client.onConnect(() => {
       }
     } else if ([...state.assistants.obyteAssistants, ...state.assistants.forwards].includes(aa_address)) {
       handleEventAssistant(result);
-    } else if ([...config.OBYTE_ASSISTANT_IMPORT_FACTORY, ...config.OBYTE_ASSISTANT_EXPORT_FACTORY].includes(aa_address)) {
+    } else if ([config.OBYTE_ASSISTANT_IMPORT_FACTORY, config.OBYTE_ASSISTANT_EXPORT_FACTORY].includes(aa_address)) {
       handleEventAssistantFactory(result);
     } else if (aa_address === config.TOKEN_REGISTRY) {
       handleEventTokenRegistry(result);
-    } else if ([...config.OBYTE_IMPORT_FACTORY, ...config.OBYTE_EXPORT_FACTORY].includes(aa_address)) {
+    } else if ([config.OBYTE_IMPORT_FACTORY, config.OBYTE_EXPORT_FACTORY].includes(aa_address)) {
       handleEventBridgeFactory(result);
     } else {
       handleEventBridge(err, result);
@@ -487,23 +487,23 @@ client.onConnect(() => {
   dispatch(openConnection());
   dispatch(checkCreatedOrders());
 
-  if (config.OBYTE_IMPORT_BASE_AA.length >= 1) {
-    config.OBYTE_IMPORT_BASE_AA.forEach(aa => client.justsaying("light/new_aa_to_watch", { aa }));
+  if (config.OBYTE_IMPORT_BASE_AAS.length >= 1) {
+    config.OBYTE_IMPORT_BASE_AAS.forEach(aa => client.justsaying("light/new_aa_to_watch", { aa }));
   } else {
-    console.error("Please specify ENV: REACT_APP_OBYTE_IMPORT_BASE_AA")
+    console.error("Please specify ENV: REACT_APP_OBYTE_IMPORT_BASE_AAS")
   }
 
-  if (config.OBYTE_EXPORT_BASE_AA.length >= 1) {
-    config.OBYTE_EXPORT_BASE_AA.forEach(aa => client.justsaying("light/new_aa_to_watch", { aa }));
+  if (config.OBYTE_EXPORT_BASE_AAS.length >= 1) {
+    config.OBYTE_EXPORT_BASE_AAS.forEach(aa => client.justsaying("light/new_aa_to_watch", { aa }));
   } else {
-    console.error("Please specify ENV: REACT_APP_OBYTE_EXPORT_BASE_AA")
+    console.error("Please specify ENV: REACT_APP_OBYTE_EXPORT_BASE_AAS")
   }
 
-  config.OBYTE_ASSISTANT_IMPORT_FACTORY.forEach(aa => client.justsaying("light/new_aa_to_watch", { aa }));
-  config.OBYTE_ASSISTANT_EXPORT_FACTORY.forEach(aa => client.justsaying("light/new_aa_to_watch", { aa }));
+  client.justsaying("light/new_aa_to_watch", { aa: config.OBYTE_ASSISTANT_IMPORT_FACTORY });
+  client.justsaying("light/new_aa_to_watch", { aa: config.OBYTE_ASSISTANT_EXPORT_FACTORY });
 
-  config.OBYTE_IMPORT_FACTORY.forEach(aa => client.justsaying("light/new_aa_to_watch", { aa }));
-  config.OBYTE_EXPORT_FACTORY.forEach(aa => client.justsaying("light/new_aa_to_watch", { aa }));
+  client.justsaying("light/new_aa_to_watch", { aa: config.OBYTE_IMPORT_FACTORY });
+  client.justsaying("light/new_aa_to_watch", { aa: config.OBYTE_EXPORT_FACTORY });
 
 
   client.justsaying("light/new_aa_to_watch", {

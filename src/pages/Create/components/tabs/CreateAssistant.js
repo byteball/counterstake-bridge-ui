@@ -13,8 +13,8 @@ import config from "appConfig";
 
 export const assistantFactoryAAs = {
   Obyte: {
-    import: config.OBYTE_ASSISTANT_IMPORT_FACTORY[config.OBYTE_ASSISTANT_IMPORT_FACTORY.length - 1],
-    export: config.OBYTE_ASSISTANT_EXPORT_FACTORY[config.OBYTE_ASSISTANT_EXPORT_FACTORY.length - 1]
+    import: config.OBYTE_ASSISTANT_IMPORT_FACTORY,
+    export: config.OBYTE_ASSISTANT_EXPORT_FACTORY
   },
 }
 

@@ -74,11 +74,11 @@ export const createBridgeOnEVM = async ({
 
 export const getFactoryContractAddressByNetwork = (network) => {
   if (network === "Ethereum") {
-    return config.ETHEREUM_BRIDGE_FACTORY[config.ETHEREUM_BRIDGE_FACTORY.length - 1];
+    return config.ETHEREUM_BRIDGE_FACTORY;
   } else if (network === "BSC") {
-    return config.BSC_BRIDGE_FACTORY[config.BSC_BRIDGE_FACTORY.length - 1];
+    return config.BSC_BRIDGE_FACTORY;
   } else if (network === "Polygon") {
-    return config.POLYGON_BRIDGE_FACTORY[config.POLYGON_BRIDGE_FACTORY.length - 1];
+    return config.POLYGON_BRIDGE_FACTORY;
   } else {
     throw Error("unknown EVM network")
   }

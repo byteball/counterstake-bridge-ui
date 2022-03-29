@@ -148,8 +148,8 @@ export const updateBridges = createAsyncThunk(
 export const getBridgesParams = createAsyncThunk(
   'update/getBridgesParams',
   async () => {
-    const import_base_aas = config.OBYTE_IMPORT_BASE_AA;
-    const export_base_aas = config.OBYTE_EXPORT_BASE_AA;
+    const import_base_aas = config.OBYTE_IMPORT_BASE_AAS;
+    const export_base_aas = config.OBYTE_EXPORT_BASE_AAS;
 
     
     let import_aas = []; 
