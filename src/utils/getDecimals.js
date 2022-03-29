@@ -2,6 +2,7 @@ import { ethers } from "ethers";
 
 import { providers } from "services/evm";
 import obyte from "services/socket";
+import config from "appConfig";
 
 export const getDecimals = async (tokenAddress, dst_network) => {
   try {
@@ -9,9 +10,9 @@ export const getDecimals = async (tokenAddress, dst_network) => {
 
       if (tokenAddress === "base") return 9
 
-      const descriptionHashVar = await obyte.api.getAaStateVars({ address: process.env.REACT_APP_TOKEN_REGISTRY, var_prefix: `current_desc_${tokenAddress}` });
+      const descriptionHashVar = await obyte.api.getAaStateVars({ address: config.TOKEN_REGISTRY, var_prefix: `current_desc_${tokenAddress}` });
       const descriptionHash = descriptionHashVar[`current_desc_${tokenAddress}`]
-      const decimalsVar = descriptionHash && await obyte.api.getAaStateVars({ address: process.env.REACT_APP_TOKEN_REGISTRY, var_prefix: `decimals_${descriptionHash}` });
+      const decimalsVar = descriptionHash && await obyte.api.getAaStateVars({ address: config.TOKEN_REGISTRY, var_prefix: `decimals_${descriptionHash}` });
 
       return decimalsVar?.[`decimals_${descriptionHash}`] || 0
     } else {

@@ -1,6 +1,8 @@
 import { LoadingOutlined } from "@ant-design/icons";
-import { Result, Button } from "antd"
+import { Result, Button } from "antd";
+
 import { generateLink } from "utils";
+import config from "appConfig";
 
 export const CreateForward = ({ assistant_aa, forward_status }) => {
 
@@ -13,7 +15,7 @@ export const CreateForward = ({ assistant_aa, forward_status }) => {
         create: 1,
         assistant: assistant_aa
       },
-      aa: process.env.REACT_APP_IMPORT_FORWARD_FACTORY
+      aa: config.IMPORT_FORWARD_FACTORY
     });
   }
 

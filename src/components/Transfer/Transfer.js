@@ -19,11 +19,12 @@ import { LineIcon } from "components/LineIcon/LineIcon";
 import { selectChainId } from "store/chainIdSlice";
 import { chainIds } from "chainIds";
 import { changeNetwork } from "utils/changeNetwork";
+import config from "appConfig";
 
 const { Step } = Steps;
 const { Countdown } = Statistic;
 
-const environment = process.env.REACT_APP_ENVIRONMENT;
+const environment = config.ENVIRONMENT;
 const numberOfMinutesWaitingForMoreConfirmations = 5;
 
 export const Transfer = (t) => {

@@ -1,5 +1,5 @@
 import { CheckCircleOutlined } from "@ant-design/icons";
-import { Button, Popconfirm, Result, Spin, Steps } from "antd"
+import { Button, Popconfirm, Result, Spin, Steps } from "antd";
 import { useWindowSize } from "hooks/useWindowSize";
 import QRButton from "obyte-qr-button";
 import { useDispatch, useSelector } from "react-redux";
@@ -9,11 +9,12 @@ import { removeCreationOrder, updateAssistantOrderStatus } from "store/settingsS
 import { generateLink } from 'utils';
 import { createPooledAssistantOnEVM } from "../../utils/createPooledAssistantOnEVM";
 import { AssistantIcon } from "../CreateBridgeSteps/AssistantIcon";
+import config from "appConfig";
 
 export const assistantFactoryAAs = {
   Obyte: {
-    import: process.env.REACT_APP_OBYTE_ASSISTANT_IMPORT_FACTORY,
-    export: process.env.REACT_APP_OBYTE_ASSISTANT_EXPORT_FACTORY,
+    import: config.OBYTE_ASSISTANT_IMPORT_FACTORY,
+    export: config.OBYTE_ASSISTANT_EXPORT_FACTORY
   },
 }
 
@@ -81,7 +82,7 @@ export const CreateAssistant = ({ orderData = {} }) => {
 
 
 
-export const CreateAssistantStep = ({ network, manager, params, factoryAddress, bridge_aa, symbol, shares_symbol, label, type, onRequest, onCreate }) => {
+export const CreateAssistantStep = ({ network, manager, params, factoryAddress, bridge_aa, symbol, shares_symbol, label, type, oracle, onRequest, onCreate }) => {
   const link = network === "Obyte" ? generateLink({ amount: 1e4, data: { manager: manager, ...params, bridge_aa }, aa: factoryAddress }) : "#";
 
   const createEVMAssistant = () => {
@@ -95,6 +96,7 @@ export const CreateAssistantStep = ({ network, manager, params, factoryAddress, 
         symbol: shares_symbol,
         bridgeSymbol: symbol,
         type,
+        oracle,
         onRequest,
         onCreate
       });
@@ -112,7 +114,7 @@ export const CreateAssistantStep = ({ network, manager, params, factoryAddress, 
 }
 
 export const CreateSymbol = ({ shares_symbol, shares_asset, symbol, manager, type }) => {
-  const link = generateLink({ amount: 1e8, data: { symbol: shares_symbol, asset: shares_asset, decimals: 9, description: `${symbol} ${type} assistant shares by ${manager}` }, aa: process.env.REACT_APP_TOKEN_REGISTRY });
+  const link = generateLink({ amount: 1e8, data: { symbol: shares_symbol, asset: shares_asset, decimals: 9, description: `${symbol} ${type} assistant shares by ${manager}` }, aa: config.TOKEN_REGISTRY });
 
   return <Result
     title={`Create ${shares_symbol} symbol for shares`}

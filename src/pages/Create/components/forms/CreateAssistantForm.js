@@ -15,6 +15,10 @@ import { selectDestAddress, setDestAddress } from "store/destAddressSlice";
 import { getSymbol } from "utils";
 import { selectTokenRegistryState } from 'store/tokenRegistrySlice';
 import { estimateGasForCreationAssistant } from '../CreateBridgeSteps/utils/estimateGas';
+import config from "appConfig";
+import { oracleAddresses } from '../CreateBridgeSteps/ConfigurationStep';
+import { getOraclePrice } from 'utils/getOraclePrice';
+import { nativeSymbols } from 'nativeSymbols';
 
 const { Option } = Select;
 
@@ -29,7 +33,7 @@ export const initialExportParams = {
   success_fee: 0.1
 }
 
-const environment = process.env.REACT_APP_ENVIRONMENT;
+const environment = config.ENVIRONMENT;
 
 export const CreateAssistantForm = () => {
   const dispatch = useDispatch();
@@ -45,6 +49,8 @@ export const CreateAssistantForm = () => {
   const [manager, setManager] = useState({});
   const [stakeSymbol, setStakeSymbol] = useState(null);
   const [estimateGas, setEstimateGas] = useState({ value: 0, loading: false, error: false });
+  const [oracle, setOracle] = useState({ value: "", valid: false });
+  const [checkedOracle, setCheckedOracle] = useState({ valid: undefined, price: undefined });
 
   const currentSide = selectedBridgeSide ? bridgeAAs[selectedBridgeSide] : undefined;
   const factoryAddress = currentSide && assistantFactoryAAs[currentSide.network] && assistantFactoryAAs[currentSide.network][currentSide.type];
@@ -85,6 +91,14 @@ export const CreateAssistantForm = () => {
       } catch {
         setStakeSymbol(null);
       }
+
+      if (currentSide.type === "export" && currentSide.network !== "Obyte"){
+        setOracle({ value: oracleAddresses[currentSide.network], valid: true })
+      }
+
+      setCheckedOracle({ valid: undefined, price: undefined });
+
+      setSymbol({ value: "", valid: false, isTaken: null, isLoading: false })
     }
   }, [selectedBridgeSide]);
 
@@ -138,7 +152,8 @@ export const CreateAssistantForm = () => {
       shares_symbol: symbol.value,
       symbol: currentSide.symbol,
       author: addresses[currentSide.network] || null,
-      type: currentSide.type
+      type: currentSide.type,
+      oracle: currentSide.network !== "Obyte" && currentSide.type === "export" ? oracle.value : undefined
     }));
   }
 
@@ -157,6 +172,18 @@ export const CreateAssistantForm = () => {
     } else {
       setSymbol(s => ({ ...s, isTaken: true, isLoading: false }));
     }
+  }
+
+  const handleChangeOracleAddress = (value) => {
+    setOracle({ value, valid: isValidManager(value) })
+    setCheckedOracle({ valid: undefined, price: undefined });
+  }
+
+  const checkOracle = async () => {
+    if (currentSide.network === "Obyte") return setCheckedOracle(false);
+   
+    const [valid, price] = await getOraclePrice({ network: currentSide.network, home_asset: currentSide.symbol, oracle: oracle.value });
+    setCheckedOracle({ valid, price });
   }
 
   if (sharesSymbols.length === 0) return "Loading..."
@@ -182,6 +209,32 @@ export const CreateAssistantForm = () => {
             onChange={(ev) => handleChangeManager(ev.target.value)}
           />
         </Form.Item>
+
+        {currentSide.network !== "Obyte" && currentSide.type === "export" && <Row gutter={8}>
+          <Col md={{ span: 24 }} sm={{ span: 24 }} xs={{ span: 24 }}>
+            <div>Oracle <InfoTooltip title={"Oracles that report the price of asset in terms of native asset."} /></div> 
+            <Form.Item>
+              <Input.Group compact>
+                <Input
+                  placeholder="Oracle"
+                  autoComplete="off"
+                  className="evmHashOrAddress"
+                  style={{ width: 'calc(100% - 81px)' }}
+                  spellCheck="false"
+                  onChange={(e) => handleChangeOracleAddress(e.target.value)}
+                  value={oracle.value}
+                />
+                <Button size="large" type="primary" disabled={!oracle.valid || checkedOracle.valid !== undefined} onClick={checkOracle}>Check</Button>
+              </Input.Group>
+              {checkedOracle.valid !== undefined && <>
+                {checkedOracle.valid ? <div style={{ color: "green", marginTop: 10 }}>
+                  <div>1 {currentSide.symbol} = {checkedOracle.price} {nativeSymbols[currentSide.network]}</div>
+                  <div>1 {nativeSymbols[currentSide.network]} = {+Number(1 / checkedOracle.price)} {currentSide.symbol}</div>
+                </div> : <div style={{ color: "red", marginTop: 10 }}>Oracle is invalid or empty</div>}
+              </>}
+            </Form.Item>
+          </Col>
+        </Row>}
 
         <Form.Item label="Symbol" extra={symbol?.isTaken ? <div style={{ color: "red" }}>Symbol already taken</div> : (symbol?.isTaken === false && <div style={{ color: "green" }}>Symbol available</div>)}>
           <Input.Group compact>
@@ -215,9 +268,8 @@ export const CreateAssistantForm = () => {
           </div> : <div style={{ marginBottom: 20 }}>Calculate the estimated cost of gas...</div>}
         </Row>}
 
-
         <Form.Item>
-          <Button type="primary" disabled={!paramsAreValid || !manager.valid || symbol?.isTaken === true || symbol?.isTaken === null} onClick={addCreateAssistantOrder}>Create</Button>
+          <Button type="primary" disabled={!paramsAreValid || !manager.valid || symbol?.isTaken === true || symbol?.isTaken === null || (currentSide.network !== "Obyte" && currentSide.type === "export" && checkedOracle.valid !== true)} onClick={addCreateAssistantOrder}>Create</Button>
         </Form.Item>
       </>}
     </Form>

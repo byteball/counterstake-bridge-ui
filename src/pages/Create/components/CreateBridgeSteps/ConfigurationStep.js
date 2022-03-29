@@ -12,52 +12,55 @@ import { configureBridge } from "store/settingsSlice";
 import { getOraclePrice } from "utils/getOraclePrice";
 import { selectSharesSymbols } from "store/assistantsSlice";
 import { selectTokenRegistryState } from "store/tokenRegistrySlice";
+import config from "appConfig";
+import { nativeSymbols } from "nativeSymbols";
 
 import styles from "../../CreatePage.module.css";
-const environment = process.env.REACT_APP_ENVIRONMENT;
+
+const environment = config.ENVIRONMENT;
 
 const stakeTokens = {
-    Obyte: [
-      {
-        asset: 'base',
-        symbol: "GBYTE",
-        decimals: 9,
-        large_threshold: 1000,
-        min_stake: 1
-      },
-      {
-        asset: environment === "testnet" ? "/YZQqJFN71D0Xa7w/WRWhnNwCxQojItoQITl9M9cMME=" : "/YZQqJFN71D0Xa7w/WRWhnNwCxQojItoQITl9M9cMME=",
-        symbol: "OUSD",
-        decimals: 4,
-        large_threshold: 100000,
-        min_stake: 20
-      }
-    ],
-    Polygon: [
-      {
-        asset: ethers.constants.AddressZero,
-        symbol: "MATIC",
-        large_threshold: 100000,
-        decimals: 18
-      }
-    ],
-    BSC: [
-      {
-        asset: ethers.constants.AddressZero,
-        symbol: "BNB",
-        large_threshold: 1000,
-        decimals: 18
-      }
-    ],
-    Ethereum: [
-      {
-        asset: ethers.constants.AddressZero,
-        symbol: "ETH",
-        large_threshold: 100,
-        decimals: 18
-      }
-    ]
-  }
+  Obyte: [
+    {
+      asset: 'base',
+      symbol: "GBYTE",
+      decimals: 9,
+      large_threshold: 1000,
+      min_stake: 1
+    },
+    {
+      asset: environment === "testnet" ? "/YZQqJFN71D0Xa7w/WRWhnNwCxQojItoQITl9M9cMME=" : "/YZQqJFN71D0Xa7w/WRWhnNwCxQojItoQITl9M9cMME=",
+      symbol: "OUSD",
+      decimals: 4,
+      large_threshold: 100000,
+      min_stake: 20
+    }
+  ],
+  Polygon: [
+    {
+      asset: ethers.constants.AddressZero,
+      symbol: "MATIC",
+      large_threshold: 100000,
+      decimals: 18
+    }
+  ],
+  BSC: [
+    {
+      asset: ethers.constants.AddressZero,
+      symbol: "BNB",
+      large_threshold: 1000,
+      decimals: 18
+    }
+  ],
+  Ethereum: [
+    {
+      asset: ethers.constants.AddressZero,
+      symbol: "ETH",
+      large_threshold: 100,
+      decimals: 18
+    }
+  ]
+}
 
 export const oracleAddresses = environment === "testnet"
   ? {
@@ -115,6 +118,9 @@ export const ConfigurationStep = ({ home_network, home_asset, home_decimals, for
   const [oracle, setOracle] = useState({});
 
   const [checkedOracle, setCheckedOracle] = useState({ valid: undefined, price: undefined });
+
+  const [exportAssistantOracle, setExportAssistantOracle] = useState({ value: "", valid: false });
+  const [checkedExportAssistantOracle, setCheckedExportAssistantOracle] = useState({ valid: undefined, price: undefined });
 
   const [homeAssistantSharesSymbol, setHomeAssistantSharesSymbol] = useState({ value: "", valid: false, isTaken: undefined });
   const [foreignAssistantSharesSymbol, setForeignAssistantSharesSymbol] = useState({ value: "", valid: false, isTaken: undefined });
@@ -197,6 +203,10 @@ export const ConfigurationStep = ({ home_network, home_asset, home_decimals, for
     if (foreign_network !== "Obyte") {
       setOracle({ value: oracleAddresses[foreign_network], valid: true })
     }
+
+    if (assistants_will_be_created) {
+      setExportAssistantOracle({ value: oracleAddresses[home_network], valid: true })
+    }
   }, []);
 
 
@@ -205,7 +215,8 @@ export const ConfigurationStep = ({ home_network, home_asset, home_decimals, for
   // eslint-disable-next-line
   const assistantParamsIsValid = (!assistants_will_be_created) || (foreignAssistantSharesSymbol.isTaken === false && foreignAssistantSharesSymbol.valid && homeAssistantSharesSymbol.valid && homeAssistantSharesSymbol.isTaken === false && homeManagerAddress.valid && foreignManagerAddress.valid && !Object.entries(homeAssistantParams).find(([_, { valid }]) => !valid)) && !Object.entries(foreignAssistantParams).find(([_, { valid }]) => !valid);
   const bridgesParamsIsValid = !Object.entries(homeParams).find(([_, { valid }]) => !valid) && !Object.entries(foreignParams).find(([_, { valid }]) => !valid) && (foreign_network !== "Obyte" ? oracle.valid && checkedOracle.valid : checkedOracle.valid);
-  const activeBtn = assistantParamsIsValid && bridgesParamsIsValid;
+  const assistantOracleValid = !assistants_will_be_created || home_network === "Obyte" || checkedExportAssistantOracle.valid;
+  const activeBtn = assistantParamsIsValid && bridgesParamsIsValid && assistantOracleValid;
 
   // handles
   const handleChangeAssistantSymbol = (side, value) => {
@@ -304,6 +315,11 @@ export const ConfigurationStep = ({ home_network, home_asset, home_decimals, for
     setCheckedOracle({ valid: undefined, price: undefined });
   }
 
+  const handleChangeExportAssistantOracleAddress = (network, value) => {
+    setExportAssistantOracle({ value, valid: isValidRecipient(value, network) })
+    setCheckedExportAssistantOracle({ valid: undefined, price: undefined });
+  }
+
   const handleChangeManagerAddress = (side, network, value) => {
     let address = value;
     try {
@@ -369,11 +385,15 @@ export const ConfigurationStep = ({ home_network, home_asset, home_decimals, for
       home_manager_address,
       foreign_manager_address,
       foreign_assistant_shares_symbol: foreignAssistantSharesSymbol.value,
-      home_assistant_shares_symbol: homeAssistantSharesSymbol.value
+      home_assistant_shares_symbol: homeAssistantSharesSymbol.value,
     };
 
     if (oraclesString) {
       params.oracles = oraclesString;
+    }
+
+    if (home_network !== "Obyte" && assistants_will_be_created) {
+      params.export_assistant_oracle = exportAssistantOracle.value;
     }
 
     params.foreign_params.stake_asset_decimals = foreignParams?.stake_asset?.value && stakeTokens[foreign_network]?.find((t) => t.asset === foreignParams?.stake_asset?.value)?.decimals;
@@ -393,6 +413,13 @@ export const ConfigurationStep = ({ home_network, home_asset, home_decimals, for
     const [valid, price] = await getOraclePrice({ ...oracles, network: foreign_network, home_asset, oracle: oracle.value });
     setCheckedOracle({ valid, price });
 
+  }
+
+  const checkExportAssistantOracle = async () => {
+    if (!exportAssistantOracle.valid) return setCheckedExportAssistantOracle({ valid: false, price: 0 });
+
+    const [valid, price] = await getOraclePrice({ network: home_network, home_asset: home_symbol, oracle: exportAssistantOracle.value });
+    setCheckedExportAssistantOracle({ valid, price });
   }
 
   const getPeriodsDescription = (periodsStr) => {
@@ -447,7 +474,7 @@ export const ConfigurationStep = ({ home_network, home_asset, home_decimals, for
   }
 
   return <div>
-    <h2 style={{ marginTop: 50 }}>Bridge on {home_network} side</h2>
+    <h2 style={{ marginTop: 50 }}>Bridge on {home_network} side (export)</h2>
     <Form>
       <Row gutter={8}>
         <Col md={{ span: 12 }} sm={{ span: 16 }} xs={{ span: 24 }}>
@@ -485,7 +512,7 @@ export const ConfigurationStep = ({ home_network, home_asset, home_decimals, for
       </Row>
     </Form>
 
-    <h2 style={{ marginTop: 50 }}>Bridge on {foreign_network} side</h2>
+    <h2 style={{ marginTop: 50 }}>Bridge on {foreign_network} side (import)</h2>
     <Form>
       <Row gutter={8}>
         <Col md={{ span: 24 }} sm={{ span: 24 }} xs={{ span: 24 }}>
@@ -537,18 +564,19 @@ export const ConfigurationStep = ({ home_network, home_asset, home_decimals, for
       {foreign_network !== "Obyte" ? <Row gutter={8}>
         <Col md={{ span: 24 }} sm={{ span: 24 }} xs={{ span: 24 }}>
           <div className={styles.label}>Oracle <InfoTooltip title={getParameterList(home_network).oracles.description} /></div>
-          <Form.Item
-            validateStatus={!isEmpty(oracle.value) ? (oracle.valid ? "success" : "error") : undefined}
-            hasFeedback={true}
-          >
-            <Input
-              placeholder="Oracle"
-              autoComplete="off"
-              className="evmHashOrAddress"
-              spellCheck="false"
-              onChange={(e) => handleChangeOracleAddress(foreign_network, e.target.value)}
-              value={oracle.value}
-            />
+          <Form.Item hasFeedback={true}>
+            <Input.Group compact>
+              <Input
+                placeholder="Oracle"
+                autoComplete="off"
+                style={{ width: 'calc(100% - 81px)' }}
+                className="evmHashOrAddress"
+                spellCheck="false"
+                onChange={(e) => handleChangeOracleAddress(foreign_network, e.target.value)}
+                value={oracle.value}
+              />
+              <Button type="primary" size="large" disabled={checkedOracle.valid !== undefined} onClick={checkOracle}>Check</Button>
+            </Input.Group>
           </Form.Item>
         </Col>
       </Row> : <div>
@@ -678,19 +706,22 @@ export const ConfigurationStep = ({ home_network, home_asset, home_decimals, for
           </Col>
         </Row>
       </div>}
-      <Row>
-        <Form.Item extra={checkedOracle.valid === false ? <p style={{ color: "red" }}>Oracle is invalid or empty</p> : ""}>
+      {foreign_network === "Obyte" && <Row>
+        <Form.Item>
           <Button type="primary" disabled={checkedOracle.valid !== undefined} onClick={checkOracle}>Check oracle</Button>
-          {checkedOracle.valid && checkedOracle.price && <div style={{ color: "green", marginTop: 10 }}>
-            <div>1 {foreign_symbol} = {Number(checkedOracle.price)} {stake_asset_symbol}</div>
-            <div>1 {stake_asset_symbol} = {+Number(1 / checkedOracle.price)} {foreign_symbol}</div>
-          </div>}
         </Form.Item>
+      </Row>}
+
+      <Row>
+        {checkedOracle.valid !== undefined && (checkedOracle.valid ? <div style={{ color: "green" }}>
+          <div>1 {foreign_symbol} = {Number(checkedOracle.price)} {stake_asset_symbol}</div>
+          <div>1 {stake_asset_symbol} = {+Number(1 / checkedOracle.price)} {foreign_symbol}</div>
+        </div> : <div style={{ color: "red" }}>Oracle is invalid or empty </div>)}
       </Row>
     </Form>
 
     {assistants_will_be_created && <div style={{ opacity: checkedOracle.valid ? 1 : 0.2 }}>
-      <h2 style={{ marginTop: 50 }}>Assistants on {home_network} side</h2>
+      <h2 style={{ marginTop: 50 }}>Assistants on {home_network} side (export)</h2>
       <Form>
         <Row gutter={8}>
           <Col md={{ span: 16 }} sm={{ span: 24 }} xs={{ span: 24 }}>
@@ -713,6 +744,34 @@ export const ConfigurationStep = ({ home_network, home_asset, home_decimals, for
           </Col>
         </Row>
 
+        {home_network !== "Obyte" && <Row gutter={8}>
+          <Col md={{ span: 24 }} sm={{ span: 24 }} xs={{ span: 24 }}>
+            <div>Oracle <InfoTooltip title="Oracles that report the price of asset in terms of native asset." /></div>
+            <Form.Item
+              validateStatus={!isEmpty(oracle.value) ? (oracle.valid ? "success" : "error") : undefined}
+            >
+              <Input.Group compact>
+                <Input
+                  placeholder="Oracle"
+                  autoComplete="off"
+                  style={{ width: 'calc(100% - 81px)' }}
+                  className="evmHashOrAddress"
+                  spellCheck="false"
+                  onChange={(e) => handleChangeExportAssistantOracleAddress(home_network, e.target.value)}
+                  value={exportAssistantOracle.value}
+                />
+                <Button size="large" disabled={!exportAssistantOracle.valid || checkedExportAssistantOracle.valid !== undefined} onClick={checkExportAssistantOracle} type="primary">Check</Button>
+              </Input.Group>
+              {home_network !== "Obyte" && checkedExportAssistantOracle.valid !== undefined && <>
+                {checkedExportAssistantOracle.valid ? <div style={{ color: "green", marginBottom: 10 }}>
+                  <div>1 {home_symbol} = {checkedExportAssistantOracle.price} {nativeSymbols[home_network]}</div>
+                  <div>1 {nativeSymbols[home_network]} = {+Number(1 / checkedExportAssistantOracle.price)} {home_symbol}</div>
+                </div> : <div style={{ color: "red", marginBottom: 10 }}>Oracle is invalid or empty</div>}
+              </>}
+            </Form.Item>
+          </Col>
+        </Row>}
+
         <Row gutter={8}>
           <Col md={{ span: 8 }} sm={{ span: 16 }} xs={{ span: 24 }}>
             <div className={styles.label}>Management fee <InfoTooltip title="Yearly fee charged by the manager for managing the pool." /></div>
@@ -729,7 +788,7 @@ export const ConfigurationStep = ({ home_network, home_asset, home_decimals, for
         </Row>
       </Form>
 
-      <h2 style={{ marginTop: 50 }}>Assistants on {foreign_network} side</h2>
+      <h2 style={{ marginTop: 50 }}>Assistants on {foreign_network} side (import)</h2>
       <Form>
         <Row gutter={8}>
           <Col md={{ span: 16 }} sm={{ span: 24 }} xs={{ span: 24 }}>

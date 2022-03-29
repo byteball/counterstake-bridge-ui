@@ -1,11 +1,12 @@
 import { encodeData } from "./encodeData";
+import config from "appConfig";
 
 const suffixes = {
   mainnet: "",
   testnet: "-tn",
   devnet: "-dev",
 };
-const suffix = suffixes[process.env.REACT_APP_ENVIRONMENT];
+const suffix = suffixes[config.ENVIRONMENT];
 
 export const generateLink = ({ amount, data, from_address, aa, asset, is_single }) => {
   let link = `obyte${suffix}:${aa}?amount=${Math.round(amount)}&asset=${encodeURIComponent(asset || "base")}`;

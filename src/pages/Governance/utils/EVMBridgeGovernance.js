@@ -7,8 +7,9 @@ import { counterstakeAbi, votedValueAddressAbi, votedValueUintAbi, votedValueUin
 import { providers } from "services/evm";
 import { getParameterList } from "./getParameterList";
 import { changeNetwork } from "utils/changeNetwork";
+import config from "appConfig";
 
-const environment = process.env.REACT_APP_ENVIRONMENT;
+const environment = config.ENVIRONMENT;
 
 const isValidEVMAddress = (address) => ethers.utils.getAddress(address) === address;
 

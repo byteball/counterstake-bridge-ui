@@ -1,7 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { chainIds } from 'chainIds';
 
-const environment = process.env.REACT_APP_ENVIRONMENT;
+import { chainIds } from 'chainIds';
+import config from "appConfig";
+
+const environment = config.ENVIRONMENT;
 
 const initialState = {
   Obyte: null

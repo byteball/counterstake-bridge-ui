@@ -1,4 +1,6 @@
-const URL = process.env.REACT_APP_BACKEND_URL;
+import config from "appConfig";
+
+const URL = config.BACKEND_URL;
 
 const request = async (endpoint, options) => {
   const response = await fetch(`${URL}${endpoint}`, {

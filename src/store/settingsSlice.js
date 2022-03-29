@@ -95,7 +95,7 @@ export const {
 
 export default settingsSlice.reducer;
 
-export const selectSortType = state => state.settings.assistants.sortType;
+export const selectSortType = state => state.settings.assistants?.sortType || "bridge";
 export const selectFilters = state => state.settings.assistants.filters;
 export const selectAssistantCreationOrder = state => state.settings.creationOrders?.assistant || null;
 export const selectBridgeCreationOrder = state => state.settings.creationOrders?.bridge || null;

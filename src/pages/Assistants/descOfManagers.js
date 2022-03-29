@@ -1,6 +1,6 @@
-const environment = process.env.REACT_APP_ENVIRONMENT;
+import config from "appConfig";
 
-export const descOfManagers = environment === "mainnet"
+export const descOfManagers = config.ENVIRONMENT === "mainnet"
   ? {
     KUNNTFAD3G55IWXSNKTDRKH222E4DF7R: {
       name: "tonych (Obyte)",

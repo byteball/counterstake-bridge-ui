@@ -12,10 +12,11 @@ import { generateLink } from "utils";
 import { ERC20Abi, exportAssistantAbi, importAssistantAbi } from "abi";
 import { ChangeAddressModal } from "modals/ChangeAddressModal";
 import { updateEvmAssistant } from "store/thunks/updateEvmAssistant";
+import config from "appConfig";
 
 const f = (x) => (~(x + "").indexOf(".") ? (x + "").split(".")[1].length : 0);
 
-const environment = process.env.REACT_APP_ENVIRONMENT;
+const environment = config.ENVIRONMENT;
 
 const MAX_UINT256 = ethers.BigNumber.from(2).pow(256).sub(1);
 

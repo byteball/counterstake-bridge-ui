@@ -1,6 +1,7 @@
 import { chainIds } from "chainIds";
+import config from "appConfig";
 
-const environment = process.env.REACT_APP_ENVIRONMENT;
+const environment = config.ENVIRONMENT;
 
 const rpcMeta = {
   mainnet: {

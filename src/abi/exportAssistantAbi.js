@@ -22,6 +22,11 @@ export const exportAssistantAbi = [
         "type": "uint16"
       },
       {
+        "internalType": "address",
+        "name": "oracleAddr",
+        "type": "address"
+      },
+      {
         "internalType": "uint8",
         "name": "_exponent",
         "type": "uint8"
@@ -235,19 +240,6 @@ export const exportAssistantAbi = [
     "inputs": [
       {
         "internalType": "address",
-        "name": "newManager",
-        "type": "address"
-      }
-    ],
-    "name": "assignNewManager",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
         "name": "account",
         "type": "address"
       }
@@ -311,98 +303,6 @@ export const exportAssistantAbi = [
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "stake_asset_amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "buyShares",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "claim_num",
-        "type": "uint256"
-      },
-      {
-        "internalType": "enum CounterstakeLibrary.Side",
-        "name": "stake_on",
-        "type": "uint8"
-      },
-      {
-        "internalType": "uint256",
-        "name": "stake",
-        "type": "uint256"
-      }
-    ],
-    "name": "challenge",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "string",
-        "name": "txid",
-        "type": "string"
-      },
-      {
-        "internalType": "uint32",
-        "name": "txts",
-        "type": "uint32"
-      },
-      {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      },
-      {
-        "internalType": "int256",
-        "name": "reward",
-        "type": "int256"
-      },
-      {
-        "internalType": "string",
-        "name": "sender_address",
-        "type": "string"
-      },
-      {
-        "internalType": "address payable",
-        "name": "recipient_address",
-        "type": "address"
-      },
-      {
-        "internalType": "string",
-        "name": "data",
-        "type": "string"
-      }
-    ],
-    "name": "claim",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "decimals",
-    "outputs": [
-      {
-        "internalType": "uint8",
-        "name": "",
-        "type": "uint8"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "address",
         "name": "spender",
         "type": "address"
@@ -422,6 +322,19 @@ export const exportAssistantAbi = [
       }
     ],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "exit_fee10000",
+    "outputs": [
+      {
+        "internalType": "uint16",
+        "name": "",
+        "type": "uint16"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -471,49 +384,6 @@ export const exportAssistantAbi = [
         "type": "bool"
       }
     ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "bridgeAddr",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "managerAddr",
-        "type": "address"
-      },
-      {
-        "internalType": "uint16",
-        "name": "_management_fee10000",
-        "type": "uint16"
-      },
-      {
-        "internalType": "uint16",
-        "name": "_success_fee10000",
-        "type": "uint16"
-      },
-      {
-        "internalType": "uint8",
-        "name": "_exponent",
-        "type": "uint8"
-      },
-      {
-        "internalType": "string",
-        "name": "_name",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "_symbol",
-        "type": "string"
-      }
-    ],
-    "name": "initExportAssistant",
-    "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
@@ -570,41 +440,29 @@ export const exportAssistantAbi = [
     "type": "function"
   },
   {
-    "inputs": [
+    "inputs": [],
+    "name": "network_fee_compensation",
+    "outputs": [
       {
         "internalType": "uint256",
-        "name": "claim_num",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "claimed_amount",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "won_stake",
-        "type": "uint256"
-      },
-      {
-        "internalType": "string",
         "name": "",
-        "type": "string"
-      },
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "oracleAddress",
+    "outputs": [
       {
         "internalType": "address",
         "name": "",
         "type": "address"
-      },
-      {
-        "internalType": "string",
-        "name": "",
-        "type": "string"
       }
     ],
-    "name": "onReceivedFromClaim",
-    "outputs": [],
-    "stateMutability": "nonpayable",
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -621,47 +479,42 @@ export const exportAssistantAbi = [
     "type": "function"
   },
   {
-    "inputs": [
+    "inputs": [],
+    "name": "profit_diffusion_period",
+    "outputs": [
       {
         "internalType": "uint256",
-        "name": "claim_num",
-        "type": "uint256"
-      }
-    ],
-    "name": "recordLoss",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "shares_amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "redeemShares",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "contract GovernanceFactory",
-        "name": "governanceFactory",
-        "type": "address"
-      },
-      {
-        "internalType": "contract VotedValueFactory",
         "name": "",
-        "type": "address"
+        "type": "uint256"
       }
     ],
-    "name": "setupGovernance",
-    "outputs": [],
-    "stateMutability": "nonpayable",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "recent_profit",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "recent_profit_ts",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -783,6 +636,246 @@ export const exportAssistantAbi = [
     "type": "function"
   },
   {
+    "stateMutability": "payable",
+    "type": "receive"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "bridgeAddr",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "managerAddr",
+        "type": "address"
+      },
+      {
+        "internalType": "uint16",
+        "name": "_management_fee10000",
+        "type": "uint16"
+      },
+      {
+        "internalType": "uint16",
+        "name": "_success_fee10000",
+        "type": "uint16"
+      },
+      {
+        "internalType": "address",
+        "name": "oracleAddr",
+        "type": "address"
+      },
+      {
+        "internalType": "uint8",
+        "name": "_exponent",
+        "type": "uint8"
+      },
+      {
+        "internalType": "string",
+        "name": "_name",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_symbol",
+        "type": "string"
+      }
+    ],
+    "name": "initExportAssistant",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getUnavailableProfit",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "txid",
+        "type": "string"
+      },
+      {
+        "internalType": "uint32",
+        "name": "txts",
+        "type": "uint32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "int256",
+        "name": "reward",
+        "type": "int256"
+      },
+      {
+        "internalType": "string",
+        "name": "sender_address",
+        "type": "string"
+      },
+      {
+        "internalType": "address payable",
+        "name": "recipient_address",
+        "type": "address"
+      },
+      {
+        "internalType": "string",
+        "name": "data",
+        "type": "string"
+      }
+    ],
+    "name": "claim",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "claim_num",
+        "type": "uint256"
+      },
+      {
+        "internalType": "enum CounterstakeLibrary.Side",
+        "name": "stake_on",
+        "type": "uint8"
+      },
+      {
+        "internalType": "uint256",
+        "name": "stake",
+        "type": "uint256"
+      }
+    ],
+    "name": "challenge",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes4",
+        "name": "interfaceId",
+        "type": "bytes4"
+      }
+    ],
+    "name": "supportsInterface",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "claim_num",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "claimed_amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "won_stake",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      },
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "name": "onReceivedFromClaim",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "claim_num",
+        "type": "uint256"
+      }
+    ],
+    "name": "recordLoss",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "claim_num",
+        "type": "uint256"
+      }
+    ],
+    "name": "recordWin",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "stake_asset_amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "buyShares",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "shares_amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "redeemShares",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "withdrawManagementFee",
     "outputs": [],
@@ -797,7 +890,125 @@ export const exportAssistantAbi = [
     "type": "function"
   },
   {
-    "stateMutability": "payable",
-    "type": "receive"
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "newManager",
+        "type": "address"
+      }
+    ],
+    "name": "assignNewManager",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "contract GovernanceFactory",
+        "name": "governanceFactory",
+        "type": "address"
+      },
+      {
+        "internalType": "contract VotedValueFactory",
+        "name": "votedValueFactory",
+        "type": "address"
+      }
+    ],
+    "name": "setupGovernance",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_profit_diffusion_period",
+        "type": "uint256"
+      }
+    ],
+    "name": "validateProfitDiffusionPeriod",
+    "outputs": [],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_profit_diffusion_period",
+        "type": "uint256"
+      }
+    ],
+    "name": "setProfitDiffusionPeriod",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_exit_fee10000",
+        "type": "uint256"
+      }
+    ],
+    "name": "validateExitFee",
+    "outputs": [],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_exit_fee10000",
+        "type": "uint256"
+      }
+    ],
+    "name": "setExitFee",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "oracleAddr",
+        "type": "address"
+      }
+    ],
+    "name": "validateOracle",
+    "outputs": [],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "oracleAddr",
+        "type": "address"
+      }
+    ],
+    "name": "setOracle",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "decimals",
+    "outputs": [
+      {
+        "internalType": "uint8",
+        "name": "",
+        "type": "uint8"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
   }
 ]

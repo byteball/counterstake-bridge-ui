@@ -23,7 +23,7 @@ const { Countdown } = Statistic;
 /* eslint eqeqeq: "off" */
 
 export const GovernanceItem = (props) => {
-  const { name, value, selectedBridgeAddress, activeGovernance, choice, bridge_network, leader, voteTokenDecimals, voteTokenAddress, voteTokenSymbol, stakeTokenDecimals, stakeTokenSymbol, challenging_period, freeze_period, supports = {}, challenging_period_start_ts, change, balance, activeWallet, contract_address } = props;
+  const { name, value, selectedBridgeAddress, activeGovernance, choice, bridge_network, leader, voteTokenDecimals, voteTokenSymbol, stakeTokenDecimals, stakeTokenSymbol, challenging_period, freeze_period, supports = {}, challenging_period_start_ts, change, balance, activeWallet, contract_address } = props;
   const { rule, description } = getParameterList(bridge_network)?.[name];
 
   const valueView = viewParam({ name, value, network: bridge_network, stakeTokenDecimals, stakeTokenSymbol });
