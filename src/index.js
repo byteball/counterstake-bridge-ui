@@ -1,17 +1,21 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import 'antd/dist/antd.dark.less';
-import './index.css';
-import getStore from "./store";
-
+import { HelmetProvider } from 'react-helmet-async';
 import { Provider } from 'react-redux';
 import ReactGA from "react-ga";
 import { PersistGate } from "redux-persist/integration/react";
-import AppRouter from "./AppRouter";
-import { HelmetProvider } from 'react-helmet-async';
-import reportWebVitals from './reportWebVitals';
+import 'antd/dist/antd.dark.less';
 
-ReactGA.initialize(process.env.REACT_APP_GA_ID);
+import getStore from "./store";
+import AppRouter from "./AppRouter";
+import reportWebVitals from './reportWebVitals';
+import config from "appConfig";
+
+import './index.css';
+
+if (config.GA_ID) {
+  ReactGA.initialize(config.GA_ID);
+}
 
 export const { store, persistor } = getStore();
 

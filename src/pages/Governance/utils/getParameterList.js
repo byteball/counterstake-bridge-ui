@@ -1,8 +1,9 @@
 import { ethers } from "ethers";
 import { isNaN } from "lodash";
 import obyte from "obyte";
+import config from "appConfig";
 
-const environment = process.env.REACT_APP_ENVIRONMENT;
+const environment = config.ENVIRONMENT;
 
 export const getParameterList = (network) => ({
   ratio: {

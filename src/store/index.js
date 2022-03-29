@@ -25,6 +25,8 @@ import assistantsSlice from './assistantsSlice';
 import settingsSlice from './settingsSlice';
 import tokenRegistrySlice from './tokenRegistrySlice';
 
+import config from "appConfig";
+
 const rootReducer = combineReducers({
   transfers: transfersReducer,
   destAddress: destAddressReducer,
@@ -42,7 +44,7 @@ const rootReducer = combineReducers({
 });
 
 const persistConfig = {
-  key: 'root',
+  key: `root${config.ENVIRONMENT === "testnet" ? "-tn" : ""}`,
   version: 1,
   storage,
   whitelist: ['transfers', 'destAddress', 'addedTokens', 'settings'],

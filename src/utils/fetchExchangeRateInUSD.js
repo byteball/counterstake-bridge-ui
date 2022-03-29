@@ -1,8 +1,9 @@
 import { ethers } from "ethers";
 
 import { nativeSymbols } from "nativeSymbols";
+import config from "appConfig";
 
-const environment = process.env.REACT_APP_ENVIRONMENT;
+const environment = config.ENVIRONMENT;
 
 const cache_lifetime = 10 * 60 * 1000; // 10 minutes
 

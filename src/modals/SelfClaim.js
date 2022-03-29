@@ -12,6 +12,7 @@ import { chainIds } from "chainIds";
 import { updateTransferStatus } from "store/transfersSlice";
 import { changeNetwork } from "utils/changeNetwork";
 import { ERC20Abi } from "abi";
+import config from "appConfig";
 
 const counterstakeAbi = [
   "function claim(string memory txid, uint32 txts, uint amount, int reward, uint stake, string memory sender_address, address payable recipient_address, string memory data) payable external"
@@ -19,7 +20,7 @@ const counterstakeAbi = [
 
 const MAX_UINT256 = BigNumber.from(2).pow(256).sub(1);
 
-const environment = process.env.REACT_APP_ENVIRONMENT;
+const environment = config.ENVIRONMENT;
 
 export const SelfClaim = ({ txid, amount, dst_token, sender_address, reward, dst_bridge_aa, dest_address, src_token, txts: txtsCache }) => {
   const { bridgeAAParams, directions } = store.getState();

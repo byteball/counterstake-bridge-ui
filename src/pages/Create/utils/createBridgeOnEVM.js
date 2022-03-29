@@ -2,6 +2,7 @@ import { BigNumber, ethers } from "ethers";
 
 import { counterstakeFactoryAbi } from "abi";
 import { changeNetwork } from "utils/changeNetwork";
+import config from "appConfig";
 
 export const createBridgeOnEVM = async ({
   type,
@@ -73,11 +74,11 @@ export const createBridgeOnEVM = async ({
 
 export const getFactoryContractAddressByNetwork = (network) => {
   if (network === "Ethereum") {
-    return process.env.REACT_APP_ETHEREUM_BRIDGE_FACTORY;
+    return config.ETHEREUM_BRIDGE_FACTORY[config.ETHEREUM_BRIDGE_FACTORY.length - 1];
   } else if (network === "BSC") {
-    return process.env.REACT_APP_BSC_BRIDGE_FACTORY;
+    return config.BSC_BRIDGE_FACTORY[config.BSC_BRIDGE_FACTORY.length - 1];
   } else if (network === "Polygon") {
-    return process.env.REACT_APP_POLYGON_BRIDGE_FACTORY
+    return config.POLYGON_BRIDGE_FACTORY[config.POLYGON_BRIDGE_FACTORY.length - 1];
   } else {
     throw Error("unknown EVM network")
   }

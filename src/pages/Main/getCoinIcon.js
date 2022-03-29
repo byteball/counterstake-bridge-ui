@@ -4,6 +4,8 @@ import { ReactComponent as EthNetwork } from "./img/networks/eth.svg";
 import { ReactComponent as PolygonNetwork } from "./img/networks/polygon.svg";
 import { ReactComponent as DefaultNetwork } from "./img/networks/default.svg";
 
+import config from "appConfig";
+
 import styles from "./coinIcon.module.css";
 
 import { memo } from "react";
@@ -38,7 +40,7 @@ export const getCoinIcon = (network, symbol) => {
 const Coin = memo(({ symbol, icons }) => {
   const smb = symbol.replace(/[0-9]/g, '');
   if (icons.includes(String(symbol).toUpperCase())) {
-    return <img src={`${process.env.REACT_APP_ICON_CDN_URL}/${symbol.toUpperCase()}-INV.svg`} width={40} height={40} key={smb} alt={smb} className={styles.icon} style={{ display: "inherit" }} />
+    return <img src={`${config.ICON_CDN_URL}/${symbol.toUpperCase()}-INV.svg`} width={40} height={40} key={smb} alt={smb} className={styles.icon} style={{ display: "inherit" }} />
   } else {
     return <img src={`https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.17.2/svg/color/${smb.toLowerCase()}.svg`} width={40} height={40} key={smb} alt={smb} className={styles.icon} style={{ display: "inherit" }} onError={(e) => { if (e.target.src !== "plug.svg") { e.target.src = "plug.svg"; e.target.onerror = null } }} />
   }

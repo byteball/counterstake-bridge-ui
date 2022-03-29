@@ -3,12 +3,12 @@ export const assistantFactoryAbi = [
     "inputs": [
       {
         "internalType": "address",
-        "name": "_exportAssistantFactory",
+        "name": "_exportAssistantMaster",
         "type": "address"
       },
       {
         "internalType": "address",
-        "name": "_importAssistantFactory",
+        "name": "_importAssistantMaster",
         "type": "address"
       },
       {
@@ -89,7 +89,7 @@ export const assistantFactoryAbi = [
   },
   {
     "inputs": [],
-    "name": "exportAssistantFactory",
+    "name": "exportAssistantMaster",
     "outputs": [
       {
         "internalType": "address",
@@ -102,7 +102,7 @@ export const assistantFactoryAbi = [
   },
   {
     "inputs": [],
-    "name": "importAssistantFactory",
+    "name": "importAssistantMaster",
     "outputs": [
       {
         "internalType": "address",
@@ -134,6 +134,11 @@ export const assistantFactoryAbi = [
         "internalType": "uint16",
         "name": "_success_fee10000",
         "type": "uint16"
+      },
+      {
+        "internalType": "address",
+        "name": "oracleAddr",
+        "type": "address"
       },
       {
         "internalType": "uint8",

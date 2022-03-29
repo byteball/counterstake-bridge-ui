@@ -15,11 +15,12 @@ import { generateLink } from "utils";
 import { changeNetwork } from "utils/changeNetwork";
 import { ChangeAddressModal } from "./ChangeAddressModal";
 import { updateEvmAssistant } from "store/thunks/updateEvmAssistant";
+import config from "appConfig";
 
 const f = (x) => (~(x + "").indexOf(".") ? (x + "").split(".")[1].length : 0);
 const MAX_UINT256 = BigNumber.from(2).pow(256).sub(1);
 
-const environment = process.env.REACT_APP_ENVIRONMENT;
+const environment = config.ENVIRONMENT;
 
 export const SwapTokensModal = ({ block, size, assistant_aa, network, swap_fee, ts, management_fee, success_fee, image_share, image_asset, image_asset_decimals, image_asset_symbol, image_balance = 0, image_balance_in_work = 0, image_mf = 0, image_sf = 0, image_profit = 0, stake_share, stake_asset, stake_asset_decimals, stake_asset_symbol, stake_balance = 0, stake_balance_in_work = 0, stake_sf = 0, stake_mf = 0, stake_profit = 0 }) => {
   const [amountIn, setAmountIn] = useState();

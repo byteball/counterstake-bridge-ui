@@ -29,6 +29,7 @@ import { selectChainId } from "store/chainIdSlice";
 import { chainIds } from "chainIds";
 import { changeNetwork } from "utils/changeNetwork";
 import historyInstance from "historyInstance";
+import config from "appConfig";
 
 import styles from "./MainPage.module.css";
 
@@ -48,7 +49,7 @@ const erc20Abi = [
   "function balanceOf(address account) public view virtual override returns (uint256)",
 ];
 
-const environment = process.env.REACT_APP_ENVIRONMENT;
+const environment = config.ENVIRONMENT;
 
 const MAX_UINT256 = ethers.BigNumber.from(2).pow(256).sub(1);
 
@@ -392,7 +393,7 @@ export const MainPage = () => {
         address: selectedDestination.dst_bridge_aa,
         symbol,
         decimals: selectedDestination.token.decimals,
-        image: `${process.env.REACT_APP_ICON_CDN_URL}/${String(symbol).toUpperCase()}.svg`
+        image: `${config.ICON_CDN_URL}/${String(symbol).toUpperCase()}.svg`
       },
     };
 

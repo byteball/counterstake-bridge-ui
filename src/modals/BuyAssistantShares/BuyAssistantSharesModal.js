@@ -16,11 +16,12 @@ import { addTokenToTracked, selectAddedTokens } from "store/addedTokensSlice";
 import { ChangeAddressModal } from "modals/ChangeAddressModal";
 import { updateEvmAssistant } from "store/thunks/updateEvmAssistant";
 import browserChatInstance from "utils/browserChat";
+import config from "appConfig";
 
 const { Paragraph } = Typography;
 const f = (x) => (~(x + "").indexOf(".") ? (x + "").split(".")[1].length : 0);
 
-const environment = process.env.REACT_APP_ENVIRONMENT;
+const environment = config.ENVIRONMENT;
 
 const MAX_UINT256 = ethers.BigNumber.from(2).pow(256).sub(1);
 

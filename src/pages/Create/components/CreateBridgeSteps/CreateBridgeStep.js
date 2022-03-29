@@ -7,6 +7,10 @@ import { updateBridgeOrder } from "store/settingsSlice";
 import { generateLink } from "utils";
 import { createBridgeOnEVM } from "../../utils/createBridgeOnEVM";
 import { BridgeView } from "./BridgeView";
+import config from "appConfig";
+
+const actualObyteImportFactory = config.OBYTE_IMPORT_FACTORY[config.OBYTE_IMPORT_FACTORY.length - 1];
+const actualObyteExportFactory = config.OBYTE_EXPORT_FACTORY[config.OBYTE_EXPORT_FACTORY.length - 1];
 
 export const CreateBridgeStep = ({ home_address, foreign_address, foreign_params, home_params, home_decimals, home_network, home_asset, foreign_network, foreign_asset, oracles, foreign_decimals, foreign_bridge_request, home_bridge_request, foreign_symbol, foreign_description, home_symbol }) => {
   const dispatch = useDispatch();
@@ -37,7 +41,7 @@ export const CreateBridgeStep = ({ home_address, foreign_address, foreign_params
         min_tx_age,
         oracles
       },
-      aa: process.env.REACT_APP_OBYTE_IMPORT_FACTORY
+      aa: actualObyteImportFactory
     }) : "#";
 
     return <div>
@@ -124,7 +128,7 @@ export const CreateBridgeStep = ({ home_address, foreign_address, foreign_params
         min_stake,
         min_tx_age
       },
-      aa: process.env.REACT_APP_OBYTE_EXPORT_FACTORY
+      aa: actualObyteExportFactory
     }) : "#";
 
     return <div>

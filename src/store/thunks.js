@@ -5,6 +5,7 @@ import { setDirections } from "./directionsSlice";
 import obyte from "../services/socket";
 import { setGovernanceList } from "./governanceSlice";
 import { updateExportedTokens } from "./settingsSlice";
+import config from "appConfig";
 
 const { createAsyncThunk } = require("@reduxjs/toolkit")
 
@@ -31,7 +32,7 @@ export const getCoinIcons = createAsyncThunk(
   'getCoinIcons',
   async () => {
     let list = [];
-    const response = await fetch(`${process.env.REACT_APP_ICON_CDN_URL}/list.json`);
+    const response = await fetch(`${config.ICON_CDN_URL}/list.json`);
 
     if (response.ok) {
       list = await response.json();
@@ -147,16 +148,15 @@ export const updateBridges = createAsyncThunk(
 export const getBridgesParams = createAsyncThunk(
   'update/getBridgesParams',
   async () => {
-    const import_base_aa = process.env.REACT_APP_OBYTE_IMPORT_BASE_AA;
-    const export_base_aa = process.env.REACT_APP_OBYTE_EXPORT_BASE_AA;
+    const import_base_aas = config.OBYTE_IMPORT_BASE_AA;
+    const export_base_aas = config.OBYTE_EXPORT_BASE_AA;
 
-    const import_aas = await obyte.api.getAasByBaseAas({
-      base_aa: import_base_aa
-    });
-
-    const export_aas = await obyte.api.getAasByBaseAas({
-      base_aa: export_base_aa
-    });
+    
+    let import_aas = []; 
+    let export_aas = [];
+ 
+    await Promise.all(import_base_aas.map(base_aa => obyte.api.getAasByBaseAas({ base_aa }).then(aas => import_aas = [...import_aas, ...aas])));
+    await Promise.all(export_base_aas.map(base_aa => obyte.api.getAasByBaseAas({ base_aa }).then(aas => export_aas = [...export_aas, ...aas])));
 
     const importParams = {};
     const exportParams = {};

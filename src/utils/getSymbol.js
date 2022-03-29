@@ -1,13 +1,14 @@
 import { ethers } from "ethers";
 import { providers } from "services/evm";
 import obyte from "services/socket";
+import config from "appConfig";
 
 export const getSymbol = async (tokenAddress, dst_network) => {
   if (dst_network === "Obyte") {
 
     if (tokenAddress === "base") return "GBYTE"
 
-    const aaStateVars = await obyte.api.getAaStateVars({ address: process.env.REACT_APP_TOKEN_REGISTRY, var_prefix: `a2s_${tokenAddress}` });
+    const aaStateVars = await obyte.api.getAaStateVars({ address: config.TOKEN_REGISTRY, var_prefix: `a2s_${tokenAddress}` });
 
     if (`a2s_${tokenAddress}` in aaStateVars) {
       return aaStateVars[`a2s_${tokenAddress}`];

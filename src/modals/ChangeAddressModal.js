@@ -7,8 +7,9 @@ import { ethers } from "ethers";
 import { chainIds } from "chainIds";
 import { ReactComponent as MetamaskLogo } from "pages/Main/metamask-fox.svg";
 import { setDestAddress } from "store/destAddressSlice";
+import config from "appConfig";
 
-const environment = process.env.REACT_APP_ENVIRONMENT;
+const environment = config.ENVIRONMENT;
 
 export const ChangeAddressModal = ({ network, children, action = "Add", currentAddress }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);

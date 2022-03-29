@@ -8,8 +8,9 @@ import { getParameterList } from "pages/Governance/utils/getParameterList";
 import { providers } from "services/evm";
 import { fetchCryptocompareExchangeRateCached } from "utils/fetchExchangeRateInUSD";
 import { oracleAddresses } from "../ConfigurationStep";
+import config from "appConfig";
 
-const environment = process.env.REACT_APP_ENVIRONMENT;
+const environment = config.ENVIRONMENT;
 
 export const estimateGasForCreationBridge = async ({ home_network, foreign_network, assistantsWillBeCreated }) => {
   let fullFee = 0;
@@ -114,7 +115,7 @@ export const estimateGasForCreationAssistant = async (network, type) => { // typ
         fakeСontractAddress = environment === "testnet" ? "0x5e31fcc4EC6D042B0c1C779Fe7e6273c10D16bE9" : "0xCF2b29769dec9b9210fE77163B0AE7D87F7FB612";
       }
 
-      estimateGas = await contract.estimateGas.createExportAssistant(fakeСontractAddress, "0xC03fA3cf434A0f8Ce7152Ff432d678e403Eaab11", management_fee10000, success_fee10000, 1, "desc", "SYMBOL");
+      estimateGas = await contract.estimateGas.createExportAssistant(fakeСontractAddress, "0xC03fA3cf434A0f8Ce7152Ff432d678e403Eaab11", management_fee10000, success_fee10000, "0x8AB42C0303578C256B2F6db8bB197bA4dF6392A2", 1, "desc", "SYMBOL");
     }
 
     return gasPriceInUSD * (estimateGas.toNumber() / 1e18);

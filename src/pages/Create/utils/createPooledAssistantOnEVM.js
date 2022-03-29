@@ -2,14 +2,15 @@ import { ethers } from "ethers";
 
 import { assistantFactoryAbi } from "abi";
 import { changeNetwork } from "utils/changeNetwork";
+import config from "appConfig";
 
 export const evmAssistantFactories = {
-  Ethereum: process.env.REACT_APP_ETHEREUM_ASSISTANT_FACTORY,
-  BSC: process.env.REACT_APP_BSC_ASSISTANT_FACTORY,
-  Polygon: process.env.REACT_APP_POLYGON_ASSISTANT_FACTORY
+  Ethereum: config.ETHEREUM_ASSISTANT_FACTORY[config.ETHEREUM_ASSISTANT_FACTORY.length - 1],
+  BSC: config.BSC_ASSISTANT_FACTORY[config.BSC_ASSISTANT_FACTORY.length - 1],
+  Polygon: config.POLYGON_ASSISTANT_FACTORY[config.POLYGON_ASSISTANT_FACTORY.length - 1]
 }
 
-export const createPooledAssistantOnEVM = async ({ type, network, bridge_aa, manager, management_fee, success_fee, swap_fee, exponent, symbol, bridgeSymbol, onRequest, onCreate }) => {
+export const createPooledAssistantOnEVM = async ({ type, network, bridge_aa, manager, management_fee, success_fee, swap_fee, exponent, symbol, oracle, bridgeSymbol, onRequest, onCreate }) => {
 
   const contractAddress = evmAssistantFactories[network];
 
@@ -55,7 +56,7 @@ export const createPooledAssistantOnEVM = async ({ type, network, bridge_aa, man
     await res.wait();
     onCreate();
   } else {
-    const res = await contract.createExportAssistant(bridge_aa, manager, management_fee10000, success_fee10000, exponent, name, symbol);
+    const res = await contract.createExportAssistant(bridge_aa, manager, management_fee10000, success_fee10000, oracle, exponent, name, symbol);
     onRequest(res?.hash);
     await res.wait();
     onCreate();

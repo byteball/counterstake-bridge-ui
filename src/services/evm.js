@@ -2,20 +2,21 @@ import { BigNumber, ethers } from "ethers";
 
 import { claimMyself, updateTransferStatus } from "store/transfersSlice";
 import { store } from "index";
+import config from "appConfig";
 
 const counterstakeAbi = [
   "event NewClaim(uint indexed claim_num, address author_address, string sender_address, address recipient_address, string txid, uint32 txts, uint amount, int reward, uint stake, string data, uint32 expiry_ts)"
 ];
 
-const environment = process.env.REACT_APP_ENVIRONMENT;
+const environment = config.ENVIRONMENT;
 
 export const providers = {
   Ethereum: (environment === 'devnet')
     ? new ethers.providers.JsonRpcProvider("http://0.0.0.0:7545") // ganache
-    : new ethers.providers.InfuraProvider(environment === 'testnet' ? "rinkeby" : "homestead", process.env.REACT_APP_INFURA_PROJECT_ID),
+    : new ethers.providers.InfuraProvider(environment === 'testnet' ? "rinkeby" : "homestead", config.INFURA_PROJECT_ID),
   BSC: (environment === 'devnet')
     ? null
-    : new ethers.providers.JsonRpcProvider(environment === 'testnet' ? "https://data-seed-prebsc-1-s2.binance.org:8545" : "https://bsc-dataseed.binance.org"),
+    : new ethers.providers.JsonRpcProvider(environment === 'testnet' ? "https://data-seed-prebsc-1-s1.binance.org:8545" : "https://bsc-dataseed.binance.org"),
   Polygon: (environment === 'devnet')
     ? null
     : new ethers.providers.JsonRpcProvider(environment === 'testnet' ? "https://rpc-mumbai.matic.today" : "https://rpc-mainnet.maticvigil.com"),

@@ -26,7 +26,8 @@ export const CreateBridgeAssistantsStep = ({
   foreign_assistant_shares_asset,
   foreign_assistant_symbol_request,
   home_assistant_shares_symbol,
-  foreign_assistant_shares_symbol
+  foreign_assistant_shares_symbol,
+  export_assistant_oracle
 }) => {
   const dispatch = useDispatch();
 
@@ -51,6 +52,7 @@ export const CreateBridgeAssistantsStep = ({
     return <CreateAssistantStep
       network={type === "home" ? home_network : foreign_network}
       bridge_aa={type === "home" ? home_address : foreign_address}
+      oracle={type === "home" ? export_assistant_oracle : undefined}
       manager={type === "home" ? home_manager_address : foreign_manager_address}
       exponent={1}
       shares_symbol={type === "home" ? home_assistant_shares_symbol : foreign_assistant_shares_symbol}

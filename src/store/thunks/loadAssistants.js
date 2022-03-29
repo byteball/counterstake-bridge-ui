@@ -11,8 +11,9 @@ import { getDecimals, getSymbol } from "utils";
 import { fetchExchangeRateInUSD } from "utils/fetchExchangeRateInUSD";
 import { getAaBalances } from "utils/getAaBalances";
 import { getBalance } from "utils/getBalance";
+import config from "appConfig";
 
-const forward_factory = process.env.REACT_APP_IMPORT_FORWARD_FACTORY;
+const forward_factory = config.IMPORT_FORWARD_FACTORY;
 
 if (!forward_factory) {
   console.error("env 'REACT_APP_IMPORT_FORWARD_FACTORY' not found")
@@ -28,12 +29,12 @@ export const loadAssistants = createAsyncThunk(
     const shares_symbols = [];
 
     assistantsList?.data.forEach(({ shares_symbol }) => shares_symbol && shares_symbols.push(shares_symbol));
-    assistantsList = assistantsList?.data.filter(({ network }) => network === "Obyte");
+    assistantsList = assistantsList?.data.filter(({ network, version }) => (network === "Obyte" || version !== "v1"));
 
-    if (process.env.REACT_APP_IMPORT_FORWARD_FACTORY) {
-      forwardAAs = await obyte.api.getAaStateVars({ address: process.env.REACT_APP_IMPORT_FORWARD_FACTORY });
+    if (config.IMPORT_FORWARD_FACTORY) {
+      forwardAAs = await obyte.api.getAaStateVars({ address: config.IMPORT_FORWARD_FACTORY });
       await obyte.justsaying("light/new_aa_to_watch", {
-        aa: process.env.REACT_APP_IMPORT_FORWARD_FACTORY
+        aa: config.IMPORT_FORWARD_FACTORY
       });
     }
 

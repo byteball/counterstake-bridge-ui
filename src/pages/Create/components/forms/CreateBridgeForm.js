@@ -18,8 +18,11 @@ import { ReactComponent as DefaultNetwork } from "pages/Main/img/networks/defaul
 import { selectTokenRegistryState } from "store/tokenRegistrySlice";
 import { estimateGasForCreationBridge } from "../CreateBridgeSteps/utils/estimateGas";
 
+import config from "appConfig";
+
 import styles from "../../CreatePage.module.css";
-const environment = process.env.REACT_APP_ENVIRONMENT;
+
+const environment = config.ENVIRONMENT;
 
 const initValue = { value: "", valid: false };
 

@@ -4,12 +4,13 @@ import { useSelector } from "react-redux";
 import { ethers } from "ethers";
 import { FilterOutlined } from "@ant-design/icons";
 
-// import { chainIds } from "chainIds";
+import { chainIds } from "chainIds";
 import { selectHomeTokens, selectManagers } from "store/assistantsSlice";
 import { descOfManagers } from "pages/Assistants/descOfManagers";
 import { selectFilters } from "store/settingsSlice";
+import config from "appConfig";
 
-// const environment = process.env.REACT_APP_ENVIRONMENT;
+const environment = config.ENVIRONMENT;
 
 export const AssistantFiltersModal = ({ removeFilter, addFilter = () => { } }) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -41,7 +42,7 @@ export const AssistantFiltersModal = ({ removeFilter, addFilter = () => { } }) =
       <div style={{ marginTop: 20 }}><b>Network:</b></div>
       <Select mode="multiple" ref={el => refs.current[1] = el} value={filters.filter((f) => f.type === "network").map(({ value }) => value)} style={{ width: "100%" }} placeholder="Select a network" onChange={(all) => { filters.filter((f) => f.type === "network").length < all.length ? addFilter({ type: "network", value: all[all.length - 1] }) : removeFilter(filters.filter((f) => f.type === "network" && !all.includes(f.value))?.[0]); refs.current[1]?.blur(); }}>
         <Select.Option key="network-Obyte" value="Obyte">Obyte</Select.Option>
-        {/* {Object.keys(chainIds[environment]).map((network, i) => <Select.Option key={"network-" + network} value={network}>{network}</Select.Option>)} */}
+        {Object.keys(chainIds[environment]).map((network, i) => <Select.Option key={"network-" + network} value={network}>{network}</Select.Option>)}
       </Select>
 
       <div style={{ marginTop: 20 }}><b>Manager:</b></div>
@@ -51,9 +52,9 @@ export const AssistantFiltersModal = ({ removeFilter, addFilter = () => { } }) =
  
       <div style={{ marginTop: 20 }}><b>Token:</b></div>
       <Select optionFilterProp="label" mode="multiple" ref={el => refs.current[3] = el} value={filters.filter((f) => f.type === "home_asset").map(({ value }) => value)} style={{ width: "100%" }} placeholder="Select a token" onChange={(all) => { filters.filter((f) => f.type === "home_asset").length < all.length ? addFilter({ type: "home_asset", value: all[all.length - 1] }) : removeFilter(filters.filter((f) => f.type === "home_asset" && !all.includes(f.value))?.[0]); refs.current[2]?.blur(); }}>
-        {/* <Select.Option key="MATIC-ADDRESS" value={ethers.constants.AddressZero + "_Polygon"}>MATIC</Select.Option>
+        <Select.Option key="MATIC-ADDRESS" value={ethers.constants.AddressZero + "_Polygon"}>MATIC</Select.Option>
         <Select.Option key="ETH-ADDRESS" value={ethers.constants.AddressZero + "_Ethereum"}>ETH</Select.Option>
-        <Select.Option key="BNB-ADDRESS" value={ethers.constants.AddressZero + "_BSC"}>BNB</Select.Option> */}
+        <Select.Option key="BNB-ADDRESS" value={ethers.constants.AddressZero + "_BSC"}>BNB</Select.Option>
         {Object.keys(homeTokens).filter((a) => a !== ethers.constants.AddressZero).map((home_token_asset, i) => <Select.Option key={"token" + home_token_asset} value={home_token_asset} label={homeTokens[home_token_asset]}>{homeTokens[home_token_asset]}</Select.Option>)}
       </Select>
     </Modal>
