@@ -26,17 +26,8 @@ export const estimateGasForCreationBridge = async ({ home_network, foreign_netwo
 
     const challenging_periods = getParameterList(foreign_network).challenging_periods.initValue.map((v) => BigNumber.from(String(Number(v * 3600))));
     const large_challenging_periods = getParameterList(foreign_network).large_challenging_periods.initValue.map((v) => BigNumber.from(String(Number(v * 3600))));
-    let fakeToken = "0x9ACECb31B2511d9ED421d50F55a7cFCACb04D885";
 
-    if (foreign_network === "BSC"){
-      fakeToken = environment === "testnet" ? "0xc3cE345f751Ca60da7aFc6F83fcFA3B1b2600959" : "0x8C9827Cd430d945aE5A5c3cfdc522f8D342334B9";
-    } else if (foreign_network === "Ethereum") {
-      fakeToken = environment === "testnet" ? "0xfB5bF83Fd8ff6bf4b5408336F65707644E8F6dD9" : "0xCfef8857E9C80e3440A823971420F7Fa5F62f020";
-    } else if (foreign_network === "Polygon") {
-      fakeToken = environment === "testnet" ? "0x0F2656e068b77cdA65213Ef25705B728d5C73340" : "0xfe4546feFe124F30788c4Cc1BB9AA6907A7987F9";
-    }
-
-    const estimateGas = await contract.estimateGas.createImport(home_network, fakeToken, "foreign_description", "ESTIMATE", ethers.constants.AddressZero, oracles, 150, 100, "10000000000000000000", challenging_periods, large_challenging_periods);
+    const estimateGas = await contract.estimateGas.createImport("Obyte", "base", "foreign_description", "ESTIMATE", ethers.constants.AddressZero, oracles, 150, 100, "10000000000000000000", challenging_periods, large_challenging_periods);
 
     const gasPrice = await provider.getGasPrice();
     const currentNativeSymbol = nativeSymbols[foreign_network];
@@ -108,14 +99,14 @@ export const estimateGasForCreationAssistant = async (network, type) => { // typ
 
       let fakeСontractAddress;
       if (network === "Ethereum") {
-        fakeСontractAddress = environment === "testnet" ? "0xA065E75f0aE60Ed3EE82e1d82D28aAE8d82af990" : "0x3BE8A7D4Aa3E9b723a718E1B83fE8a8B5C37871C";
+        fakeСontractAddress = environment === "testnet" ? "0xA065E75f0aE60Ed3EE82e1d82D28aAE8d82af990" : "0x74aF8A878317E0F6e72e302FbcDF5f3009186398";
       } else if (network === "BSC") {
         fakeСontractAddress = environment === "testnet" ? "0x5eA4395f667B613F6695f487d52c87CB298e4837" : "0xa5893a1A1FF15031d8AB5aC24531D3B3418612EE";
       } else if (network === "Polygon") {
         fakeСontractAddress = environment === "testnet" ? "0x5e31fcc4EC6D042B0c1C779Fe7e6273c10D16bE9" : "0xCF2b29769dec9b9210fE77163B0AE7D87F7FB612";
       }
 
-      estimateGas = await contract.estimateGas.createExportAssistant(fakeСontractAddress, "0xC03fA3cf434A0f8Ce7152Ff432d678e403Eaab11", management_fee10000, success_fee10000, "0x8AB42C0303578C256B2F6db8bB197bA4dF6392A2", 1, "desc", "SYMBOL");
+      estimateGas = await contract.estimateGas.createExportAssistant(fakeСontractAddress, "0xC03fA3cf434A0f8Ce7152Ff432d678e403Eaab11", management_fee10000, success_fee10000, ethers.constants.AddressZero, 1, "desc", "SYMBOL");
     }
 
     return gasPriceInUSD * (estimateGas.toNumber() / 1e18);

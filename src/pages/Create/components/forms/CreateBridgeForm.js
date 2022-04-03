@@ -64,6 +64,8 @@ export const CreateBridgeForm = () => {
     setTokenAddress(initValue);
     setHomeSymbol(initValue);
     setHomeDecimals(initValue);
+    setForeignSymbol({ value: "", valid: false, isTaken: null });
+
     if (value === foreignNetwork.value) {
       const freeNetwork = networks.find((n) => n !== value);
       handleChangeForeignNetwork(freeNetwork);

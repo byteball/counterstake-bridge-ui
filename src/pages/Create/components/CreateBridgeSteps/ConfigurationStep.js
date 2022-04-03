@@ -215,7 +215,7 @@ export const ConfigurationStep = ({ home_network, home_asset, home_decimals, for
   // eslint-disable-next-line
   const assistantParamsIsValid = (!assistants_will_be_created) || (foreignAssistantSharesSymbol.isTaken === false && foreignAssistantSharesSymbol.valid && homeAssistantSharesSymbol.valid && homeAssistantSharesSymbol.isTaken === false && homeManagerAddress.valid && foreignManagerAddress.valid && !Object.entries(homeAssistantParams).find(([_, { valid }]) => !valid)) && !Object.entries(foreignAssistantParams).find(([_, { valid }]) => !valid);
   const bridgesParamsIsValid = !Object.entries(homeParams).find(([_, { valid }]) => !valid) && !Object.entries(foreignParams).find(([_, { valid }]) => !valid) && (foreign_network !== "Obyte" ? oracle.valid && checkedOracle.valid : checkedOracle.valid);
-  const assistantOracleValid = !assistants_will_be_created || home_network === "Obyte" || checkedExportAssistantOracle.valid;
+  const assistantOracleValid = !assistants_will_be_created || home_network === "Obyte" || home_asset === ethers.constants.AddressZero || checkedExportAssistantOracle.valid;
   const activeBtn = assistantParamsIsValid && bridgesParamsIsValid && assistantOracleValid;
 
   // handles
@@ -393,7 +393,7 @@ export const ConfigurationStep = ({ home_network, home_asset, home_decimals, for
     }
 
     if (home_network !== "Obyte" && assistants_will_be_created) {
-      params.export_assistant_oracle = exportAssistantOracle.value;
+      params.export_assistant_oracle = home_asset !== ethers.constants.AddressZero ? exportAssistantOracle.value : ethers.constants.AddressZero;
     }
 
     params.foreign_params.stake_asset_decimals = foreignParams?.stake_asset?.value && stakeTokens[foreign_network]?.find((t) => t.asset === foreignParams?.stake_asset?.value)?.decimals;
@@ -744,7 +744,7 @@ export const ConfigurationStep = ({ home_network, home_asset, home_decimals, for
           </Col>
         </Row>
 
-        {home_network !== "Obyte" && <Row gutter={8}>
+        {home_network !== "Obyte" && home_asset !== ethers.constants.AddressZero && <Row gutter={8}>
           <Col md={{ span: 24 }} sm={{ span: 24 }} xs={{ span: 24 }}>
             <div>Oracle <InfoTooltip title="Oracles that report the price of asset in terms of native asset." /></div>
             <Form.Item
