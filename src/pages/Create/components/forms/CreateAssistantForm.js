@@ -98,7 +98,8 @@ export const CreateAssistantForm = () => {
 
       setCheckedOracle({ valid: undefined, price: undefined });
 
-      setSymbol({ value: "", valid: false, isTaken: null, isLoading: false })
+      setSymbol({ value: "", valid: false, isTaken: null, isLoading: false });
+      setManager({ value: "", valid: false });
     }
   }, [selectedBridgeSide]);
 
@@ -153,7 +154,7 @@ export const CreateAssistantForm = () => {
       symbol: currentSide.symbol,
       author: addresses[currentSide.network] || null,
       type: currentSide.type,
-      oracle: currentSide.network !== "Obyte" && currentSide.type === "export" ? oracle.value : undefined
+      oracle: currentSide.network !== "Obyte" && currentSide.type === "export" ? (currentSide.asset !== ethers.constants.AddressZero ? oracle.value : ethers.constants.AddressZero) : undefined
     }));
   }
 
@@ -210,7 +211,7 @@ export const CreateAssistantForm = () => {
           />
         </Form.Item>
 
-        {currentSide.network !== "Obyte" && currentSide.type === "export" && <Row gutter={8}>
+        {currentSide.network !== "Obyte" && currentSide.type === "export" && currentSide.asset !== ethers.constants.AddressZero && <Row gutter={8}>
           <Col md={{ span: 24 }} sm={{ span: 24 }} xs={{ span: 24 }}>
             <div>Oracle <InfoTooltip title={"Oracles that report the price of asset in terms of native asset."} /></div> 
             <Form.Item>
@@ -269,7 +270,7 @@ export const CreateAssistantForm = () => {
         </Row>}
 
         <Form.Item>
-          <Button type="primary" disabled={!paramsAreValid || !manager.valid || symbol?.isTaken === true || symbol?.isTaken === null || (currentSide.network !== "Obyte" && currentSide.type === "export" && checkedOracle.valid !== true)} onClick={addCreateAssistantOrder}>Create</Button>
+          <Button type="primary" disabled={!paramsAreValid || !manager.valid || symbol?.isTaken === true || symbol?.isTaken === null || (currentSide.network !== "Obyte" && currentSide.type === "export" && checkedOracle.valid !== true && currentSide.asset !== ethers.constants.AddressZero)} onClick={addCreateAssistantOrder}>Create</Button>
         </Form.Item>
       </>}
     </Form>
