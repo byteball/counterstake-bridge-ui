@@ -7,9 +7,7 @@ import { useWindowSize } from "hooks/useWindowSize";
 export const MainMenu = ({ mode, pathname, onClose }) => {
 
   const getPathnameForMenu = () => {
-    if (pathname.startsWith("/user-guide"))
-      return "/user-guide";
-    return pathname;
+    return pathname.split("/").slice(0, 2).join("/");
   };
 
   const [width] = useWindowSize();
