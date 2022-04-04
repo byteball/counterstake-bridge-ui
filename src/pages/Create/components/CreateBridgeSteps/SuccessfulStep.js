@@ -9,6 +9,6 @@ export const SuccessfulStep = () => {
   return <Result
     title="Bridge created successfully"
     icon={<CheckCircleOutlined style={{ color: "#fff" }} />}
-    extra={<Button type="primary" onClick={() => dispatch(removeCreationOrder({ orderType: "bridge" }))}>Back to creation form</Button>}
+    extra={<Button type="primary" onClick={() => dispatch(removeCreationOrder({ orderType: "bridge" }))}>Create another bridge or assistant</Button>}
   />
 }
