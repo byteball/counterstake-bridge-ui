@@ -5,6 +5,8 @@ import { providers } from "services/evm";
 import obyte from "services/socket";
 
 export const getBalance = async (address, asset, network) => {
+  if (!address)
+    throw Error(`bad address on ${network}, asset ${asset}`);
   try {
     if (network === "Obyte") {
       return await obyte.api.getBalances([address]).then((b) => b?.[address]?.[asset]?.total) || 0;
@@ -17,6 +19,7 @@ export const getBalance = async (address, asset, network) => {
       }
     }
   } catch (e) {
-    console.log("getBalance error", e)
+    console.log(`getBalance error on address ${address} network ${network}`, e);
+    return 0;
   }
 }
