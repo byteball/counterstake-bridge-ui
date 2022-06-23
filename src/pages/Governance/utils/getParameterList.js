@@ -4,6 +4,7 @@ import obyte from "obyte";
 import config from "appConfig";
 
 const environment = config.ENVIRONMENT;
+const f = (x) => (~(x + "").indexOf(".") ? (x + "").split(".")[1].length : 0);
 
 export const getParameterList = (network) => ({
   ratio: {
@@ -38,7 +39,7 @@ export const getParameterList = (network) => ({
     description: "Minimum stake amount.",
     rule: "The value of the min_stake parameter must be integer greater than or equal to 0",
     initValue: network === "Obyte" ? 100000 : 0,
-    validator: value => value >= 0
+    validator: (value, {stakeTokenDecimals = 0}) => value >= 0 && f(value) <= stakeTokenDecimals
   },
   large_threshold: {
     name: "large_threshold",
@@ -46,7 +47,7 @@ export const getParameterList = (network) => ({
     description: "The threshold amount that makes a stake “large” and triggers longer challenging periods.",
     rule: "The value of the large_threshold parameter must be integer greater than or equal to 0",
     initValue: network === "Obyte" ? 100000000 : 0,
-    validator: value => value >= 0
+    validator: (value, {stakeTokenDecimals = 0}) => value >= 0 && f(value) <= stakeTokenDecimals
   },
   challenging_periods: {
     name: "challenging_periods",
