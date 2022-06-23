@@ -102,7 +102,7 @@ export const ChangeParamsModal = ({ supportedValue, description, name, activeGov
       setParamValue({ value: undefined, valid: false });
     } else if (
       (reg.test(String(value)) || name === "oracles") &&
-      parameterInfo.validator(value)
+      parameterInfo.validator(value, { stakeTokenDecimals })
     ) {
       setParamValue({ value, valid: true });
     } else {

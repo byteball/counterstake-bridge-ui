@@ -83,7 +83,7 @@ export class EVMBridgeGovernance {
     } else if (['challenging_periods', 'large_challenging_periods'].includes(name)) {
       transformedValue = String(newValue).split(" ").map((v) => BigNumber.from(String(Number(v * 3600))));
     } else if (name === "min_stake" || name === "large_threshold") {
-      transformedValue = ethers.utils.parseUnits(Number(newValue).toFixed(this.stake_asset_decimals), this.stake_asset_decimals).toString();
+      transformedValue = ethers.utils.parseUnits(newValue, this.stake_asset_decimals).toString();
     } else {
       transformedValue = newValue;
     }
