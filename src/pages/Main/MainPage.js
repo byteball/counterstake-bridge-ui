@@ -331,6 +331,9 @@ export const MainPage = () => {
       if (willGetToken) {
         setSelectedDestination(willGetToken);
         setSelectedInput(willSendInput);
+
+        const recipientAddress = addresses[willGetToken.network];
+        setRecipient({value: recipientAddress, valid: isValidRecipient(recipientAddress, willGetToken.network) });
       }
     }
   }
@@ -458,6 +461,11 @@ export const MainPage = () => {
                         setSelectedInput(inputs[index]);
                         const validDestination = inputs[index].destinations.find((d) => (d.token.network in chainIds[environment]) || d.token.network === "Obyte");
                         setSelectedDestination(validDestination);
+
+                        const network = validDestination.token.network;
+                        const recipientAddress = addresses[network];
+                        setRecipient({value: recipientAddress, valid: isValidRecipient(recipientAddress, network) });
+
                         searchInputInRef?.current?.blur();
                       }}
                       value={selectedInput && selectedInput.index}
@@ -523,7 +531,14 @@ export const MainPage = () => {
                     placeholder="Token to receive"
                     ref={searchInputOutRef}
                     onChange={index => {
-                      setSelectedDestination(selectedInput.destinations[index])
+                      const destination = selectedInput.destinations[index];
+                      const network = destination.token.network;
+
+                      setSelectedDestination(destination);
+
+                      const recipientAddress = addresses[network];
+                      setRecipient({value: recipientAddress, valid: isValidRecipient(recipientAddress, network) });
+
                       searchInputOutRef?.current?.blur();
                     }}
                     value={selectedDestination?.index}
