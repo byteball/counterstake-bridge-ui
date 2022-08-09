@@ -331,6 +331,9 @@ export const MainPage = () => {
       if (willGetToken) {
         setSelectedDestination(willGetToken);
         setSelectedInput(willSendInput);
+
+        const recipientAddress = addresses[currentSendToken.network];
+        setRecipient({value: recipientAddress, valid: isValidRecipient(recipientAddress, currentSendToken.network) });
       }
     }
   }
@@ -523,7 +526,14 @@ export const MainPage = () => {
                     placeholder="Token to receive"
                     ref={searchInputOutRef}
                     onChange={index => {
-                      setSelectedDestination(selectedInput.destinations[index])
+                      const destination = selectedInput.destinations[index];
+                      const network = destination.token.network;
+
+                      setSelectedDestination(destination);
+
+                      const recipientAddress = addresses[network];
+                      setRecipient({value: recipientAddress, valid: isValidRecipient(recipientAddress, network) });
+
                       searchInputOutRef?.current?.blur();
                     }}
                     value={selectedDestination?.index}
