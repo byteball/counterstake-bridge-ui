@@ -332,8 +332,8 @@ export const MainPage = () => {
         setSelectedDestination(willGetToken);
         setSelectedInput(willSendInput);
 
-        const recipientAddress = addresses[currentSendToken.network];
-        setRecipient({value: recipientAddress, valid: isValidRecipient(recipientAddress, currentSendToken.network) });
+        const recipientAddress = addresses[willGetToken.network];
+        setRecipient({value: recipientAddress, valid: isValidRecipient(recipientAddress, willGetToken.network) });
       }
     }
   }
@@ -461,6 +461,11 @@ export const MainPage = () => {
                         setSelectedInput(inputs[index]);
                         const validDestination = inputs[index].destinations.find((d) => (d.token.network in chainIds[environment]) || d.token.network === "Obyte");
                         setSelectedDestination(validDestination);
+
+                        const network = validDestination.token.network;
+                        const recipientAddress = addresses[network];
+                        setRecipient({value: recipientAddress, valid: isValidRecipient(recipientAddress, network) });
+
                         searchInputInRef?.current?.blur();
                       }}
                       value={selectedInput && selectedInput.index}
