@@ -7,3 +7,4 @@ export * from "./getSymbol";
 export * from "./getRequiredStake";
 export * from "./getStatusIndex";
 export * from "./getChallengingPeriod";
+export * from "./isContract";
