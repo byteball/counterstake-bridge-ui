@@ -30,6 +30,7 @@ import { chainIds } from "chainIds";
 import { changeNetwork } from "utils/changeNetwork";
 import historyInstance from "historyInstance";
 import config from "appConfig";
+import { isContract } from "utils";
 
 import styles from "./MainPage.module.css";
 
@@ -84,6 +85,7 @@ export const MainPage = () => {
   const [inited, setInited] = useState(false);
   const query = useQuery();
   const location = useLocation();
+  const [recipientIsContract, setRecipientIsContract] = useState('pending');
 
   useEffect(() => {
     if (rehydrated && isOpenConnection) {
@@ -95,7 +97,21 @@ export const MainPage = () => {
     dispatch(getCoinIcons())
   }, []);
 
-  useEffect(()=>{
+  useEffect(async () => {
+    if (recipient.valid && recipient.value && selectedDestination.token.asset === ethers.constants.AddressZero) {
+      setRecipientIsContract('pending');
+
+      const recipientIsContract = await isContract(recipient.value, selectedDestination.token.network);
+
+      if (recipientIsContract) {
+        setRecipientIsContract(true);
+      } else {
+        setRecipientIsContract(false);
+      }
+    }
+  }, [recipient]);
+
+  useEffect(() => {
     if (!inited && inputs.length !== 0 && rehydrated && selectedDestination){
 
       const recipient = query.get("recipient");
@@ -415,6 +431,9 @@ export const MainPage = () => {
     };
   }
 
+  const blockContractRecipient = selectedDestination?.token?.asset === ethers.constants.AddressZero && recipientIsContract;
+  const waitingValidation = recipient.valid && selectedDestination?.token?.asset === ethers.constants.AddressZero && recipientIsContract === 'pending';
+
   return (
     <>
       <div className="main_page">
@@ -557,6 +576,7 @@ export const MainPage = () => {
                 <span style={{ fontSize: 12 }}>Assistant reward: {reward ? +reward.toPrecision(4) : 0} {selectedDestination && selectedDestination.token.symbol}{selectedDestination && `. Active assistants: ${countAssistants}.`}</span>
                 <Form.Item
                   hasFeedback
+                  help={blockContractRecipient === true ? 'Native tokens cannot be transferred to contracts' : null}
                   style={{ width: "100%", marginTop: 20 }}
                   extra={selectedDestination && selectedDestination.token.network === 'Obyte' &&
                     <span>
@@ -580,7 +600,7 @@ export const MainPage = () => {
                   }
                   validateStatus={
                     recipient.valid !== undefined
-                      ? recipient.valid
+                      ? recipient.valid && !blockContractRecipient
                         ? "success"
                         : "error"
                       : undefined
@@ -613,12 +633,13 @@ export const MainPage = () => {
                 type="primary"
                 size="large"
                 ref={transferRef}
-                loading={!inputs}
+                loading={!inputs || waitingValidation}
                 key="btn-transfer"
                 disabled={
                   !recipient.valid ||
                   !amountIn ||
                   !(amountOut > 0)
+                  || blockContractRecipient
                 }
                 onClick={addToken}
                 href={generateLink({
