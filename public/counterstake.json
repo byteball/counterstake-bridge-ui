@@ -1,0 +1,19 @@
+{
+	"version": "1.0",
+	"description": "Counterstake decentralized oracle",
+	"homepage_url": "https://oracle.counterstake.org",
+	"source_url": "https://github.com/byteball/counterstake-oracle",
+	"field_descriptions": {
+		"question": "Question that can be answered by yes or no (max 128 characters)",
+		"deadline" : "ISO string date when question becomes open to reporting",
+		"description": "Detailed terms and conditions for your question",
+		"question_id": "Id of the question that concerns your action",
+		"outcome": "Answer for a question: yes or no",
+		"initial_coeff": "(optional - default: 1.5) coefficient applied to the reward that determines amount the first reporter has to stake",
+		"counterstake_coeff": "(optional - default: 1.5) coefficient applied to to the opposite side stake that determines amount required to reverse the outcome",
+		"commit": "Create result datafeed and pay initial reporter",
+		"withdraw": "Withdraw a gain. Set the value to 1.",
+		"address": "Withdraw a gain for another address than yours",
+		"nickname": "Set your nickname"
+	}
+}
