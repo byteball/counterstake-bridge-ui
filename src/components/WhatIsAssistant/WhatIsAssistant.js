@@ -11,7 +11,7 @@ export const WhatIsAssistant = () => {
 
   return (
     <>
-      <span style={{ marginBottom: 10, cursor: "pointer", borderBottom: "1px dashed #fff", fontSize: 16 }} onClick={() => setIsOpen((o) => !o)}>What is Assistant?</span>
+      <span style={{ marginBottom: 10, cursor: "pointer", borderBottom: "1px dashed #fff", fontSize: 16 }} onClick={() => setIsOpen((o) => !o)}>What is an Assistant?</span>
       <div ref={ref} style={{ overflow: 'hidden', transition: '0.4s', paddingTop: 5 }}>
         <Paragraph>
           Assistants accelerate the transfer process for users by claiming the transfers for them and immediately paying the claimed coins to the user. For their help, they earn a reward which is subtracted from the amount received by the user. For transfers sent from this website, the reward is currently set as 1% of the transferred amount, and the assistant usually receives the full transferred amount in 3 days.        </Paragraph>
