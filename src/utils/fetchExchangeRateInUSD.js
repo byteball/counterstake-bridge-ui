@@ -132,14 +132,19 @@ async function tryGetTokenPrice(network, token_address, nativeSymbol, cached) {
 }
 
 export const fetchExchangeRateInUSD = async (network, asset, cached) => {
-  if (network === 'Obyte') {
-    if (asset === 'base')
-      return await fetchCryptocompareExchangeRateCached('GBYTE', 'USD', cached);
-    const prices = await fetchObyteTokenPricesCached(cached);
-    const price_in_usd = prices[asset];
-    return price_in_usd || null;
+  try {
+    if (network === 'Obyte') {
+      if (asset === 'base')
+        return await fetchCryptocompareExchangeRateCached('GBYTE', 'USD', cached);
+      const prices = await fetchObyteTokenPricesCached(cached);
+      const price_in_usd = prices[asset];
+      return price_in_usd || null;
+    }
+    if (asset === ethers.constants.AddressZero)
+      return await fetchCryptocompareExchangeRateCached(nativeSymbols[network], 'USD', cached);
+    return await tryGetTokenPrice(network, asset, 'USD', cached);
+  } catch (e) {
+    console.error('fetchExchangeRateInUSD error', e);
+    return 0;
   }
-  if (asset === ethers.constants.AddressZero)
-    return await fetchCryptocompareExchangeRateCached(nativeSymbols[network], 'USD', cached);
-  return await tryGetTokenPrice(network, asset, 'USD', cached);
 }
