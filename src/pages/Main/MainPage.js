@@ -80,7 +80,7 @@ export const MainPage = () => {
   const [inFocus, setInFocus] = useState(true);
   const [pendingTokens, setPendingTokens] = useState({});
   const addedTokens = useSelector(selectAddedTokens);
-  const max_amount = (selectedDestination && selectedDestination.max_amount && (selectedDestination.max_amount.toPrecision(4))) || 0;
+  const max_amount = (selectedDestination && selectedDestination.max_amount && (selectedDestination.max_amount.toPrecision(9))) || 0;
   const min_decimals = selectedInput?.token && selectedDestination?.token && Math.min(selectedInput.token.decimals, selectedDestination.token.decimals);
   const [inited, setInited] = useState(false);
   const query = useQuery();
