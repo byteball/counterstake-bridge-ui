@@ -29,7 +29,19 @@ const rpcMeta = {
       },
       rpcUrls: ['https://rpc-mainnet.maticvigil.com'],
       blockExplorerUrls: ['https://polygonscan.com/'],
-    }
+    },
+    Kava: {
+      chainId: '0x8ae',
+      chainName: 'Kava EVM Network',
+      nativeCurrency:
+      {
+        name: 'KAVA',
+        symbol: 'KAVA',
+        decimals: 18
+      },
+      rpcUrls: ['https://evm.kava.io'],
+      blockExplorerUrls: ['https://explorer.kava.io/'],
+    },
   },
   testnet: {
     Ethereum: undefined, // rinkeby
@@ -56,7 +68,19 @@ const rpcMeta = {
       },
       rpcUrls: ['https://rpc-mumbai.maticvigil.com'],
       blockExplorerUrls: ['https://mumbai.polygonscan.com/'],
-    }
+    },
+    Kava: {
+      chainId: '0x8ad',
+      chainName: 'Kava EVM Test Network',
+      nativeCurrency:
+      {
+        name: 'KAVA',
+        symbol: 'KAVA',
+        decimals: 18
+      },
+      rpcUrls: ['https://evm.testnet.kava.io'],
+      blockExplorerUrls: ['https://explorer.testnet.kava.io/'],
+    },
   },
   devnet: {
     Ethereum: 1337, // ganache

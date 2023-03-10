@@ -20,6 +20,9 @@ export const providers = {
   Polygon: (environment === 'devnet')
     ? null
     : new ethers.providers.JsonRpcProvider(environment === 'testnet' ? "https://rpc-mumbai.maticvigil.com" : "https://rpc-mainnet.maticvigil.com"),
+  Kava: (environment === 'devnet')
+    ? null
+    : new ethers.providers.JsonRpcProvider(environment === 'testnet' ? "https://evm.testnet.kava.io" : "https://evm.kava.io"),
 };
 
 // new claim on Ethereum or BSC

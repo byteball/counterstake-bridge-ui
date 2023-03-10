@@ -7,7 +7,8 @@ import config from "appConfig";
 export const evmAssistantFactories = {
   Ethereum: config.ETHEREUM_ASSISTANT_FACTORY,
   BSC: config.BSC_ASSISTANT_FACTORY,
-  Polygon: config.POLYGON_ASSISTANT_FACTORY
+  Polygon: config.POLYGON_ASSISTANT_FACTORY,
+  Kava: config.KAVA_ASSISTANT_FACTORY,
 }
 
 export const createPooledAssistantOnEVM = async ({ type, network, bridge_aa, manager, management_fee, success_fee, swap_fee, exponent, symbol, oracle, bridgeSymbol, onRequest, onCreate }) => {

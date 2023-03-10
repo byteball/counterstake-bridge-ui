@@ -55,6 +55,7 @@ export const AssistantFiltersModal = ({ removeFilter, addFilter = () => { } }) =
         <Select.Option key="MATIC-ADDRESS" value={ethers.constants.AddressZero + "_Polygon"}>MATIC</Select.Option>
         <Select.Option key="ETH-ADDRESS" value={ethers.constants.AddressZero + "_Ethereum"}>ETH</Select.Option>
         <Select.Option key="BNB-ADDRESS" value={ethers.constants.AddressZero + "_BSC"}>BNB</Select.Option>
+        <Select.Option key="KAVA-ADDRESS" value={ethers.constants.AddressZero + "_KAVA"}>KAVA</Select.Option>
         {Object.keys(homeTokens).filter((a) => a !== ethers.constants.AddressZero).map((home_token_asset, i) => <Select.Option key={"token" + home_token_asset} value={home_token_asset} label={homeTokens[home_token_asset]}>{homeTokens[home_token_asset]}</Select.Option>)}
       </Select>
     </Modal>

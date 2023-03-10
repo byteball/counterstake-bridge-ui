@@ -70,6 +70,8 @@ export const fetchERC20ExchangeRate = async (chain, token_address, quote) => {
       token_address = '0x0D8775F648430679A709E98d2b0Cb6250d2887EF';
     else if (token_address === '0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee') // BUSD testnet
       token_address = '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56';
+    else if (token_address === '0x43D8814FdFB9B8854422Df13F1c66e34E4fa91fD') // Kava USDC testnet
+			token_address = '0xfA9343C3897324496A05fC75abeD6bAC29f8A40f';
     else if (token_address === '0xB554fCeDb8E4E0DFDebbE7e58Ee566437A19bfB2') // DAI devnet
       token_address = '0x6b175474e89094c44da98b954eedeac495271d0f';
     else
@@ -79,8 +81,12 @@ export const fetchERC20ExchangeRate = async (chain, token_address, quote) => {
   const prices = data.market_data.current_price
 
   quote = quote.toLowerCase()
-  if (!prices[quote])
-    throw new Error(`no ${quote} in response ${JSON.stringify(data)}`);
+	if (!prices[quote]) {
+		if (!prices.usd)
+			throw new Error(`no ${quote} and no usd in response ${JSON.stringify(data)}`);
+		const quote_price_in_usd = await fetchCryptocompareExchangeRateCached(quote, 'USD', true);
+		return prices.usd / quote_price_in_usd;
+	}
   return prices[quote]
 }
 
@@ -108,6 +114,7 @@ const coingeckoChainIds = {
   Ethereum: 'ethereum',
   BSC: 'binance-smart-chain',
   Polygon: 'polygon-pos',
+  Kava: 'kava',
 };
 
 async function tryGetTokenPrice(network, token_address, nativeSymbol, cached) {
@@ -115,6 +122,7 @@ async function tryGetTokenPrice(network, token_address, nativeSymbol, cached) {
     case 'Ethereum':
     case 'BSC':
     case 'Polygon':
+    case 'Kava':
       try {
         const chain = coingeckoChainIds[network];
         return await fetchERC20ExchangeRateCached(chain, token_address, nativeSymbol, cached);

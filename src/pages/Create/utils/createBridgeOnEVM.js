@@ -79,6 +79,8 @@ export const getFactoryContractAddressByNetwork = (network) => {
     return config.BSC_BRIDGE_FACTORY;
   } else if (network === "Polygon") {
     return config.POLYGON_BRIDGE_FACTORY;
+  } else if (network === "Kava") {
+    return config.KAVA_BRIDGE_FACTORY;
   } else {
     throw Error("unknown EVM network")
   }

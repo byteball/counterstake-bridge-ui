@@ -25,6 +25,8 @@ export const getSymbol = async (tokenAddress, dst_network) => {
         return "BNB";
       } else if (dst_network === "Polygon") {
         return "MATIC";
+      } else if (dst_network === "Kava") {
+        return "KAVA";
       }
     }
 
