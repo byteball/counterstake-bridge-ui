@@ -13,6 +13,7 @@ import { ReactComponent as ObyteNetwork } from "pages/Main/img/networks/obyte.sv
 import { ReactComponent as BscNetwork } from "pages/Main/img/networks/bsc.svg";
 import { ReactComponent as EthNetwork } from "pages/Main/img/networks/eth.svg";
 import { ReactComponent as PolygonNetwork } from "pages/Main/img/networks/polygon.svg";
+import { ReactComponent as KavaNetwork } from "pages/Main/img/networks/kava.svg";
 import { ReactComponent as DefaultNetwork } from "pages/Main/img/networks/default.svg";
 
 import { selectTokenRegistryState } from "store/tokenRegistrySlice";
@@ -263,6 +264,8 @@ export const CreateBridgeForm = () => {
                   NetworkIcon = EthNetwork
                 } else if (network === "Polygon") {
                   NetworkIcon = PolygonNetwork
+                } else if (network === "Kava") {
+                  NetworkIcon = KavaNetwork
                 } else {
                   NetworkIcon = DefaultNetwork
                 }
@@ -298,6 +301,8 @@ export const CreateBridgeForm = () => {
                   NetworkIcon = EthNetwork
                 } else if (network === "Polygon") {
                   NetworkIcon = PolygonNetwork
+                } else if (network === "Kava") {
+                  NetworkIcon = KavaNetwork
                 } else {
                   NetworkIcon = DefaultNetwork
                 }

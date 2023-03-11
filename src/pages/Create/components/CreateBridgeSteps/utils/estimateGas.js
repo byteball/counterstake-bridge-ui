@@ -20,7 +20,7 @@ export const estimateGasForCreationBridge = async ({ home_network, foreign_netwo
     const provider = providers[foreign_network];
 
     const contractAddress = getFactoryContractAddressByNetwork(foreign_network);
-    
+
     const contract = new ethers.Contract(contractAddress, counterstakeFactoryAbi, provider);
     const oracles = oracleAddresses[foreign_network];
 
@@ -92,21 +92,27 @@ export const estimateGasForCreationAssistant = async (network, type) => { // typ
         fakeСontractAddress = environment === "testnet" ? "0x9F60328982ab3e34020A9D43763db43d03Add7CF" : "0x0aD0Cce772ffcF8f9e70031cC8c1b7c20af5212F";
       } else if (network === "Polygon") {
         fakeСontractAddress = environment === "testnet" ? "0xeA9E7c046c6E4635F9A71836fF023c8f45948433" : "0xAB5F7a0e20b0d056Aed4Aa4528C78da45BE7308b";
+      } else if (network === "Kava") {
+        fakeСontractAddress = environment === "testnet" ? "0xe1C41Aae8b62caF493908ca63990f019c0786121" : "0x0b93109d05Ef330acD2c75148891cc61D20C3EF1";
       }
 
       estimateGas = await contract.estimateGas.createImportAssistant(fakeСontractAddress, "0xC03fA3cf434A0f8Ce7152Ff432d678e403Eaab11", management_fee10000, success_fee10000, swap_fee10000, 1, "desc", "SYMBOL");
     } else if (type === "export") {
 
+      const oracle = oracleAddresses[network];
       let fakeСontractAddress;
+
       if (network === "Ethereum") {
         fakeСontractAddress = environment === "testnet" ? "0xA065E75f0aE60Ed3EE82e1d82D28aAE8d82af990" : "0x74aF8A878317E0F6e72e302FbcDF5f3009186398";
       } else if (network === "BSC") {
         fakeСontractAddress = environment === "testnet" ? "0x5eA4395f667B613F6695f487d52c87CB298e4837" : "0xa5893a1A1FF15031d8AB5aC24531D3B3418612EE";
       } else if (network === "Polygon") {
         fakeСontractAddress = environment === "testnet" ? "0x5e31fcc4EC6D042B0c1C779Fe7e6273c10D16bE9" : "0xCF2b29769dec9b9210fE77163B0AE7D87F7FB612";
+      } else if (network === "Kava") {
+        fakeСontractAddress = environment === "testnet" ? "0x9309711a961b730252EeA9Af7EcF6681CBc4EFB8" : "0xF32a650F5f964F5858a392e9D6242aCE35a6Ddf9";
       }
 
-      estimateGas = await contract.estimateGas.createExportAssistant(fakeСontractAddress, "0xC03fA3cf434A0f8Ce7152Ff432d678e403Eaab11", management_fee10000, success_fee10000, ethers.constants.AddressZero, 1, "desc", "SYMBOL");
+      estimateGas = await contract.estimateGas.createExportAssistant(fakeСontractAddress, "0xC03fA3cf434A0f8Ce7152Ff432d678e403Eaab11", management_fee10000, success_fee10000, oracle, 1, "desc", "SYMBOL");
     }
 
     return gasPriceInUSD * (estimateGas.toNumber() / 1e18);

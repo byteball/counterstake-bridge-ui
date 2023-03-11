@@ -2,6 +2,7 @@ import { ReactComponent as ObyteNetwork } from "./img/networks/obyte.svg";
 import { ReactComponent as BscNetwork } from "./img/networks/bsc.svg";
 import { ReactComponent as EthNetwork } from "./img/networks/eth.svg";
 import { ReactComponent as PolygonNetwork } from "./img/networks/polygon.svg";
+import { ReactComponent as KavaNetwork } from "./img/networks/kava.svg";
 import { ReactComponent as DefaultNetwork } from "./img/networks/default.svg";
 
 import config from "appConfig";
@@ -14,7 +15,7 @@ import { store } from "index";
 
 export const getCoinIcon = (network, symbol) => {
   const networkName = String(network).toLowerCase();
-  const symbolName = String(symbol).toLowerCase();
+  const symbolName = String(symbol === 'KUSDC' ? "USDC" : symbol).toLowerCase();
   const state = store.getState();
   const icons = state.cdnIcons.list;
   let NetworkIcon;
@@ -27,6 +28,8 @@ export const getCoinIcon = (network, symbol) => {
     NetworkIcon = EthNetwork
   } else if (networkName === "polygon") {
     NetworkIcon = PolygonNetwork
+  } else if (networkName === "kava") {
+    NetworkIcon = KavaNetwork
   } else {
     NetworkIcon = DefaultNetwork
   }
