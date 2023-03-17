@@ -56,7 +56,7 @@ export const MainLayout = ({ children }) => {
           <div style={width > 990 ? { display: "flex", flex: 1, justifyContent: "flex-end" } : { display: "block" }}>
 
             {width >= 990 ? (
-              <MainMenu pathname={pathname} width={width} mode="horizontal" />
+              <MainMenu pathname={pathname}  onClose={() => setActiveMenu(false)} width={width} mode="horizontal" />
             ) : (
               <div style={{ display: "flex", alignItems: "center" }}>
                 <Drawer

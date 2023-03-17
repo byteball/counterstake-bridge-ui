@@ -25,17 +25,17 @@ export const MainMenu = ({ mode, pathname, onClose }) => {
       }}
     >
       <Menu.Item key="/how-it-works">
-        <NavLink to="/how-it-works" activeClassName="selected" style={{ verticalAlign: "middle" }}>
+        <NavLink to="/how-it-works" onClick={onClose} activeClassName="selected" style={{ verticalAlign: "middle" }}>
           How it works
         </NavLink>
       </Menu.Item>
       <Menu.Item key="/cs-token">
-        <NavLink to="/cs-token" activeClassName="selected" style={{ verticalAlign: "middle" }}>
+        <NavLink to="/cs-token" onClick={onClose} activeClassName="selected" style={{ verticalAlign: "middle" }}>
           CS Token
         </NavLink>
       </Menu.Item>
       <Menu.Item key="/user-guide">
-        <NavLink to="/user-guide" activeClassName="selected" style={{ verticalAlign: "middle" }}>
+        <NavLink to="/user-guide" onClick={onClose} activeClassName="selected" style={{ verticalAlign: "middle" }}>
           User guide
         </NavLink>
       </Menu.Item>
@@ -45,22 +45,22 @@ export const MainMenu = ({ mode, pathname, onClose }) => {
         </NavLink>
       </Menu.Item>
       <Menu.Item key="/governance">
-        <NavLink to="/governance" activeClassName="selected" style={{ verticalAlign: "middle" }}>
+        <NavLink onClick={onClose} to="/governance" activeClassName="selected" style={{ verticalAlign: "middle" }}>
           Governance
         </NavLink>
       </Menu.Item>
       <Menu.Item key="/assistants">
-        <NavLink to="/assistants" activeClassName="selected" style={{ verticalAlign: "middle" }}>
+        <NavLink onClick={onClose} to="/assistants" activeClassName="selected" style={{ verticalAlign: "middle" }}>
           Pooled assistants
         </NavLink>
       </Menu.Item>
       <Menu.Item key="/create">
-        <NavLink to="/create" activeClassName="selected" style={{ verticalAlign: "middle" }}>
+        <NavLink onClick={onClose} to="/create" activeClassName="selected" style={{ verticalAlign: "middle" }}>
           Create
         </NavLink>
       </Menu.Item>
       <Menu.Item key="/faq">
-        <NavLink to="/faq" activeClassName="selected" style={{ verticalAlign: "middle" }}>
+        <NavLink onClick={onClose} to="/faq" activeClassName="selected" style={{ verticalAlign: "middle" }}>
           F.A.Q.
         </NavLink>
       </Menu.Item>
