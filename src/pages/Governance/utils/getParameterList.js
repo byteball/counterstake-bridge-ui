@@ -47,7 +47,10 @@ export const getParameterList = (network) => ({
     description: "The threshold amount that makes a stake “large” and triggers longer challenging periods.",
     rule: "The value of the large_threshold parameter must be integer greater than or equal to 0",
     initValue: network === "Obyte" ? 100000000 : 0,
-    validator: (value, {stakeTokenDecimals = 0}) => value >= 0 && f(value) <= stakeTokenDecimals
+    validator: (value, meta = {}) => {
+      const {stakeTokenDecimals = 0} = meta;
+      return value >= 0 && f(value) <= stakeTokenDecimals;
+    }
   },
   challenging_periods: {
     name: "challenging_periods",
