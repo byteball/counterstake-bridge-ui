@@ -71,7 +71,7 @@ export const loadAssistants = createAsyncThunk(
       }
 
       if (!(a.home_asset in homeTokens)) {
-        homeTokens[a.home_asset] = a.home_symbol;
+        homeTokens[a.home_asset] = `${a.home_symbol} from ${a.home_network}`;
       }
 
       if (a.network === "Obyte") {
