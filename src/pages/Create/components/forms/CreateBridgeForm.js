@@ -75,7 +75,7 @@ export const CreateBridgeForm = () => {
 
   const handleChangeForeignNetwork = (value) => setForeignNetwork({ value, valid: true });
 
-  useEffect(()=> {
+  useEffect(() => {
     handleChangeForeignSymbol(null, foreignSymbol.value);
   }, [foreignNetwork]);
 
@@ -86,7 +86,7 @@ export const CreateBridgeForm = () => {
   const handleChangeForeignDescription = (e) => setForeignDescription({ value: e.target.value, valid: e.target.value !== "" && e.target.value.length > 0 && e.target.value.length <= 50 });
 
   const handleChangeForeignSymbol = async (e, targetValue) => {
-    const value = String(e ? e.target.value : targetValue).toUpperCase().trim();
+    const value = String(e ? e.target.value : targetValue).trim();
     let isTaken = false;
     const valid = value !== "" && value.length >= 0 && value.length <= 11;
 
@@ -99,7 +99,6 @@ export const CreateBridgeForm = () => {
     }
 
     setForeignSymbol({ value, valid, isTaken, loading: false });
-
   }
 
   const isValidAddress = value => {
@@ -152,7 +151,7 @@ export const CreateBridgeForm = () => {
       let symbol = await getSymbol(value, homeNetwork.value);
 
       if (symbol && symbol !== value) {
-        symbol = String(symbol).toUpperCase();
+        symbol = String(symbol);
 
         setHomeSymbol(s => ({ ...s, loading: false }));
         handleChangeHomeSymbol("", symbol);
@@ -206,8 +205,8 @@ export const CreateBridgeForm = () => {
   const handleChangeHomeSymbol = async (e, tokenSymbol) => {
     const value = tokenSymbol || e?.target?.value;
     const valid = value !== "" && value.length >= 0 && value.length <= 11;
-    setHomeSymbol({ value: String(value).toUpperCase(), valid });
-    setForeignDescription((d) => ({ ...d, value: `Imported ${String(value).toUpperCase()}`, valid: true }))
+    setHomeSymbol({ value: String(value), valid });
+    setForeignDescription((d) => ({ ...d, value: `Imported ${value}`, valid: true }));
   }
 
   const createOrder = () => {
@@ -218,7 +217,7 @@ export const CreateBridgeForm = () => {
       home_network: homeNetwork.value,
 
       foreign_decimals: foreignNetwork.value === "Obyte" ? Number(foreignDecimals.value) : 18,
-      foreign_symbol: foreignSymbol.value,
+      foreign_symbol: foreignNetwork.value === "Obyte" ? String(foreignSymbol.value).toUpperCase() : foreignSymbol.value,
       foreign_network: foreignNetwork.value,
       foreign_description: foreignDescription.value,
       assistants_will_be_created: assistantsWillBeCreated.value,
@@ -325,7 +324,7 @@ export const CreateBridgeForm = () => {
           <Form.Item validateStatus={foreignSymbol.value !== "" ? (foreignSymbol.valid && (foreignNetwork.value !== "Obyte" || foreignSymbol.isTaken !== true) ? "success" : "error") : undefined} hasFeedback={true} extra={foreignSymbol.isTaken !== undefined && foreignNetwork.value === "Obyte" && <div>
             {foreignSymbol.value && foreignSymbol.valid && (foreignSymbol.isTaken ? <div style={{ color: "red" }}>Symbol already taken</div> : <div style={{ color: "green" }}>Symbol available</div>)}
           </div>}>
-            <Input placeholder="Symbol" disabled={foreignSymbol.loading} value={foreignSymbol.value} onChange={handleChangeForeignSymbol} />
+            <Input placeholder="Symbol" disabled={foreignSymbol.loading} value={foreignNetwork.value === "Obyte" ? String(foreignSymbol.value).toUpperCase() : foreignSymbol.value} onChange={handleChangeForeignSymbol} />
           </Form.Item>
         </Col>
       </Row>

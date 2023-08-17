@@ -102,9 +102,9 @@ export const AssistantList = () => {
       let bridge_label;
       if (!directions[bridge]) return null
       if (directions[bridge].type === "expatriation") {
-        bridge_label = `${directions[bridge].src_token.symbol}: ${directions[bridge].src_token.network} -> ${directions[bridge].dst_token.network} (export, assists with repatriations)`
+        bridge_label = `${directions[bridge].src_token.symbol}: ${directions[bridge].src_token.network} -> ${directions[bridge].dst_token.network} (${directions[bridge].src_token.network} side)`
       } else {
-        bridge_label = `${directions[bridge].dst_token.symbol}: ${directions[bridge].dst_token.network} -> ${directions[bridge].src_token.network} (import, assists with expatriations)`
+        bridge_label = `${directions[bridge].dst_token.symbol}: ${directions[bridge].dst_token.network} -> ${directions[bridge].src_token.network} (${directions[bridge].src_token.network} side)`
       }
       return <div key={bridge + "-" + i}>
         {sortingType === "bridge" && assistantsByBridge.length > 0 && <Title level={4}>{bridge_label}</Title>}
@@ -121,12 +121,12 @@ export const AssistantList = () => {
       let bridge_label;
       if (!directions[bridge_aa]) return null
       if (directions[bridge_aa].type === "expatriation") {
-        bridge_label = `${directions[bridge_aa].src_token.symbol}: ${directions[bridge_aa].src_token.network} -> ${directions[bridge_aa].dst_token.network} (export)`
+        bridge_label = `${directions[bridge_aa].src_token.symbol}: ${directions[bridge_aa].src_token.network} -> ${directions[bridge_aa].dst_token.network} (${directions[bridge_aa].src_token.network} side)`
       } else {
-        bridge_label = `${directions[bridge_aa].dst_token.symbol}: ${directions[bridge_aa].dst_token.network} -> ${directions[bridge_aa].src_token.network} (import)`
+        bridge_label = `${directions[bridge_aa].dst_token.symbol}: ${directions[bridge_aa].dst_token.network} -> ${directions[bridge_aa].src_token.network} (${directions[bridge_aa].src_token.network} side)`
       }
       return <div key={info.assistant_aa}>
-        {sortingType !== "bridge" && <Title level={5}>{bridge_label}</Title>}
+        {sortingType !== "bridge" && <Title level={4}>{bridge_label}</Title>}
         <AssistantItem  {...info} />
       </div>
     })}
