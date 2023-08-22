@@ -31,36 +31,38 @@ export const SubscribeForm = () => {
 	}
 
 	const submit = async () => {
-		setEmail((e) => ({ ...e, status: "loading" }));
+		if (email.value && email.valid && email.status === "pending") {
+			setEmail((e) => ({ ...e, status: "loading" }));
 
-		let formData = new FormData();
-		formData.append('fields[email]', email.value);
-		formData.append('ml-submit', '1');
-		formData.append('anticsrf', 'true');
+			let formData = new FormData();
+			formData.append('fields[email]', email.value);
+			formData.append('ml-submit', '1');
+			formData.append('anticsrf', 'true');
 
-		try {
-			fetch(appConfig.SUBSCRIBE_FORM_URL, {
-				method: 'POST',
-				body: formData
-			}, {
-			}).then(async resData => {
+			try {
+				fetch(appConfig.SUBSCRIBE_FORM_URL, {
+					method: 'POST',
+					body: formData
+				}, {
+				}).then(async resData => {
 
-				const res = await resData.json();
+					const res = await resData.json();
 
-				if (res.success) {
-					setEmail((e) => ({ ...e, status: "ok" }));
-				} else {
-					setEmail((e) => ({ ...e, status: "error", error: res.errors?.fields.email?.[0] || "Unknown error" }));
-				}
+					if (res.success) {
+						setEmail((e) => ({ ...e, status: "ok" }));
+					} else {
+						setEmail((e) => ({ ...e, status: "error", error: res.errors?.fields.email?.[0] || "Unknown error" }));
+					}
 
-			}).catch(err => {
+				}).catch(err => {
+					console.error(err);
+					setEmail((e) => ({ ...e, status: "error", error: "Unknown error" }));
+				});
+			} catch (err) {
 				console.error(err);
-				setEmail((e) => ({ ...e, status: "error", error: "Unknown error" }));
-			});
-		} catch (err) {
-			console.error(err);
-		}
+			}
 
+		}
 	}
 
 	const handleKeyPress = (ev) => {
@@ -69,18 +71,18 @@ export const SubscribeForm = () => {
 		}
 	}
 
-	return (<div style={{ maxWidth: 500, margin: "0 auto" }}>
+	return (<div style={{ maxWidth: 400, margin: "0 auto" }}>
 		<div onSubmitCapture={submit} style={{ marginBottom: 20 }}>
 			<Row gutter={[10, 10]}>
 				<Col flex="auto">
-					<Input onKeyPress={handleKeyPress} type="email" disabled={email.status === "ok" || email.status === "loading"} name="fields[email]" status={email.value ? (email.error ? "error" : "success") : undefined} aria-label="email" aria-required="true" value={email.value} onChange={emailHandleChange} size="middle" placeholder="Email address" autoComplete="off" />
+					<Input onKeyPress={handleKeyPress} type="email" disabled={email.status === "ok" || email.status === "loading"} name="fields[email]" status={email.value ? (email.error ? "error" : "success") : undefined} aria-label="email" aria-required="true" value={email.value} onChange={emailHandleChange} size="middle" placeholder="Email address" autoComplete="off" style={{ border: "1px solid #1D90FF" }} />
 				</Col>
 				<Col flex='100px'>
 					<Button
 						ref={btn}
 						style={{ height: 40 }}
 						onClick={submit}
-						disabled={!email.value || !email.valid || email.status !== "pending"}
+						disabled={email.status === "loading"}
 						size="middle"
 						type="primary"
 					>
