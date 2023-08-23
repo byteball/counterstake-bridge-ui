@@ -34,24 +34,22 @@ export const SubscribeForm = () => {
 		if (email.value && email.valid && email.status === "pending") {
 			setEmail((e) => ({ ...e, status: "loading" }));
 
-			let formData = new FormData();
-			formData.append('fields[email]', email.value);
-			formData.append('ml-submit', '1');
-			formData.append('anticsrf', 'true');
 
 			try {
-				fetch(appConfig.SUBSCRIBE_FORM_URL, {
+				fetch(`${appConfig.BACKEND_URL}/subscribe`, {
 					method: 'POST',
-					body: formData
+					body: JSON.stringify({
+						email: email.value
+					}),
+					headers: {
+						'Content-Type': 'application/json'
+					}
 				}, {
 				}).then(async resData => {
-
-					const res = await resData.json();
-
-					if (res.success) {
+					if (resData.status === 200) {
 						setEmail((e) => ({ ...e, status: "ok" }));
 					} else {
-						setEmail((e) => ({ ...e, status: "error", error: res.errors?.fields.email?.[0] || "Unknown error" }));
+						setEmail((e) => ({ ...e, status: "error", error: "Unknown error" }));
 					}
 
 				}).catch(err => {
@@ -61,7 +59,6 @@ export const SubscribeForm = () => {
 			} catch (err) {
 				console.error(err);
 			}
-
 		}
 	}
 
