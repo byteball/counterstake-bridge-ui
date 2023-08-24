@@ -609,7 +609,7 @@ export const MainPage = () => {
                   <Input
                     size="middle"
                     className="evmHashOrAddress"
-                    style={{ height: 45, paddingRight: 30}}
+                    style={{ height: 45, paddingRight: 10}}
                     spellCheck="false"
                     value={recipient.value}
                     placeholder={`Your ${selectedDestination ? selectedDestination.token.network : 'receiving'} wallet address`}
