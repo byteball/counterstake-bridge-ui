@@ -498,7 +498,7 @@ export const MainPage = () => {
                       ))}{" "}
                     </Select>
                   </Input.Group>
-                  {(Number(amountIn) > 0 && Number(amountOut) < 0) ? <Text type="danger" style={{ fontSize: 12 }}>Too small value to transfer.</Text> : (selectedDestination && (Number(amountIn) > Number(selectedDestination.max_amount || 0)) && <Text type="warning" style={{ fontSize: 12 }}>The maximum amount assistants can help with is {max_amount} {selectedDestination.token.symbol}.</Text>)}
+                  {(Number(amountIn) > 0 && Number(amountOut) < 0) ? <Text type="danger" style={{ fontSize: 12 }}>Too small value to transfer.</Text> : (selectedDestination && (Number(amountIn) > Number(selectedDestination.max_amount || 0)) && <Text type="warning" style={{ fontSize: 12 }}>The maximum amount assistants can help with is {max_amount} {selectedDestination.token.symbol}. You can still send a larger amount but you'll have to self-claim.</Text>)}
                 </Form.Item>
               </Col>
 
