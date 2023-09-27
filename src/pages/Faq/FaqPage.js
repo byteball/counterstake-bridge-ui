@@ -19,14 +19,12 @@ export const FaqPage = () => {
 
     if (hashValue === "self-claim") {
       setActive("4");
-      setTimeout(() => {
-        const element = document.getElementById("self-claim");
+      const element = document.getElementById("self-claim");
 
-        if (element) {
-          element.scrollIntoView({ behavior: "smooth", block: "start" });
-          historyInstance.replace(location.pathname);
-        }
-      }, 100);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "start" });
+        historyInstance.replace(location.pathname);
+      }
     } else {
       historyInstance.replace(location.pathname);
     }
