@@ -1,4 +1,6 @@
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import historyInstance from "historyInstance";
+import { Link, useLocation } from "react-router-dom";
 import { Collapse, Typography } from "antd";
 import { DownOutlined } from "@ant-design/icons";
 import { Helmet } from "react-helmet-async";
@@ -9,6 +11,25 @@ const { Panel } = Collapse;
 const { Title } = Typography;
 
 export const FaqPage = () => {
+  const location = useLocation();
+  const [active, setActive] = useState(null);
+
+  useEffect(() => {
+    const hashValue = location.hash.slice(1);
+
+    if (hashValue === "self-claim") {
+      setActive("4");
+      const element = document.getElementById("self-claim");
+
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "start" });
+        historyInstance.replace(location.pathname);
+      }
+    } else {
+      historyInstance.replace(location.pathname);
+    }
+  }, [location.hash])
+
   return (
     <div className="faq">
       <Helmet title="Counterstake Bridge - F.A.Q." />
@@ -17,6 +38,8 @@ export const FaqPage = () => {
       </div>
       <Collapse
         accordion
+        activeKey={active}
+        onChange={(key) => setActive(key)}
         expandIconPosition="right"
         bordered={false}
         className={styles.collapse}
@@ -68,6 +91,7 @@ export const FaqPage = () => {
         </Panel>
 
         <Panel
+          id="self-claim"
           header="Can I send a cross-chain transfer without paying an assistant reward?"
           key="4"
           className={styles.panel}
