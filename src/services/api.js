@@ -35,3 +35,10 @@ export async function getPooledAssistants() {
   const resp_body = await request(`/pooled_assistants`);
   return resp_body;
 }
+
+export async function getTransfersByDestAddress(address) {
+  if (!address) return [];
+  
+  const resp_body = await request(`/transfers/${encodeURIComponent(address)}`);
+  return resp_body?.data;
+}

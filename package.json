@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@ant-design/icons": "^4.6.2",
-    "@craco/craco": "^6.1.2",
+    "@craco/craco": "^7.1.0",
     "@fortawesome/fontawesome-svg-core": "^1.2.35",
     "@fortawesome/free-brands-svg-icons": "^5.15.3",
     "@fortawesome/react-fontawesome": "^0.1.14",
@@ -13,7 +13,7 @@
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
     "antd": "^4.15.3",
-    "craco-less": "^1.17.1",
+    "craco-less": "^3.0.1",
     "ethers": "^5.2.0",
     "lodash": "^4.17.21",
     "obyte": "^0.1.18",
@@ -26,7 +26,7 @@
     "react-hook-collapse": "^0.0.13",
     "react-redux": "^7.2.4",
     "react-router-dom": "^5.2.0",
-    "react-scripts": "4.0.3",
+    "react-scripts": "^5.0.0",
     "redux": "^4.1.0",
     "redux-persist": "^6.0.0",
     "web-vitals": "^1.0.1"

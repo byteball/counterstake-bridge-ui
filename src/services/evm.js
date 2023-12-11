@@ -16,7 +16,7 @@ export const providers = {
     : new ethers.providers.InfuraProvider(environment === 'testnet' ? "rinkeby" : "homestead", config.INFURA_PROJECT_ID),
   BSC: (environment === 'devnet')
     ? null
-    : new ethers.providers.JsonRpcProvider(environment === 'testnet' ? "https://data-seed-prebsc-1-s1.binance.org:8545" : "https://bsc-dataseed.binance.org"),
+    : new ethers.providers.JsonRpcProvider(environment === 'testnet' ? "https://bsc-testnet.publicnode.com" : "https://bsc-dataseed.binance.org"),
   Polygon: (environment === 'devnet')
     ? null
     : new ethers.providers.JsonRpcProvider(environment === 'testnet' ? "https://rpc-mumbai.maticvigil.com" : "https://rpc-mainnet.maticvigil.com"),
