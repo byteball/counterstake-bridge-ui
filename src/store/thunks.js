@@ -6,6 +6,7 @@ import obyte from "../services/socket";
 import { setGovernanceList } from "./governanceSlice";
 import { updateExportedTokens } from "./settingsSlice";
 import config from "appConfig";
+import { loadMissedTransfers } from "./thunks/loadMissedTransfers";
 
 const { createAsyncThunk } = require("@reduxjs/toolkit")
 
@@ -50,7 +51,7 @@ export const updateBridges = createAsyncThunk(
     if (resp.status !== 'success')
       return [];
 
-    const { governance } = thunkAPI.getState();
+    const { governance, directions: lastDirections } = thunkAPI.getState();
     const governanceListExists = Object.keys(governance.exportList || {}).length > 0 || Object.keys(governance.importList || {}).length > 0;
 
     const bridges = resp.data;
@@ -141,6 +142,11 @@ export const updateBridges = createAsyncThunk(
 
     thunkAPI.dispatch(setDirections(directions));
     thunkAPI.dispatch(updateExportedTokens(imported_tokens));
+
+    if (!lastDirections) {
+      thunkAPI.dispatch(loadMissedTransfers(directions));
+    }
+
     return inputs.map((i, index) => ({ index, ...i, destinations: i.destinations.map((d, id) => ({ ...d, index: id })) }));
   }
 );
@@ -151,10 +157,10 @@ export const getBridgesParams = createAsyncThunk(
     const import_base_aas = config.OBYTE_IMPORT_BASE_AAS;
     const export_base_aas = config.OBYTE_EXPORT_BASE_AAS;
 
-    
-    let import_aas = []; 
+
+    let import_aas = [];
     let export_aas = [];
- 
+
     await Promise.all(import_base_aas.map(base_aa => obyte.api.getAasByBaseAas({ base_aa }).then(aas => import_aas = [...import_aas, ...aas])));
     await Promise.all(export_base_aas.map(base_aa => obyte.api.getAasByBaseAas({ base_aa }).then(aas => export_aas = [...export_aas, ...aas])));
 

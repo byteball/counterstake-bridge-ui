@@ -112,14 +112,16 @@ export const assistantsSlice = createSlice({
   },
   extraReducers: {
     [loadAssistants.fulfilled]: (state, action) => {
-      state.assistants = action.payload.assistants;
-      state.obyteAssistants = action.payload.obyteAssistants;
-      state.balanceOfMyObyteWallet = action.payload.balanceOfMyObyteWallet;
-      state.forwards = action.payload.forwards;
-      state.homeTokens = action.payload.homeTokens;
-      state.managers = action.payload.managers;
-      state.sharesSymbols = action.payload.shares_symbols;
-      state.loaded = true;
+      if (action.payload) {
+        state.assistants = action.payload.assistants;
+        state.obyteAssistants = action.payload.obyteAssistants;
+        state.balanceOfMyObyteWallet = action.payload.balanceOfMyObyteWallet;
+        state.forwards = action.payload.forwards;
+        state.homeTokens = action.payload.homeTokens;
+        state.managers = action.payload.managers;
+        state.sharesSymbols = action.payload.shares_symbols;
+        state.loaded = true;
+      }
     },
     [updateEvmAssistant.fulfilled]: (state, action) => {
       const payload = action.payload || {};

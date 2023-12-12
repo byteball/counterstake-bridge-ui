@@ -25,6 +25,7 @@ import { getCoinIcon } from "./getCoinIcon";
 import { selectConnectionStatus } from "store/connectionSlice";
 import { selectInputs } from "store/inputsSlice";
 import { addTokenToTracked, selectAddedTokens } from "store/addedTokensSlice";
+import { loadMissedTransfers } from "store/thunks/loadMissedTransfers";
 import { selectChainId } from "store/chainIdSlice";
 import { chainIds } from "chainIds";
 import { changeNetwork } from "utils/changeNetwork";
@@ -119,6 +120,7 @@ export const MainPage = () => {
       const dst_network = query.get("dst_network");
 
       if (recipient && dst_network && isValidRecipient(recipient, dst_network)){
+        dispatch(loadMissedTransfers());
         dispatch(setDestAddress({ address: recipient, network: dst_network}))
       }
 
@@ -207,8 +209,10 @@ export const MainPage = () => {
   }, [selectedDestination, inited]);
 
   useEffect(() => {
-    if (recipient.valid)
+    if (recipient.valid) {
       dispatch(setDestAddress({ address: recipient.value, network: selectedDestination.token.network }));
+      dispatch(loadMissedTransfers());
+    }
   }, [recipient])
 
   useEffect(() => {
