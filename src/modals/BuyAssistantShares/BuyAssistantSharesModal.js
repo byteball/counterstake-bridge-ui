@@ -112,7 +112,7 @@ export default ({ size, side, network, block, assistant_aa, forward, forward_sta
               payments.push({ address: forward, amount: Math.floor(imageAmount * 10 ** image_asset_decimals), asset: image_asset });
             }
 
-            if (stake_asset !== 'base' && image_asset !== 'base')
+            if ((stake_asset !== 'base' && image_asset !== 'base') || (stake_asset === 'base' && stakeAmount < 1e4) || (image_asset === 'base' && imageAmount < 1e4))
               payments.push({ address: forward, amount: 1e4 });
           }
 
