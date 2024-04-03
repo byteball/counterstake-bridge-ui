@@ -32,17 +32,7 @@ export const FaqPage = () => {
       <div className={styles.titleWrap}>
         <Title level={1}>F.A.Q.</Title>
       </div>
-      <div
-        // accordion
-        // activeKey={active}
-        // onChange={(key) => setActive(key)}
-        // expandIconPosition="right"
-        // bordered={false}
-        className={styles.collapse}
-      // expandIcon={({ isActive }) => (
-      //   <DownOutlined rotate={isActive ? 180 : 0} className={styles.icon} />
-      // )}
-      >
+      <div className={styles.collapse}>
         <div
           key="0"
           className={styles.panel}
@@ -53,20 +43,14 @@ export const FaqPage = () => {
           </p>
         </div>
 
-        <div
-          key="1"
-          className={styles.panel}
-        >
+        <div key="1" className={styles.panel}>
           <h2>How much does a transfer cost?</h2>
           <p>
             It depends on the direction of the transfer as the network fees on the destination network are one of the main factors that determines the cost. On Obyte, the fees are fractions of a cent while on Ethereum the total fees required to receive a transfer are about $16 (assuming 20 gwei gas price and 1 ETH = $2,000). These fees don't depend on the size of the transfer, that's why larger transfers are less expensive percentage-wise. On top of that, you need to pay a reward to an assistant who helps you to receive your transfer. This website sets the reward to 1% but it may go down in the future thanks to competition among assistants.
           </p>
         </div>
 
-        <div
-          key="2"
-          className={styles.panel}
-        >
+        <div key="2" className={styles.panel}>
           <h2>Who are assistants?</h2>
           <p>
             They are bots that help you receive your transfer on the destination network. They monitor both the source and destination networks 24/7 and claim your transfer for you. When claiming, an assistant who picked your transfer also pays the transfer amount to you, less the reward. Claiming requires that they lock their money both to pay to you and to put a stake that they risk to lose if the claim proves to be mistaken or fraudulent. If all goes well, they get back both the stake and the full transfer amount several days later. They risk their capital and lock it for some time, and for that, they expect a reward.
@@ -76,31 +60,21 @@ export const FaqPage = () => {
           </p>
         </div>
 
-        <div
-          key="3"
-          className={styles.panel}
-        >
+        <div key="3" className={styles.panel}>
           <h2>Can an assistant steal my money?</h2>
           <p>
             No, they can't. The code allows them to claim your transfer only if they simultaneously pay the transfer amount less the reward to you.
           </p>
         </div>
 
-        <div
-          id="self-claim"
-          key="4"
-          className={styles.panel}
-        >
+        <div id="self-claim" key="4" className={styles.panel}>
           <h2>Can I send a cross-chain transfer without paying an assistant reward?</h2>
           <p>
             Yes, you can, if you send a transfer that is larger than any assistant can process. In this case, you have an option to claim the transfer yourself (self-claim) or wait for an assistant to refill their capital and claim your transfer. If you decide to claim yourself, you don't pay the assistant reward (usually 1%), however you'll need to pay a stake, and you'll be able to withdraw your transfer, along with the stake, on the destination chain only several days later (3 days by default). This website will update the status of your transfer and guide you through the process.
           </p>
         </div>
 
-        <div
-          key="4.5"
-          className={styles.panel}
-        >
+        <div key="4.5" className={styles.panel}>
           <h2>Can a whale block my transfer by staking large amounts against it?</h2>
           <p>
             They can try but if your claim is legitimate, it will be easy to mobilize the honest community to defend your claim and earn a portion of the whale's stake. In each consecutive counterstaking period, the total stake can grow only by a factor of 1.5 and each subsequent period is longer than the previous one. This gives enough time to mobilize the community around the true outcome.
@@ -120,40 +94,28 @@ export const FaqPage = () => {
           </p>
         </div>
 
-        <div
-          key="5"
-          className={styles.panel}
-        >
+        <div key="5" className={styles.panel}>
           <h2>What chains are supported?</h2>
           <p>
             Counterstake protocol can connect any two chains that support some form of on-chain <i>programmable agents</i>: Autonomous Agents on Obyte, Smart Contracts on Ethereum, Chaincode on Hyperledger Fabric, etc. It is currently implemented for Obyte, Ethereum, Binance Smart Chain, and Polygon (formerly Matic). Launching Counterstake on any other Obyte-based or EVM-compatible chain is as easy as <a href="https://github.com/byteball/counterstake-bridge" target="_blank" rel="noopener">deploying the relevant code</a> on these chains.
           </p>
         </div>
 
-        <div
-          key="6"
-          className={styles.panel}
-        >
+        <div key="6" className={styles.panel}>
           <h2>Is Counterstake protocol decentralized?</h2>
           <p>
             Yes, by design. Some other cross-chain bridge protocols rely on central custodians, operators, storemen, multisig signers, MPC signers, federated signers, etc. There is nothing like that in Counterstake. Participation is open, anybody can become an assistant or even claim their transfers themselves without the help of assistants.
           </p>
         </div>
 
-        <div
-          key="7"
-          className={styles.panel}
-        >
+        <div key="7" className={styles.panel}>
           <h2>Do I need to route every transfer through Obyte?</h2>
           <p>
             No, you don't have to. You can transfer directly between any two supported chains, e.g. between Ethereum and BSC.
           </p>
         </div>
 
-        <div
-          key="7.5"
-          className={styles.panel}
-        >
+        <div key="7.5" className={styles.panel}>
           <h2>How does Counterstake compare against other cross-chain bridges?</h2>
           <p>
             See below:
@@ -176,10 +138,7 @@ export const FaqPage = () => {
           </p>
         </div>
 
-        <div
-          key="7.6"
-          className={styles.panel}
-        >
+        <div key="7.6" className={styles.panel}>
           <h2>Can I call code/dapps on the remote chain?</h2>
           <p>
             Yes. If the recipient address is a programmable agent (autonomous agent, smart contract, etc), it will be called and receive the transferred money. You can also send data that would guide its execution. With some additional wiring, the receiving agent can be instructed to call back to the source chain and transfer some other token back. This way, the sending user doesn't even need to have an account on the destination chain.
@@ -189,10 +148,7 @@ export const FaqPage = () => {
           </p>
         </div>
 
-        <div
-          key="8"
-          className={styles.panel}
-        >
+        <div key="8" className={styles.panel}>
           <h2>Do I need to use Counterstake token?</h2>
           <p>
             No, the protocol does not require any new tokens. However note that by using the protocol you are making CS holders richer, as more use deflates their token faster. You might consider <Link to="/cs-token">becoming one</Link> as well.
