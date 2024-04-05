@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Typography, Tabs } from "antd";
 import { Helmet } from "react-helmet-async";
 import { useHistory, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
+
 import styles from "./UserGuidePage.module.css";
 import { ReactComponent as MetamaskLogo } from "pages/Main/metamask-fox.svg";
 
@@ -36,10 +38,10 @@ export const UserGuidePage = () => {
           animated={false}
           style={{ fontSize: '16px' }}
         >
-          <TabPane tab="Ethereum to Obyte" key="ethereum-to-obyte">
+          <TabPane tab={<Link style={{ pointerEvents: 'none' }} to="/user-guide/ethereum-to-obyte">Ethereum to Obyte</Link>} key="ethereum-to-obyte">
             <Ethereum2ObyteGuide />
           </TabPane>
-          <TabPane tab="Obyte to Ethereum" key="obyte-to-ethereum">
+          <TabPane tab={<Link style={{ pointerEvents: 'none' }} to="/user-guide/obyte-to-ethereum">Obyte to Ethereum</Link>} key="obyte-to-ethereum">
             <Obyte2EthereumGuide />
           </TabPane>
         </Tabs>
