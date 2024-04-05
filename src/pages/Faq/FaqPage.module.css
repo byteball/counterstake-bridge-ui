@@ -18,14 +18,12 @@
 }
 
 .panel {
-  /* background-color: #333; */
-  /* border-radius: 15px; */
   margin-bottom: 30px;
-  /* padding-top: 20px; */
-  padding-bottom: 30px;
-  border-bottom: 1px solid #333;
+  padding: 20px;
   font-size: 16px;
   line-height: 25px;
+  border-radius: 15px;
+  background-color: #303030;
 }
 
 .panel:last-child {
