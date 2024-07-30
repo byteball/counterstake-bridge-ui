@@ -7,7 +7,7 @@ import { startWatchingDestinationBridge, startWatchingSourceBridge } from "servi
 import { setTransfers } from "store/transfersSlice";
 
 export const loadMissedTransfers = createAsyncThunk(
-	'get/loadAssistants',
+	'get/loadMissedTransfers',
 	async (_directions, { getState, dispatch }) => {
 		const missedTransfers = [];
 
