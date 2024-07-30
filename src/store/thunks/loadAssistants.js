@@ -108,11 +108,11 @@ export const loadAssistants = createAsyncThunk(
 
     // get evm assistants info
     const evmAssistantInfo = {};
-    const EthereumProvider =  config.NODEREAL_PROJECT_ID ? new ethers.providers.JsonRpcProvider(`https://eth-mainnet.nodereal.io/v1/${config.NODEREAL_PROJECT_ID}`) : null;
+    const nodeRealEthereumProvider =  config.NODEREAL_PROJECT_ID ? new ethers.providers.JsonRpcProvider(`https://eth-mainnet.nodereal.io/v1/${config.NODEREAL_PROJECT_ID}`) : null;
 
     const infoEVMGetters = evm_contracts.map(({ assistant_aa, network, side, stake_asset, image_asset, shares_asset, home_network, home_asset }) => {
 
-      const assistant_contract = new ethers.Contract(assistant_aa, side === "import" ? importAssistantAbi : exportAssistantAbi, network === "Ethereum" ? EthereumProvider || providers[network] : providers[network]);
+      const assistant_contract = new ethers.Contract(assistant_aa, side === "import" ? importAssistantAbi : exportAssistantAbi, network === "Ethereum" ? nodeRealEthereumProvider || providers[network] : providers[network]);
 
       return Promise.all([
         assistant_contract.mf().then(value => isArray(value) ? [BigNumber.from(value[0]).toString(), BigNumber.from(value[1]).toString()] : BigNumber.from(value).toString()),
