@@ -163,6 +163,5 @@ export const selectBalanceOfObyteWallet = state => state.assistants.balanceOfMyO
 export const selectHomeTokens = state => state.assistants.homeTokens;
 export const selectManagers = state => state.assistants.managers;
 export const selectSharesSymbols = state => state.assistants.sharesSymbols;
-export const selectAssistantsLoadStatus = state => state.assistants.loaded;
 
 export default assistantsSlice.reducer;
