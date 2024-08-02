@@ -12,12 +12,50 @@ import { fetchExchangeRateInUSD } from "utils/fetchExchangeRateInUSD";
 import { getAaBalances } from "utils/getAaBalances";
 import { getBalance } from "utils/getBalance";
 import config from "appConfig";
+import { getMultiCallAddress } from "utils/getMulticallAddress";
 
 const forward_factory = config.IMPORT_FORWARD_FACTORY;
 
 if (!forward_factory) {
   console.error("env 'REACT_APP_IMPORT_FORWARD_FACTORY' not found")
 }
+
+const multicallAbi = [
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "components": [
+          {
+            "name": "target",
+            "type": "address"
+          },
+          {
+            "name": "callData",
+            "type": "bytes"
+          }
+        ],
+        "name": "calls",
+        "type": "tuple[]"
+      }
+    ],
+    "name": "aggregate",
+    "outputs": [
+      {
+        "name": "blockNumber",
+        "type": "uint256"
+      },
+      {
+        "name": "returnData",
+        "type": "bytes[]"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  }
+];
+
 
 export const loadAssistants = createAsyncThunk(
   'get/loadAssistants',
@@ -108,28 +146,74 @@ export const loadAssistants = createAsyncThunk(
 
     // get evm assistants info
     const evmAssistantInfo = {};
-    const nodeRealEthereumProvider =  config.NODEREAL_PROJECT_ID ? new ethers.providers.JsonRpcProvider(`https://eth-mainnet.nodereal.io/v1/${config.NODEREAL_PROJECT_ID}`) : null;
+    const nodeRealEthereumProvider = config.NODEREAL_PROJECT_ID ? new ethers.providers.JsonRpcProvider(`https://eth-mainnet.nodereal.io/v1/${config.NODEREAL_PROJECT_ID}`) : null;
 
     const infoEVMGetters = evm_contracts.map(({ assistant_aa, network, side, stake_asset, image_asset, shares_asset, home_network, home_asset }) => {
+      const multiCallContract = new ethers.Contract(getMultiCallAddress(network), multicallAbi, network === "Ethereum" ? nodeRealEthereumProvider || providers[network] : providers[network]);
+      const contractInterface = new ethers.utils.Interface(side === "import" ? importAssistantAbi : exportAssistantAbi);
 
-      const assistant_contract = new ethers.Contract(assistant_aa, side === "import" ? importAssistantAbi : exportAssistantAbi, network === "Ethereum" ? nodeRealEthereumProvider || providers[network] : providers[network]);
+      const calls = [
+        {
+          target: assistant_aa,
+          callData: contractInterface.encodeFunctionData("mf")
+        },
+        {
+          target: assistant_aa,
+          callData: contractInterface.encodeFunctionData("ts")
+        },
+        {
+          target: assistant_aa,
+          callData: contractInterface.encodeFunctionData("success_fee10000")
+        },
+        {
+          target: assistant_aa,
+          callData: contractInterface.encodeFunctionData("management_fee10000")
+        },
+        {
+          target: assistant_aa,
+          callData: contractInterface.encodeFunctionData("profit")
+        },
+        {
+          target: assistant_aa,
+          callData: contractInterface.encodeFunctionData("balance_in_work")
+        },
+        {
+          target: assistant_aa,
+          callData: contractInterface.encodeFunctionData("exponent")
+        },
+        {
+          target: assistant_aa,
+          callData: contractInterface.encodeFunctionData("totalSupply")
+        },
+      ];
+
+      if (side === "import") {
+        calls.push({
+          target: assistant_aa,
+          callData: contractInterface.encodeFunctionData("swap_fee10000") // only for import side
+        })
+      }
+
+      const evmAssistantDataGetter = multiCallContract.aggregate(calls).then(({ returnData }) => {
+        const data = returnData.map((data, index) => {
+          const functionFragment = contractInterface.getFunction(calls[index].callData.slice(0, 10));
+          return contractInterface.decodeFunctionResult(functionFragment, data);
+        })
+
+        const res = data.map(([value]) => {
+          return isArray(value) ? [BigNumber.from(value[0]).toString(), BigNumber.from(value[1]).toString()] : BigNumber.from(typeof value !== "number" ? value : String(value)).toString();
+        });
+        return res;
+      });
 
       return Promise.all([
-        assistant_contract.mf().then(value => isArray(value) ? [BigNumber.from(value[0]).toString(), BigNumber.from(value[1]).toString()] : BigNumber.from(value).toString()),
-        assistant_contract.ts().then(value => BigNumber.from(value).toString()),
-        assistant_contract.success_fee10000().then(value => value / 1e4),
-        assistant_contract.management_fee10000().then(value => value / 1e4),
-        side === "import" ? assistant_contract.swap_fee10000().then(value => value / 1e4) : null,
-        assistant_contract.profit().then(value => isArray(value) ? [BigNumber.from(value[0]).toString(), BigNumber.from(value[1]).toString()] : BigNumber.from(value).toString()),
-        assistant_contract.balance_in_work().then(value => isArray(value) ? [BigNumber.from(value[0]).toString(), BigNumber.from(value[1]).toString()] : BigNumber.from(value).toString()),
-        assistant_contract.exponent(),
-        assistant_contract.totalSupply().then(value => BigNumber.from(value).toString()),
+        evmAssistantDataGetter,
         getBalance(assistant_aa, stake_asset, network),
         side === "import" ? getBalance(assistant_aa, image_asset, network) : null,
         destAddress?.[network] ? getBalance(destAddress?.[network], shares_asset, network) : "0",
         fetchExchangeRateInUSD(network, stake_asset, true),
         side === "import" ? fetchExchangeRateInUSD(home_network, home_asset, true) : null
-      ]).then((data) => evmAssistantInfo[assistant_aa] = data);
+      ]).then(([data, ...rest]) => evmAssistantInfo[assistant_aa] = [...data, ...rest]);
     })
 
     const stakeRates = {}
@@ -198,8 +282,13 @@ export const loadAssistants = createAsyncThunk(
 
       } else {
         a.shares_decimals = 18;
+        let mf, ts, success_fee, management_fee, profit, balance_in_work, exponent, shares_supply, swap_fee, stake_balance, image_balance, my_balance_of_shares, stakeRateInUSD, imageRateInUSD;
 
-        const [mf, ts, success_fee, management_fee, swap_fee, profit, balance_in_work, exponent, shares_supply, stake_balance, image_balance, my_balance_of_shares, stakeRateInUSD, imageRateInUSD] = evmAssistantInfo[a.assistant_aa];
+        if (a.side === "import") {
+          [mf, ts, success_fee, management_fee, profit, balance_in_work, exponent, shares_supply, swap_fee, stake_balance, image_balance, my_balance_of_shares, stakeRateInUSD, imageRateInUSD] = evmAssistantInfo[a.assistant_aa];
+        } else {
+          [mf, ts, success_fee, management_fee, profit, balance_in_work, exponent, shares_supply, stake_balance, image_balance, my_balance_of_shares, stakeRateInUSD, imageRateInUSD] = evmAssistantInfo[a.assistant_aa];
+        }
 
         a.ts = ts;
         a.stake_balance = stake_balance;
