@@ -11,7 +11,6 @@ export const assistantsSlice = createSlice({
     loaded: false,
     assistants: {},
     forwards: [],
-    obyteAssistants: [],
     balanceOfMyObyteWallet: {},
     homeTokens: {},
     managers: [],
@@ -114,7 +113,6 @@ export const assistantsSlice = createSlice({
     [loadAssistants.fulfilled]: (state, action) => {
       if (action.payload) {
         state.assistants = action.payload.assistants;
-        state.obyteAssistants = action.payload.obyteAssistants;
         state.balanceOfMyObyteWallet = action.payload.balanceOfMyObyteWallet;
         state.forwards = action.payload.forwards;
         state.homeTokens = action.payload.homeTokens;

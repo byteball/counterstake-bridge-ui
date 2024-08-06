@@ -13,6 +13,7 @@ import { getAaBalances } from "utils/getAaBalances";
 import { getBalance } from "utils/getBalance";
 import config from "appConfig";
 import { getMultiCallAddress } from "utils/getMulticallAddress";
+import appConfig from "appConfig";
 
 const forward_factory = config.IMPORT_FORWARD_FACTORY;
 
@@ -29,7 +30,7 @@ export const loadAssistants = createAsyncThunk(
     let assistantsList = await getPooledAssistants();
     const shares_symbols = [];
     assistantsList?.data.forEach(({ shares_symbol }) => shares_symbol && shares_symbols.push(shares_symbol));
-    assistantsList = assistantsList?.data.filter(({ network, version }) => (network === "Obyte" || version !== "v1"));
+    assistantsList = assistantsList?.data.filter(({ network, version }) => (network === "Obyte" || version !== "v1") && (appConfig.ENVIRONMENT !== 'testnet' || network !== "Ethereum"));
 
     if (config.IMPORT_FORWARD_FACTORY) {
       forwardAAs = await obyte.api.getAaStateVars({ address: config.IMPORT_FORWARD_FACTORY });
@@ -191,7 +192,7 @@ export const loadAssistants = createAsyncThunk(
     await Promise.all([obyteAssistantsBalancesGetter, ...infoEVMGetters, ...obyteAssistantsParamsGetters, ...obyteAssistantsStateVarsGetters, ...shareDecimalsGetters, ...newWatches, ...stakeRatesGetters, ...ImageRatesGetters]);
 
     assistantsList.forEach(async (a) => {
-      
+
       if (a.network === "Obyte") {
         // cache
         a.cacheBalance = obyteAssistantsBalances[a.assistant_aa];
