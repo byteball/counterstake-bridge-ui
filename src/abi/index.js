@@ -8,3 +8,4 @@ export { importAssistantAbi } from "./importAssistantAbi";
 export { assistantFactoryAbi } from "./assistantFactoryAbi";
 export { counterstakeFactoryAbi } from "./counterstakeFactoryAbi";
 export { ERC20Abi } from "./ERC20Abi"
+export { multicallAbi } from "./multicallAbi";

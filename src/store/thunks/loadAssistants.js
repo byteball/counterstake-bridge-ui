@@ -1,6 +1,6 @@
 
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { exportAssistantAbi, importAssistantAbi } from "abi";
+import { exportAssistantAbi, importAssistantAbi, multicallAbi } from "abi";
 import { BigNumber, ethers } from "ethers";
 import { groupBy, isArray } from "lodash";
 
@@ -20,43 +20,6 @@ if (!forward_factory) {
   console.error("env 'REACT_APP_IMPORT_FORWARD_FACTORY' not found")
 }
 
-const multicallAbi = [
-  {
-    "constant": true,
-    "inputs": [
-      {
-        "components": [
-          {
-            "name": "target",
-            "type": "address"
-          },
-          {
-            "name": "callData",
-            "type": "bytes"
-          }
-        ],
-        "name": "calls",
-        "type": "tuple[]"
-      }
-    ],
-    "name": "aggregate",
-    "outputs": [
-      {
-        "name": "blockNumber",
-        "type": "uint256"
-      },
-      {
-        "name": "returnData",
-        "type": "bytes[]"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  }
-];
-
-
 export const loadAssistants = createAsyncThunk(
   'get/loadAssistants',
   async (_, { getState }) => {
@@ -65,13 +28,12 @@ export const loadAssistants = createAsyncThunk(
 
     let assistantsList = await getPooledAssistants();
     const shares_symbols = [];
-
     assistantsList?.data.forEach(({ shares_symbol }) => shares_symbol && shares_symbols.push(shares_symbol));
     assistantsList = assistantsList?.data.filter(({ network, version }) => (network === "Obyte" || version !== "v1"));
 
     if (config.IMPORT_FORWARD_FACTORY) {
       forwardAAs = await obyte.api.getAaStateVars({ address: config.IMPORT_FORWARD_FACTORY });
-      await obyte.justsaying("light/new_aa_to_watch", {
+      obyte.justsaying("light/new_aa_to_watch", {
         aa: config.IMPORT_FORWARD_FACTORY
       });
     }
@@ -200,7 +162,8 @@ export const loadAssistants = createAsyncThunk(
           return contractInterface.decodeFunctionResult(functionFragment, data);
         })
 
-        const res = data.map(([value]) => {
+        const res = data.map(([value], index) => {
+          if (index === 2 || index === 3) return value / 1e4; // success_fee10000, management_fee10000
           return isArray(value) ? [BigNumber.from(value[0]).toString(), BigNumber.from(value[1]).toString()] : BigNumber.from(typeof value !== "number" ? value : String(value)).toString();
         });
         return res;
