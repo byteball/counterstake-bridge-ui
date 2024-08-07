@@ -2,7 +2,7 @@ import moment from "moment";
 
 const eth_import_special = "IHK32W2GVDKBS4DU5YUFE2EQ53EZWGIZ";
 
-export const getAPY = ({ ts, stake_balance = 0, stake_balance_in_work = 0, stake_mf = 0, stake_profit = 0, image_balance = 0, image_balance_in_work = 0, image_profit = 0, image_mf = 0, shares_supply = 0, side, network, first_claim_date, management_fee, success_fee, assistant_aa, creation_date }) => {
+export const getAPY = ({ ts, stake_balance = 0, stake_balance_in_work = 0, stake_mf = 0, stake_profit = 0, image_balance = 0, image_balance_in_work = 0, image_profit = 0, image_mf = 0, shares_supply = 0, side, first_claim_date, management_fee, success_fee, assistant_aa, creation_date }) => {
   if (!first_claim_date) return 0;
 
   if (creation_date && creation_date < first_claim_date && assistant_aa !== eth_import_special)
