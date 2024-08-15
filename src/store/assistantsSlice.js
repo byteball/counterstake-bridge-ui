@@ -113,7 +113,6 @@ export const assistantsSlice = createSlice({
     [loadAssistants.fulfilled]: (state, action) => {
       if (action.payload) {
         state.assistants = action.payload.assistants;
-        state.balanceOfMyObyteWallet = action.payload.balanceOfMyObyteWallet;
         state.forwards = action.payload.forwards;
         state.homeTokens = action.payload.homeTokens;
         state.managers = action.payload.managers;
