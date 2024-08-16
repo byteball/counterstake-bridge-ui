@@ -43,30 +43,16 @@ export const AssistantItem = memo((props) => {
   let imagePrice;
   let stakePrice;
 
-  if (side === "import" && image_balance !== undefined && stake_balance !== undefined) {
-    imagePrice = Number(image_balance) !== 0 && Number(stake_balance) !== 0 ? (Number(image_balance) / (Number(stake_balance) + Number(stake_balance_in_work))) * 10 ** (stake_asset_decimals - image_asset_decimals) : 0;
-    stakePrice = Number(image_balance) !== 0 && Number(stake_balance) !== 0 ? (Number(stake_balance) / (Number(image_balance) + Number(image_balance_in_work))) * 10 ** (image_asset_decimals - stake_asset_decimals) : 0;
+  if (side === "import") {
+    imagePrice = (Number(stake_balance) !== 0 || Number(stake_balance_in_work) !== 0) ? (Number(image_balance) / (Number(stake_balance) + Number(stake_balance_in_work))) * 10 ** (stake_asset_decimals - image_asset_decimals) : 0;
+    stakePrice = (Number(image_balance) !== 0 || Number(image_balance_in_work) !== 0) ? (Number(stake_balance) / (Number(image_balance) + Number(image_balance_in_work))) * 10 ** (image_asset_decimals - stake_asset_decimals) : 0;
   }
 
   const padding = 24;
 
   return <div style={{ marginTop: 20 }}>
-    <Card
-      bodyStyle={{ padding: 0 }}
-      style={{ marginBottom: 20 }}
-      id={assistant_aa}
-    >
-      <Row
-        onClick={() => setIsOpen(!isOpen)}
-        style={{
-          paddingTop: padding,
-          paddingLeft: padding,
-          paddingRight: padding,
-          paddingBottom: padding,
-          boxSizing: "border-box",
-          cursor: "pointer"
-        }}
-      >
+    <Card bodyStyle={{ padding: 0 }} style={{ marginBottom: 20 }} id={assistant_aa}>
+      <Row onClick={() => setIsOpen(!isOpen)} style={{ padding, boxSizing: "border-box", cursor: "pointer" }}>
         <Col xs={{ span: 24 }} sm={{ span: 24 }}>
           <Row gutter={10} align="middle">
             <Col lg={{ span: 8 }} md={{ span: 24 }} sm={{ span: 24 }} style={{ marginBottom: width < 768 ? 15 : 0 }}>
@@ -110,11 +96,7 @@ export const AssistantItem = memo((props) => {
         </Col>
       </Row>
       <div ref={ref} style={{ overflow: 'hidden', transition: '0.4s' }}>
-        <Row gutter={10} align="middle" style={{
-          paddingLeft: padding,
-          paddingRight: padding,
-          paddingBottom: padding,
-        }}>
+        <Row gutter={10} align="middle" style={{ padding, paddingTop: 0 }}>
           <Col lg={{ span: 4 }} md={{ span: 8 }} sm={{ span: 12 }} xs={{ span: 24 }} style={{ marginBottom: width < 768 ? 15 : 0 }}>
             <Statistic
               loading={management_fee === undefined}
@@ -162,11 +144,7 @@ export const AssistantItem = memo((props) => {
             />
           </Col>}
         </Row>
-        <Row style={{
-          paddingLeft: padding,
-          paddingRight: padding,
-          paddingBottom: padding,
-        }}>
+        <Row style={{ padding, paddingTop: 0 }}>
           <div>
             <span style={{ fontWeight: 200 }}>Assistant address: </span>{" "}<a target="_blank" rel="noopener" className="evmHashOrAddress" href={getExplorerLink(network, assistant_aa, "address")}>{assistant_aa}</a>
           </div>
