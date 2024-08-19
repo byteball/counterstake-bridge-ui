@@ -6,7 +6,6 @@ import QRButton from "obyte-qr-button";
 
 import { generateLink } from "utils";
 import { get_shares } from "./helpers";
-import { CreateForward } from "./components/CreateForward";
 import { changeNetwork } from "utils/changeNetwork";
 import { selectChainId } from "store/chainIdSlice";
 import { chainIds } from "chainIds";
@@ -15,7 +14,7 @@ import { ERC20Abi, exportAssistantAbi, importAssistantAbi } from "abi";
 import { addTokenToTracked, selectAddedTokens } from "store/addedTokensSlice";
 import { ChangeAddressModal } from "modals/ChangeAddressModal";
 import { updateEvmAssistant } from "store/thunks/updateEvmAssistant";
-import browserChatInstance from "utils/browserChat";
+
 import config from "appConfig";
 
 const { Paragraph } = Typography;
@@ -25,14 +24,13 @@ const environment = config.ENVIRONMENT;
 
 const MAX_UINT256 = ethers.BigNumber.from(2).pow(256).sub(1);
 
-export default ({ size, side, network, block, assistant_aa, forward, forward_status, shares_decimals, shares_supply = 0, shares_symbol, shares_asset, exponent = 1, stake_balance = 0, stake_asset_symbol = "STAKE", stake_asset_decimals = 0, stake_balance_in_work = 0, stake_asset, image_asset, image_asset_decimals = 0, image_balance = 0, image_asset_symbol = "IMPORTED", image_balance_in_work = 0, stake_mf = 0, stake_sf = 0, ts, success_fee, management_fee, stake_profit = 0, image_profit = 0, image_mf = 0, image_sf = 0, stake_share = 0 }) => {
+export default ({ size, side, network, block, assistant_aa, shares_decimals, shares_supply = 0, shares_symbol, shares_asset, exponent = 1, stake_balance = 0, stake_asset_symbol = "STAKE", stake_asset_decimals = 0, stake_balance_in_work = 0, stake_asset, image_asset, image_asset_decimals = 0, image_balance = 0, image_asset_symbol = "IMPORTED", image_balance_in_work = 0, stake_mf = 0, stake_sf = 0, ts, success_fee, management_fee, stake_profit = 0, image_profit = 0, image_mf = 0, image_sf = 0, stake_share = 0 }) => {
   const [stakeAmount, setStakeAmount] = useState();
   const [imageAmount, setImageAmount] = useState();
   const [sharesAmount, setSharesAmount] = useState();
   const [isProportional, setIsProportional] = useState(side === "import" && !BigNumber.from(String(shares_supply)).isZero());
   const [inFocus, setInFocus] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
-  const [linkBuySharesForImportAssistants, setLinkBuySharesForImportAssistants] = useState();
   const [pendingTokens, setPendingTokens] = useState({});
   const stakeInputRef = useRef(null);
   const dispatch = useDispatch();
@@ -102,20 +100,6 @@ export default ({ size, side, network, block, assistant_aa, forward, forward_sta
             setSharesAmount(+Number(shares_amount / 10 ** shares_decimals).toFixed(shares_decimals));
           }
         } else {
-          const payments = [];
-          if (network === "Obyte") {
-            if (Number(stakeAmount) > 0) {
-              payments.push({ address: forward, amount: Math.floor(stakeAmount * 10 ** stake_asset_decimals), asset: stake_asset });
-            }
-
-            if (Number(imageAmount) > 0) {
-              payments.push({ address: forward, amount: Math.floor(imageAmount * 10 ** image_asset_decimals), asset: image_asset });
-            }
-
-            if ((stake_asset !== 'base' && image_asset !== 'base') || (stake_asset === 'base' && stakeAmount < 1e4) || (image_asset === 'base' && imageAmount < 1e4))
-              payments.push({ address: forward, amount: 1e4 });
-          }
-
           const gross_stake_balance = (Number(stake_balance) - (stake_asset === "base" ? 1e4 : 0)) + Number(stake_balance_in_work);
           const gross_image_balance = Number(image_balance) + Number(image_balance_in_work);
 
@@ -134,12 +118,6 @@ export default ({ size, side, network, block, assistant_aa, forward, forward_sta
           const amountPurchasedShares = +Number((new_shares_supply - Number(shares_supply)) / 10 ** shares_decimals).toFixed(shares_decimals);
 
           setSharesAmount(amountPurchasedShares);
-
-          if (network === "Obyte") {
-            const paymentJsonBase64 = browserChatInstance.generatePaymentString({ payments });
-            const message = `Buy ≈${amountPurchasedShares} ${shares_symbol || "shares"} \n[buy-shares](payment:${paymentJsonBase64})`;
-            setLinkBuySharesForImportAssistants(browserChatInstance.sendMessageAfterPairing(message));
-          }
         }
       } else {
         const decimals = Number(exponent) > 2 ? 9 : 18;
@@ -206,8 +184,34 @@ export default ({ size, side, network, block, assistant_aa, forward, forward_sta
     }
   }
 
+  let link = null;
+  if (isVisible && network === "Obyte" && (Number(stakeAmount) > 0.0001 || stake_asset !== 'base')) {
+    if (side === "export") {
+      link = generateLink({ amount: stakeAmount * 10 ** stake_asset_decimals, aa: assistant_aa, asset: stake_asset !== 'base' ? stake_asset : undefined, data: { buy_shares: 1 } });
+    } else if (side === "import" && (Number(stakeAmount) > 0.0001 || stake_asset !== 'base')) {
+      const linkOptions = {
+        aa: assistant_aa,
+        is_single: true,
+        data: { buy_shares: 1 }
+      }
 
-  const linkBuySharesForExportAssistants = isVisible && network === "Obyte" && side === "export" ? generateLink({ amount: stakeAmount * 10 ** stake_asset_decimals, aa: assistant_aa, asset: stake_asset, data: { buy_shares: 1 } }) : undefined;
+      if (Number(stakeAmount) > 0) {
+        linkOptions.amount = Math.floor(stakeAmount * 10 ** stake_asset_decimals);
+        if (stake_asset !== 'base') {
+          linkOptions.asset = stake_asset;
+        }
+      }
+
+      if (Number(imageAmount) > 0) {
+        linkOptions.amount2 = Math.floor(imageAmount * 10 ** image_asset_decimals);
+        if (image_asset !== 'base') {
+          linkOptions.asset2 = image_asset;
+        }
+      }
+
+      link = generateLink(linkOptions);
+    }
+  }
 
   const isValid = (!BigNumber.from(String(shares_supply)).isZero() || side === "export") ? (stakeAmount && Number(stakeAmount) > 0) || (imageAmount && Number(imageAmount) > 0) : stakeAmount && Number(stakeAmount) > 0 && imageAmount && Number(imageAmount) > 0;
 
@@ -385,29 +389,27 @@ export default ({ size, side, network, block, assistant_aa, forward, forward_sta
       </Tooltip>}
 
     <Modal title="Buy shares" visible={isVisible} onCancel={closeModal} footer={null} onClick={stopPropagation}>
-      {!forward && side === "import" && network === "Obyte" ? <CreateForward assistant_aa={assistant_aa} forward_status={forward_status} /> : <>
-        {(BigNumber.from(String(shares_supply)).isZero() && side === "import") && <Paragraph type="warning">
-          Send both assets for the first issue
-        </Paragraph>}
-        <Form layout="vertical" onClick={stopPropagation}>
-          <div><b>You send:</b></div>
-          <Form.Item>
-            <Input ref={stakeInputRef} placeholder="Amount in stake tokens" value={stakeAmount} onChange={stakeHandleChange} suffix={stake_asset_symbol} />
-          </Form.Item>
+      {(BigNumber.from(String(shares_supply)).isZero() && side === "import") && <Paragraph type="warning">
+        Send both assets for the first issue
+      </Paragraph>}
+      <Form layout="vertical" onClick={stopPropagation}>
+        <div><b>You send:</b></div>
+        <Form.Item>
+          <Input ref={stakeInputRef} placeholder="Amount in stake tokens" value={stakeAmount} onChange={stakeHandleChange} suffix={stake_asset_symbol} />
+        </Form.Item>
 
-          {side === "import" && <Form.Item>
-            <Input placeholder="Amount in imported tokens" onChange={imageHandleChange} value={imageAmount} suffix={image_asset_symbol} />
-          </Form.Item>}
+        {side === "import" && <Form.Item>
+          <Input placeholder="Amount in imported tokens" onChange={imageHandleChange} value={imageAmount} suffix={image_asset_symbol} />
+        </Form.Item>}
 
-          {side === "import" && !BigNumber.from(String(shares_supply)).isZero() && <div style={{ marginBottom: 20 }}><Checkbox checked={isProportional} onChange={proportionalCheckboxChanged}>Proportional amounts</Checkbox></div>}
+        {side === "import" && !BigNumber.from(String(shares_supply)).isZero() && <div style={{ marginBottom: 20 }}><Checkbox checked={isProportional} onChange={proportionalCheckboxChanged}>Proportional amounts</Checkbox></div>}
 
-          <div><b>You get:</b></div>
-          <Form.Item>
-            <Input placeholder="Amount in shares" disabled={true} value={isValid ? sharesAmount : undefined} suffix={shares_symbol} />
-          </Form.Item>
-          {network === "Obyte" ? <QRButton type="primary" href={side === "export" ? linkBuySharesForExportAssistants : linkBuySharesForImportAssistants} disabled={!isValid}>Send{isValid ? <>&nbsp;{Number(stakeAmount) > 0 && <span>{+Number(stakeAmount).toFixed(6)} {stakeAmount && stake_asset_symbol} {Number(imageAmount) > 0 && "and"} </span>} {Number(imageAmount) > 0 && <span>{+Number(imageAmount).toFixed(6)} {imageAmount && image_asset_symbol}</span>}</> : null} </QRButton> : <Button type="primary" onClick={buySharesFromEVM} disabled={!isValid}>Send{isValid ? <>&nbsp;{Number(stakeAmount) > 0 && <span>{+Number(stakeAmount).toFixed(6)} {stakeAmount && stake_asset_symbol} {Number(imageAmount) > 0 && "and"} </span>} {Number(imageAmount) > 0 && <span>{+Number(imageAmount).toFixed(6)} {imageAmount && image_asset_symbol}</span>}</> : null}</Button>}
-        </Form>
-      </>}
+        <div><b>You get:</b></div>
+        <Form.Item>
+          <Input placeholder="Amount in shares" disabled={true} value={isValid ? sharesAmount : undefined} suffix={shares_symbol} />
+        </Form.Item>
+        {network === "Obyte" ? <QRButton type="primary" href={link} disabled={!isValid || !link}>Send{isValid ? <>&nbsp;{Number(stakeAmount) > 0 && <span>{+Number(stakeAmount).toFixed(6)} {stakeAmount && stake_asset_symbol} {Number(imageAmount) > 0 && "and"} </span>} {Number(imageAmount) > 0 && <span>{+Number(imageAmount).toFixed(6)} {imageAmount && image_asset_symbol}</span>}</> : null} </QRButton> : <Button type="primary" onClick={buySharesFromEVM} disabled={!isValid}>Send{isValid ? <>&nbsp;{Number(stakeAmount) > 0 && <span>{+Number(stakeAmount).toFixed(6)} {stakeAmount && stake_asset_symbol} {Number(imageAmount) > 0 && "and"} </span>} {Number(imageAmount) > 0 && <span>{+Number(imageAmount).toFixed(6)} {imageAmount && image_asset_symbol}</span>}</> : null}</Button>}
+      </Form>
     </Modal>
   </div>
 }

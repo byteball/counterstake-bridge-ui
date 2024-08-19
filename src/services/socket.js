@@ -9,14 +9,13 @@ import { store } from "index";
 import { closeConnection, openConnection } from "store/connectionSlice";
 import { getClaim } from "utils/getClaim";
 import { changeGovernanceState } from "store/governanceSlice";
-import { reqToCreateForward, saveForward, updateObyteAssistant } from "store/assistantsSlice";
+import {  updateObyteAssistant } from "store/assistantsSlice";
 import { getBalanceOfObyteWallet } from "store/thunks/getBalanceOfObyteWallet";
 import { registerSymbolForPooledAssistant, updateAssistantOrderStatus, updateBridgeOrder } from "store/settingsSlice";
 import { checkCreatedOrders } from "store/thunks/checkCreatedOrders";
 import config from "appConfig";
 
 const environment = config.ENVIRONMENT;
-const forwardFactory = config.IMPORT_FORWARD_FACTORY;
 
 let client = new obyte.Client(
   environment === 'devnet' ? 'ws://localhost:6611' : `wss://obyte.org/bb${environment === 'testnet' ? "-test" : ""}`,
@@ -232,7 +231,7 @@ const handleEventAssistant = (result) => {
     if (state.destAddress?.Obyte && author && author === state.destAddress?.Obyte) {
       message.info("We have received your request. The interface will update after the transaction stabilizes", 5)
     }
-  } else if (subject === "light/aa_response" && !state.assistants.forwards.includes(aa_address)) {
+  } else if (subject === "light/aa_response") {
     let diff = {};
 
     if (updatedStateVars) {
@@ -449,29 +448,7 @@ client.onConnect(() => {
 
     if (aa_address === state.governance.activeGovernance) {
       handleEventGovernance(result)
-    } else if (forwardFactory && (aa_address === forwardFactory)) {
-      if (subject === "light/aa_request") {
-        const { messages } = body.unit;
-        const payload = getAAPayload(messages);
-        if (payload.create && payload.assistant) {
-          dispatch(reqToCreateForward(payload.assistant));
-        }
-      } else if (subject === "light/aa_response") {
-        const { updatedStateVars } = body;
-        if (updatedStateVars[forwardFactory]) {
-          const varName = Object.keys(updatedStateVars[forwardFactory])?.[0];
-          if (varName) {
-            const assistant_address = varName.split("_")[2];
-            if (obyte.utils.isValidAddress(assistant_address)) {
-              const forward = updatedStateVars[forwardFactory][varName].value;
-              if (obyte.utils.isValidAddress(forward)) {
-                dispatch(saveForward({ assistant_address, forward }));
-              }
-            }
-          }
-        }
-      }
-    } else if ([...state.assistants.obyteAssistants, ...state.assistants.forwards].includes(aa_address)) {
+    } else if ([...state.assistants.obyteAssistants].includes(aa_address)) {
       handleEventAssistant(result);
     } else if ([config.OBYTE_ASSISTANT_IMPORT_FACTORY, config.OBYTE_ASSISTANT_EXPORT_FACTORY].includes(aa_address)) {
       handleEventAssistantFactory(result);
