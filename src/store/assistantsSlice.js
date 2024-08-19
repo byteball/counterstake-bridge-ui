@@ -1,45 +1,24 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createDraftSafeSelector, createSlice } from '@reduxjs/toolkit';
 
 import { loadAssistants } from './thunks/loadAssistants';
 import { getBalanceOfObyteWallet } from './thunks/getBalanceOfObyteWallet';
 import { updateAllEvmAssistants } from './thunks/updateAllEvmAssistants';
 import { updateEvmAssistant } from './thunks/updateEvmAssistant';
+import { getAPY } from 'pages/Assistants/helpers/getAPY';
+import { calcAssistantUsdBalance } from 'utils/calcAssistantUsdBalance';
 
 export const assistantsSlice = createSlice({
   name: 'assistants',
   initialState: {
     loaded: false,
     assistants: {},
-    forwards: [],
-    obyteAssistants: [],
     balanceOfMyObyteWallet: {},
     homeTokens: {},
     managers: [],
+    obyteAssistants: [],
     sharesSymbols: []
   },
   reducers: {
-    reqToCreateForward: (state, action) => {
-      const assistant_address = action.payload;
-      const bridges = Object.keys(state.assistants);
-      const bridgeByAssistant = bridges.find((b) => state.assistants[b]?.findIndex((a) => a.assistant_aa === assistant_address) >= 0)
-      const assistant = state.assistants[bridgeByAssistant]?.find((a) => a.assistant_aa === assistant_address);
-      if (assistant) {
-        assistant.forward_status = "stabilization";
-      } else {
-        console.error("reqToCreateForward: ", assistant_address, " not found")
-      }
-    },
-    saveForward: (state, action) => {
-      const { assistant_address, forward } = action.payload;
-      const bridges = Object.keys(state.assistants);
-      const bridgeByAssistant = bridges.find((b) => state.assistants[b]?.findIndex((a) => a.assistant_aa === assistant_address) >= 0)
-      const assistant = state.assistants[bridgeByAssistant]?.find((a) => a.assistant_aa === assistant_address);
-      if (assistant) {
-        assistant.forward = forward;
-      } else {
-        console.error("saveForward: ", assistant_address, " not found")
-      }
-    },
     updateObyteAssistant: (state, action) => {
       const { address, diff, balances } = action.payload;
 
@@ -115,8 +94,6 @@ export const assistantsSlice = createSlice({
       if (action.payload) {
         state.assistants = action.payload.assistants;
         state.obyteAssistants = action.payload.obyteAssistants;
-        state.balanceOfMyObyteWallet = action.payload.balanceOfMyObyteWallet;
-        state.forwards = action.payload.forwards;
         state.homeTokens = action.payload.homeTokens;
         state.managers = action.payload.managers;
         state.sharesSymbols = action.payload.shares_symbols;
@@ -147,18 +124,31 @@ export const assistantsSlice = createSlice({
       updatedInfo?.forEach(({ bridge_aa, ...u }) => {
         const assistant = state.assistants[bridge_aa]?.find((a) => a.assistant_aa === u.assistant_aa);
 
-        Object.keys(u).forEach(name => {
-          assistant[name] = u[name];
-        })
-        
+        if (assistant) {
+          Object.keys(u).forEach(name => { assistant[name] = u[name]; });
+        } else {
+          console.warn(`Attempted to update unknown assistant: ${u.assistant_aa}. It may be a new assistant.`);
+        }
       });
     }
   }
 });
 
-export const { reqToCreateForward, saveForward, updateObyteAssistant } = assistantsSlice.actions;
+export const { updateObyteAssistant } = assistantsSlice.actions;
 
-export const selectAssistants = state => state.assistants.assistants;
+export const selectAssistantsList = state => state.assistants.assistants;
+
+export const selectAssistants = createDraftSafeSelector(selectAssistantsList, (assistants = {}) => {
+  return Object.entries(assistants).map(([bridge, assistants]) => {
+    const assistantsWithAPY = assistants.map(a => ({
+      ...a,
+      APY: getAPY(a),
+      totalBalanceInUSD: calcAssistantUsdBalance(a)
+    }))
+    return [bridge, assistantsWithAPY]
+  });
+});
+
 export const selectBalanceOfObyteWallet = state => state.assistants.balanceOfMyObyteWallet;
 export const selectHomeTokens = state => state.assistants.homeTokens;
 export const selectManagers = state => state.assistants.managers;

@@ -72,3 +72,15 @@ svg .white {
 .createAssistant .ant-form-item-label label {
   font-weight: 300;
 }
+.ant-statistic .ant-skeleton .ant-skeleton-title {
+  margin-top: 6px;
+  background: linear-gradient(90deg, #262626 40%, #2d2d2d 50%, #262626 60%) right / 300% 100%;
+  max-width: 50%;
+  animation: skeleton-loading 1.5s linear infinite;
+}
+
+@keyframes skeleton-loading {
+  to {
+    background-position: left;
+  }
+}

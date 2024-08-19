@@ -4,7 +4,7 @@ export const directionsSlice = createSlice({
   name: 'directions',
   initialState: {},
   reducers: {
-    setDirections: (state, action) => {
+    setDirections: (_state, action) => {
 		  return action.payload;
     },
   },

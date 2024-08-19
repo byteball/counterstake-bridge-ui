@@ -13,13 +13,13 @@ const environment = config.ENVIRONMENT;
 export const providers = {
   Ethereum: (environment === 'devnet')
     ? new ethers.providers.JsonRpcProvider("http://0.0.0.0:7545") // ganache
-    : new ethers.providers.InfuraProvider(environment === 'testnet' ? "rinkeby" : "homestead", config.INFURA_PROJECT_ID),
+    : environment !== 'testnet' ? new ethers.providers.InfuraProvider("homestead", config.INFURA_PROJECT_ID) : null,
   BSC: (environment === 'devnet')
     ? null
     : new ethers.providers.JsonRpcProvider(environment === 'testnet' ? "https://bsc-testnet.publicnode.com" : "https://bsc-dataseed.binance.org"),
   Polygon: (environment === 'devnet')
     ? null
-    : new ethers.providers.JsonRpcProvider(environment === 'testnet' ? "https://rpc-mumbai.maticvigil.com" : "https://polygon-rpc.com"),
+    : new ethers.providers.JsonRpcProvider(environment === 'testnet' ? "https://lb.drpc.org/ogrpc?network=polygon-mumbai&dkey=Ao-5EFErO0GtsfoqNeD3Dc0fTzGeU_0R77XZvmJKmvm9" : "https://polygon-rpc.com"),
   Kava: (environment === 'devnet')
     ? null
     : new ethers.providers.JsonRpcProvider(environment === 'testnet' ? "https://evm.testnet.kava.io" : "https://evm.kava.io"),

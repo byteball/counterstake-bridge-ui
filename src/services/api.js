@@ -31,8 +31,8 @@ export async function getTransferStatus(txid) {
   return resp_body?.data;
 }
 
-export async function getPooledAssistants() {
-  const resp_body = await request(`/pooled_assistants`);
+export async function getPooledAssistants({reqBridgesInfo = false} = {}) {
+  const resp_body = await request(`/pooled_assistants${reqBridgesInfo ? '?reqBridgesInfo=1' : ''}${reqBridgesInfo ? "&" : "?"}reqUsdRates=true`);
   return resp_body;
 }
 

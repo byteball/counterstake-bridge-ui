@@ -9,10 +9,13 @@ import { WhatIsAssistant } from "components/WhatIsAssistant/WhatIsAssistant";
 import { AssistantList } from "./AssistantList";
 import styles from "./AssistantsPage.module.css";
 import { updateAllEvmAssistants } from "store/thunks/updateAllEvmAssistants";
+
 import { selectAssistants } from "store/assistantsSlice";
 import client from "services/socket";
 
 const { Title } = Typography;
+
+const EVM_ASSISTANTS_UPDATE_INTERVAL = 1000 * 60 * 15;
 
 export const AssistantsPage = () => {
   const dispatch = useDispatch();
@@ -28,8 +31,8 @@ export const AssistantsPage = () => {
 
   useEffect(() => {
     let intervalId;
-    if (Object.keys(assistants).length > 0) {
-      intervalId = setInterval(() => dispatch(updateAllEvmAssistants()), 1000 * 60 * 3)
+    if (assistants.length > 0) {
+      intervalId = setInterval(() => dispatch(updateAllEvmAssistants()), EVM_ASSISTANTS_UPDATE_INTERVAL);
     }
     return () => {
       if (intervalId) clearInterval(intervalId);

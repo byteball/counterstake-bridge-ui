@@ -136,11 +136,13 @@ export const updateBridges = createAsyncThunk(
         })
       }
     }
+
+    thunkAPI.dispatch(setDirections(directions)); // logic from getDirectionsByBridgesInfo(bridgesInfo);  
+
     if (!governanceListExists) {
       thunkAPI.dispatch(setGovernanceList({ import_aas, export_aas, list: list.sort((a, b) => compare(a.bridge_label, b.bridge_label)) }));
     }
 
-    thunkAPI.dispatch(setDirections(directions));
     thunkAPI.dispatch(updateExportedTokens(imported_tokens));
 
     if (!lastDirections) {

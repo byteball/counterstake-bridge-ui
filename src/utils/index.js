@@ -8,3 +8,7 @@ export * from "./getRequiredStake";
 export * from "./getStatusIndex";
 export * from "./getChallengingPeriod";
 export * from "./isContract";
+export * from "./getBalance";
+export * from "./getExtendedAssistantData";
+export * from "./getDirectionsByBridgesInfo";
+export * from "./fetchExchangeRateInUSD";

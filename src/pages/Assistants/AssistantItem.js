@@ -23,7 +23,7 @@ const max_display_decimals = 5;
 const { useBreakpoint } = Grid;
 
 export const AssistantItem = memo((props) => {
-  const { APY, totalBalanceInUSD, assistant_aa, my_balance_of_shares, manager, network, side, stake_asset_symbol, stake_asset_decimals, image_asset_symbol, image_asset_decimals, shares_decimals, shares_symbol, shares_asset, stake_balance = 0, image_balance = 0, stake_balance_in_work = 0, image_balance_in_work = 0, success_fee, management_fee } = props;
+  const { APY, totalBalanceInUSD, assistant_aa, my_balance_of_shares, manager, network, side, stake_asset_symbol, stake_asset_decimals, image_asset_symbol, image_asset_decimals, shares_decimals, shares_symbol, shares_asset, stake_balance, image_balance, stake_balance_in_work = 0, image_balance_in_work = 0, success_fee, management_fee } = props;
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef();
   const [width] = useWindowSize();
@@ -44,29 +44,15 @@ export const AssistantItem = memo((props) => {
   let stakePrice;
 
   if (side === "import") {
-    imagePrice = Number(image_balance) !== 0 && Number(image_balance) !== 0 ? (Number(image_balance) / (Number(stake_balance) + Number(stake_balance_in_work))) * 10 ** (stake_asset_decimals - image_asset_decimals) : 0;
-    stakePrice = Number(image_balance) !== 0 && Number(image_balance) !== 0 ? (Number(stake_balance) / (Number(image_balance) + Number(image_balance_in_work))) * 10 ** (image_asset_decimals - stake_asset_decimals) : 0;
+    imagePrice = (Number(stake_balance) !== 0 || Number(stake_balance_in_work) !== 0) ? (Number(image_balance) / (Number(stake_balance) + Number(stake_balance_in_work))) * 10 ** (stake_asset_decimals - image_asset_decimals) : 0;
+    stakePrice = (Number(image_balance) !== 0 || Number(image_balance_in_work) !== 0) ? (Number(stake_balance) / (Number(image_balance) + Number(image_balance_in_work))) * 10 ** (image_asset_decimals - stake_asset_decimals) : 0;
   }
 
   const padding = 24;
 
   return <div style={{ marginTop: 20 }}>
-    <Card
-      bodyStyle={{ padding: 0 }}
-      style={{ marginBottom: 20 }}
-      id={assistant_aa}
-    >
-      <Row
-        onClick={() => setIsOpen(!isOpen)}
-        style={{
-          paddingTop: padding,
-          paddingLeft: padding,
-          paddingRight: padding,
-          paddingBottom: padding,
-          boxSizing: "border-box",
-          cursor: "pointer"
-        }}
-      >
+    <Card bodyStyle={{ padding: 0 }} style={{ marginBottom: 20 }} id={assistant_aa}>
+      <Row onClick={() => setIsOpen(!isOpen)} style={{ padding, boxSizing: "border-box", cursor: "pointer" }}>
         <Col xs={{ span: 24 }} sm={{ span: 24 }}>
           <Row gutter={10} align="middle">
             <Col lg={{ span: 8 }} md={{ span: 24 }} sm={{ span: 24 }} style={{ marginBottom: width < 768 ? 15 : 0 }}>
@@ -110,13 +96,10 @@ export const AssistantItem = memo((props) => {
         </Col>
       </Row>
       <div ref={ref} style={{ overflow: 'hidden', transition: '0.4s' }}>
-        <Row gutter={10} align="middle" style={{
-          paddingLeft: padding,
-          paddingRight: padding,
-          paddingBottom: padding,
-        }}>
+        <Row gutter={10} align="middle" style={{ padding, paddingTop: 0 }}>
           <Col lg={{ span: 4 }} md={{ span: 8 }} sm={{ span: 12 }} xs={{ span: 24 }} style={{ marginBottom: width < 768 ? 15 : 0 }}>
             <Statistic
+              loading={management_fee === undefined}
               title={<span style={{ fontWeight: 200 }}>Management fee <InfoTooltip title="Yearly fee charged by the manager for managing the pool." /></span>}
               value={management_fee * 100}
               valueStyle={{ overflow: "hidden", width: "100%" }}
@@ -125,6 +108,7 @@ export const AssistantItem = memo((props) => {
           </Col>
           <Col lg={{ span: 4 }} md={{ span: 8 }} sm={{ span: 12 }} xs={{ span: 24 }} style={{ marginBottom: width <= 576 ? 15 : 0 }}>
             <Statistic
+              loading={success_fee === undefined}
               title={<span style={{ fontWeight: 200 }}>Success fee <InfoTooltip title="Manager’s share of the pool’s profits." /></span>}
               value={success_fee * 100}
               valueStyle={{ overflow: "hidden", width: "100%" }}
@@ -134,6 +118,7 @@ export const AssistantItem = memo((props) => {
 
           <Col lg={{ span: 6 }} md={{ span: 8 }} sm={{ span: 12 }} xs={{ span: 24 }} style={{ marginBottom: width <= 576 ? 15 : 0 }}>
             <Statistic
+              loading={stake_balance_in_work === undefined}
               formatter={formatter}
               title={<span style={{ fontWeight: 200 }}>Balance in work <InfoTooltip title="Capital that is currently tied up in claims and challenges. This is “at-risk” capital and it’s not included when redeeming the pool’s shares." /></span>}
               valueStyle={{ overflow: "hidden", width: "100%" }}
@@ -142,6 +127,7 @@ export const AssistantItem = memo((props) => {
           </Col>
           <Col lg={{ span: 5 }} md={{ span: 8 }} sm={{ span: 12 }} xs={{ span: 24 }}>
             <Statistic
+              loading={mySharesBalance === undefined}
               formatter={formatter}
               title={<span style={{ fontWeight: 200 }}>My shares balance <InfoTooltip title="The number of shares in your wallet." /></span>}
               valueStyle={{ overflow: "hidden", width: "100%" }}
@@ -150,6 +136,7 @@ export const AssistantItem = memo((props) => {
           </Col>
           {side === "import" && <Col lg={{ span: 5 }} md={{ span: 8 }} sm={{ span: 12 }} xs={{ span: 24 }} style={{ marginTop: width <= 576 && side === "import" ? 15 : 0 }}>
             <Statistic
+              loading={stakePrice === undefined || imagePrice === undefined}
               formatter={formatter}
               title={<span style={{ fontWeight: 200 }}>Swap prices <InfoTooltip title={`The pool holds both ${image_asset_symbol} and ${stake_asset_symbol} and allows swaps between the two tokens.`} /></span>}
               valueStyle={{ overflow: "hidden", width: "100%" }}
@@ -157,11 +144,7 @@ export const AssistantItem = memo((props) => {
             />
           </Col>}
         </Row>
-        <Row style={{
-          paddingLeft: padding,
-          paddingRight: padding,
-          paddingBottom: padding,
-        }}>
+        <Row style={{ padding, paddingTop: 0 }}>
           <div>
             <span style={{ fontWeight: 200 }}>Assistant address: </span>{" "}<a target="_blank" rel="noopener" className="evmHashOrAddress" href={getExplorerLink(network, assistant_aa, "address")}>{assistant_aa}</a>
           </div>
