@@ -31,7 +31,7 @@ export const AssistantsPage = () => {
 
   useEffect(() => {
     let intervalId;
-    if (Object.keys(assistants).length > 0) {
+    if (assistants.length > 0) {
       intervalId = setInterval(() => dispatch(updateAllEvmAssistants()), EVM_ASSISTANTS_UPDATE_INTERVAL);
     }
     return () => {
