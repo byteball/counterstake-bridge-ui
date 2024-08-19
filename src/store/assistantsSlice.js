@@ -127,7 +127,7 @@ export const assistantsSlice = createSlice({
         if (assistant) {
           Object.keys(u).forEach(name => { assistant[name] = u[name]; });
         } else {
-          console.log('try change unknown assistant (Maybe it\'s new one)')
+          console.warn(`Attempted to update unknown assistant: ${u.assistant_aa}. It may be a new assistant.`);
         }
       });
     }
