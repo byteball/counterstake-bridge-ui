@@ -82,7 +82,7 @@ export const SwapTokensModal = ({ block, size, assistant_aa, network, swap_fee, 
     if (!isEmpty(inToken) && !isEmpty(outToken) && amountIn && Number(amountIn)) {
       if (network === "Obyte") {
         const net_of_swap_fee = 1 - swap_fee;
-        
+
         const inGrossBalance = inToken.balance + inToken.balance_in_work;
         const outGrossBalance = outToken.balance + outToken.balance_in_work;
 
@@ -111,7 +111,7 @@ export const SwapTokensModal = ({ block, size, assistant_aa, network, swap_fee, 
 
         const inNewMf = inToken.mf + (inGrossBalance * Number(management_fee) * (timestamp - Number(ts)) / (360 * 24 * 3600));
         const outNewMf = outToken.mf + (outGrossBalance * Number(management_fee) * (timestamp - Number(ts)) / (360 * 24 * 3600));
-        
+
         const inNetBalance = inGrossBalance - inNewMf - Math.max(inToken.profit * success_fee, 0)
         const outNetBalance = outGrossBalance - outNewMf - Math.max(outToken.profit * success_fee, 0)
 
@@ -235,7 +235,7 @@ export const SwapTokensModal = ({ block, size, assistant_aa, network, swap_fee, 
   return <div onClick={stopPropagation}>
     {addresses[network]
       ? <Button onClick={openModal} block={block} size={size} disabled={(network !== "Obyte" && !window.ethereum) || !addresses[network] || BigNumber.from(String(stake_balance)).isZero() || BigNumber.from(String(image_balance)).isZero()}>Swap tokens</Button>
-      : <Tooltip title={<ChangeAddressModal network={network}>Please add your {String(network).toLowerCase()} wallet address</ChangeAddressModal>}>
+      : <Tooltip overlayStyle={{ maxWidth: 400 }} title={<ChangeAddressModal network={network}>Please add your {String(network).toLowerCase()} wallet address</ChangeAddressModal>}>
         <Button onClick={openModal} block={block} size={size} disabled={(network !== "Obyte" && !window.ethereum) || !addresses[network]}>Swap tokens</Button>
       </Tooltip>}
     <Modal title="Swap tokens" visible={isVisible} onCancel={closeModal} footer={null} onClick={stopPropagation}>
