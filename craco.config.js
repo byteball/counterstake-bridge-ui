@@ -20,7 +20,7 @@ module.exports = {
               "@modal-content-bg": "#141414",
               "@modal-footer-bg": "#141414",
               "@drawer-bg": "#141414",
-              "@tooltip-bg": "#141414",
+              "@tooltip-bg": "#2b2b2b",
             },
             javascriptEnabled: true,
           },

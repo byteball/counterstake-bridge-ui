@@ -384,7 +384,7 @@ export default ({ size, side, network, block, assistant_aa, shares_decimals, sha
   return <div onClick={stopPropagation}>
     {addresses[network]
       ? <Button onClick={openModal} block={block} size={size} disabled={(network !== "Obyte" && !window.ethereum) || !addresses[network]}>Buy shares</Button>
-      : <Tooltip title={<ChangeAddressModal network={network}>Please add your {String(network).toLowerCase()} wallet address</ChangeAddressModal>}>
+      : <Tooltip overlayStyle={{ maxWidth: 400 }} title={<ChangeAddressModal network={network}>Please add your {String(network).toLowerCase()} wallet address</ChangeAddressModal>}>
         <Button onClick={openModal} block={block} size={size} disabled={(network !== "Obyte" && !window.ethereum) || !addresses[network]}>Buy shares</Button>
       </Tooltip>}
 
