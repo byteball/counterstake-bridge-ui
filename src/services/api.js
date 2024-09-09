@@ -33,7 +33,7 @@ export async function getTransferStatus(txid) {
 
 export async function getPooledAssistants({reqBridgesInfo = false} = {}) {
   const resp_body = await request(`/pooled_assistants${reqBridgesInfo ? '?reqBridgesInfo=1' : ''}${reqBridgesInfo ? "&" : "?"}reqUsdRates=true`);
-  return resp_body;
+  return reqBridgesInfo ? resp_body : { assistants: resp_body };
 }
 
 export async function getTransfersByDestAddress(address) {
