@@ -236,7 +236,7 @@ export const CreateBridgeForm = () => {
       tokenHelp = <p style={{ color: "red" }}>Bridge already exists</p>
     } else if (!homeSymbol.value || !homeDecimals.valid || !tokenAddress.valid) {
       if (homeNetwork.value === "Obyte") {
-        tokenHelp = <p style={{ color: "red" }}>Please add the token to the {<a style={{ color: "red", textDecoration: "underline" }} target="_blank" href={`https://${environment === "testnet" && "testnet."}tokens.ooo`} rel="noopener">registry</a>}.</p>
+        tokenHelp = <p style={{ color: "red" }}>Please add the token to the {<a style={{ color: "red", textDecoration: "underline" }} target="_blank" href={`https://${environment === "testnet" ? "testnet." : ''}tokens.ooo`} rel="noopener">registry</a>}.</p>
       } else {
         tokenHelp = <p style={{ color: "red" }}>We could not get information about the token</p>
       }
