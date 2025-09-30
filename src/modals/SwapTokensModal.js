@@ -219,7 +219,7 @@ export const SwapTokensModal = ({ block, size, assistant_aa, network, swap_fee, 
       await res?.wait();
       dispatch(updateEvmAssistant(assistant_aa));
     } catch (e) {
-      console.log(e);
+      console.log("error", e);
       dispatch(updateEvmAssistant(assistant_aa));
     }
   }

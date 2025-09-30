@@ -8,24 +8,27 @@ import obyte from "services/socket";
 import { getExtendedAssistantData, getDirectionsByBridgesInfo } from "utils";
 import { setDirections } from "store/directionsSlice";
 
-import appConfig from "appConfig";
 import { getBalanceOfObyteWallet } from "./getBalanceOfObyteWallet";
+import { filterBridgesByNetworks } from "utils/filterBridgesByNetworks";
+import { filterAssistantsByNetwork } from "utils/filterAssistantsByNetwork";
+import { filterAssistantsByVersionAndEnvironment } from "utils/filterAssistantsByVersionAndEnvironment";
 
 export const loadAssistants = createAsyncThunk(
   'get/loadAssistants',
   async (_, { getState, dispatch }) => {
     const { directions: directionsFromStore, destAddress } = getState();
     const reqBridgesInfo = Object.keys(directionsFromStore).length === 0;
-    let { assistants: assistantsList, bridges_info: bridgesInfo } = await getPooledAssistants({ reqBridgesInfo }).then(({ data }) => data);
-
+    const { assistants: assistantsListRaw, bridges_info: bridgesInfoRaw } = await getPooledAssistants({ reqBridgesInfo }).then(({ data }) => data);
+    const bridgesInfo = filterBridgesByNetworks(bridgesInfoRaw);
     const directions = reqBridgesInfo ? getDirectionsByBridgesInfo(bridgesInfo) : directionsFromStore;
+    let assistantsList = filterAssistantsByNetwork(assistantsListRaw);
 
     if (reqBridgesInfo) {
       dispatch(setDirections(directions));
     }
 
     const shares_symbols = [];
-    assistantsList = assistantsList.filter(({ network, version }) => (network === "Obyte" || version !== "v1") && (appConfig.ENVIRONMENT !== 'testnet' || network !== "Ethereum"));
+    assistantsList = filterAssistantsByVersionAndEnvironment(assistantsList);
     assistantsList?.forEach(({ shares_symbol }) => shares_symbol && shares_symbols.push(shares_symbol));
     const dataGetters = assistantsList.map((a, index) => getExtendedAssistantData(a, directions, destAddress ?? {}).then((data) => assistantsList[index] = { ...a, ...data }));
 
