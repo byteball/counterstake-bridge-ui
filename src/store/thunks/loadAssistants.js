@@ -20,7 +20,7 @@ export const loadAssistants = createAsyncThunk(
     let { assistants: assistantsListRaw, bridges_info: bridgesInfoRaw } = await getPooledAssistants({ reqBridgesInfo }).then(({ data }) => data);
     const bridgesInfo = bridgesInfoRaw ? bridgesInfoRaw.filter(({foreign_network, home_network}) => ((foreign_network in nativeSymbols) || foreign_network === "Obyte") && (home_network === "Obyte" || (home_network in nativeSymbols))) : [];
     const directions = reqBridgesInfo ? getDirectionsByBridgesInfo(bridgesInfo) : directionsFromStore;
-    let assistantsList = assistantsListRaw.filter(({ network }) => (network in nativeSymbols));
+    let assistantsList = assistantsListRaw.filter(({ network }) => (network in nativeSymbols) || network === "Obyte");
 
     if (reqBridgesInfo) {
       dispatch(setDirections(directions));
