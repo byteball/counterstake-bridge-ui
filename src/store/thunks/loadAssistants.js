@@ -10,15 +10,17 @@ import { setDirections } from "store/directionsSlice";
 
 import appConfig from "appConfig";
 import { getBalanceOfObyteWallet } from "./getBalanceOfObyteWallet";
+import { nativeSymbols } from "nativeSymbols";
 
 export const loadAssistants = createAsyncThunk(
   'get/loadAssistants',
   async (_, { getState, dispatch }) => {
     const { directions: directionsFromStore, destAddress } = getState();
     const reqBridgesInfo = Object.keys(directionsFromStore).length === 0;
-    let { assistants: assistantsList, bridges_info: bridgesInfo } = await getPooledAssistants({ reqBridgesInfo }).then(({ data }) => data);
-
+    let { assistants: assistantsListRaw, bridges_info: bridgesInfoRaw } = await getPooledAssistants({ reqBridgesInfo }).then(({ data }) => data);
+    const bridgesInfo = bridgesInfoRaw ? bridgesInfoRaw.filter(({foreign_network, home_network}) => ((foreign_network in nativeSymbols) || foreign_network === "Obyte") && (home_network === "Obyte" || (home_network in nativeSymbols))) : [];
     const directions = reqBridgesInfo ? getDirectionsByBridgesInfo(bridgesInfo) : directionsFromStore;
+    let assistantsList = assistantsListRaw.filter(({ network }) => (network in nativeSymbols));
 
     if (reqBridgesInfo) {
       dispatch(setDirections(directions));

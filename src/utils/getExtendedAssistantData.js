@@ -15,7 +15,8 @@ import { getSymbol } from "./getSymbol";
 
 export const getExtendedAssistantData = async ({ assistant_aa, network, side, bridge_aa, shares_asset }, directions, destAddress = {}) => {
     if (directions[bridge_aa] === undefined) {
-        throw new Error("Unknown direction");
+        return null;
+        // throw new Error("Unknown direction" + bridge_aa);
     }
 
     const stake_asset = side === 'import' ? directions[bridge_aa]?.stake_asset : directions[bridge_aa]?.src_token.asset;
