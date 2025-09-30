@@ -18,7 +18,7 @@ export const loadAssistants = createAsyncThunk(
   async (_, { getState, dispatch }) => {
     const { directions: directionsFromStore, destAddress } = getState();
     const reqBridgesInfo = Object.keys(directionsFromStore).length === 0;
-    let { assistants: assistantsListRaw, bridges_info: bridgesInfoRaw } = await getPooledAssistants({ reqBridgesInfo }).then(({ data }) => data);
+    const { assistants: assistantsListRaw, bridges_info: bridgesInfoRaw } = await getPooledAssistants({ reqBridgesInfo }).then(({ data }) => data);
     const bridgesInfo = filterBridgesByNetworks(bridgesInfoRaw);
     const directions = reqBridgesInfo ? getDirectionsByBridgesInfo(bridgesInfo) : directionsFromStore;
     let assistantsList = filterAssistantsByNetwork(assistantsListRaw);
