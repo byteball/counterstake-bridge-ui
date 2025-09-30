@@ -8,9 +8,10 @@ import obyte from "services/socket";
 import { getExtendedAssistantData, getDirectionsByBridgesInfo } from "utils";
 import { setDirections } from "store/directionsSlice";
 
-import appConfig from "appConfig";
 import { getBalanceOfObyteWallet } from "./getBalanceOfObyteWallet";
-import { nativeSymbols } from "nativeSymbols";
+import { filterBridgesByNetworks } from "utils/filterBridgesByNetworks";
+import { filterAssistantsByNetwork } from "utils/filterAssistantsByNetwork";
+import { filterAssistantsByVersionAndEnvironment } from "utils/filterAssistantsByVersionAndEnvironment";
 
 export const loadAssistants = createAsyncThunk(
   'get/loadAssistants',
@@ -18,16 +19,16 @@ export const loadAssistants = createAsyncThunk(
     const { directions: directionsFromStore, destAddress } = getState();
     const reqBridgesInfo = Object.keys(directionsFromStore).length === 0;
     let { assistants: assistantsListRaw, bridges_info: bridgesInfoRaw } = await getPooledAssistants({ reqBridgesInfo }).then(({ data }) => data);
-    const bridgesInfo = bridgesInfoRaw ? bridgesInfoRaw.filter(({foreign_network, home_network}) => ((foreign_network in nativeSymbols) || foreign_network === "Obyte") && (home_network === "Obyte" || (home_network in nativeSymbols))) : [];
+    const bridgesInfo = filterBridgesByNetworks(bridgesInfoRaw);
     const directions = reqBridgesInfo ? getDirectionsByBridgesInfo(bridgesInfo) : directionsFromStore;
-    let assistantsList = assistantsListRaw.filter(({ network }) => (network in nativeSymbols));
+    let assistantsList = filterAssistantsByNetwork(assistantsListRaw);
 
     if (reqBridgesInfo) {
       dispatch(setDirections(directions));
     }
 
     const shares_symbols = [];
-    assistantsList = assistantsList.filter(({ network, version }) => (network === "Obyte" || version !== "v1") && (appConfig.ENVIRONMENT !== 'testnet' || network !== "Ethereum"));
+    assistantsList = filterAssistantsByVersionAndEnvironment(assistantsList);
     assistantsList?.forEach(({ shares_symbol }) => shares_symbol && shares_symbols.push(shares_symbol));
     const dataGetters = assistantsList.map((a, index) => getExtendedAssistantData(a, directions, destAddress ?? {}).then((data) => assistantsList[index] = { ...a, ...data }));
 
