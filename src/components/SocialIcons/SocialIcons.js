@@ -31,7 +31,7 @@ export const SocialIcons = ({size = "full", centered = false}) => { // type full
     {
       name: "youtube",
       icon: faYoutube,
-      link: "https://www.youtube.com/channel/UC59w9bmROOeUFakVvhMepPQ/"
+      link: "https://www.youtube.com/@ObyteOrg"
     },
     {
       name: "medium",
