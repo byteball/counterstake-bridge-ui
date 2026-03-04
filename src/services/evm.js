@@ -19,7 +19,7 @@ export const providers = {
     : new ethers.providers.JsonRpcProvider(environment === 'testnet' ? "https://bsc-testnet.publicnode.com" : "https://bsc-dataseed.binance.org"),
   Polygon: (environment === 'devnet')
     ? null
-    : new ethers.providers.JsonRpcProvider(environment === 'testnet' ? "https://lb.drpc.org/ogrpc?network=polygon-mumbai&dkey=Ao-5EFErO0GtsfoqNeD3Dc0fTzGeU_0R77XZvmJKmvm9" : "https://polygon-rpc.com"),
+    : new ethers.providers.JsonRpcProvider(environment === 'testnet' ? "https://lb.drpc.org/ogrpc?network=polygon-mumbai&dkey=Ao-5EFErO0GtsfoqNeD3Dc0fTzGeU_0R77XZvmJKmvm9" : "https://polygon-bor-rpc.publicnode.com"),
   Kava: (environment === 'devnet')
     ? null
     : new ethers.providers.JsonRpcProvider(environment === 'testnet' ? "https://evm.testnet.kava.io" : "https://evm.kava.io"),

@@ -27,6 +27,9 @@ export const loadAssistants = createAsyncThunk(
       dispatch(setDirections(directions));
     }
 
+    // filter out assistants whose bridge was filtered out (e.g. unsupported network on the other side)
+    assistantsList = assistantsList.filter(({ bridge_aa }) => bridge_aa in directions);
+
     const shares_symbols = [];
     assistantsList = filterAssistantsByVersionAndEnvironment(assistantsList);
     assistantsList?.forEach(({ shares_symbol }) => shares_symbol && shares_symbols.push(shares_symbol));
