@@ -18,7 +18,7 @@ const multiCalls = {
     },
     Kava: {
         mainnet: MULTICALL3_ADDRESS,
-        testnet: MULTICALL3_ADDRESS
+        testnet: "0x62d2f38dAA1153b381c6ed2A48e7f4673303ac9A"
     }
 }
 
