@@ -1,6 +1,8 @@
 import { BigNumber, ethers } from "ethers";
 import { isArray } from "lodash";
 
+import { formatPeriodDuration } from "./formatPeriodDuration";
+
 export const viewParam = ({ name, value, network, stakeTokenDecimals, stakeTokenSymbol }) => {
   if (value === undefined) return null
   if (name === "oracles" && network === "Obyte") {
@@ -10,8 +12,9 @@ export const viewParam = ({ name, value, network, stakeTokenDecimals, stakeToken
     })
   } if (network !== "Obyte" && ["ratio", "counterstake_coef"].includes(name)) {
     return Number(value) / 100
-  } if ((name === "large_challenging_periods" || name === "challenging_periods") && isArray(value) && network !== "Obyte") {
-    return value.map((v) => v / 3600).join(" ");
+  } if ((name === "large_challenging_periods" || name === "challenging_periods") && network !== "Obyte") {
+    const periods = isArray(value) ? value : String(value).split(" ").map(Number);
+    return periods.map((v) => formatPeriodDuration(v)).join(" ");
   } else if (name === "min_price" && network !== "Obyte") {
     return +ethers.utils.formatUnits(BigNumber.from(value), 20).toString();
   } else if (name === "min_stake" || name === "large_threshold") {

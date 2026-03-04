@@ -116,7 +116,7 @@ export const GovernanceItem = (props) => {
           <InfoCircleOutlined style={{ marginLeft: 10 }} />
         </Tooltip>
       </div>
-      <div className={styles.headerValue}><span className={styles.label}>Current value</span>: <span className={name === "oracles" ? "evmHashOrAddress" : ""} style={name === "oracles" ? { textTransform: "none" } : {}}>{valueView}</span></div>
+      <div className={styles.headerValue}><span className={styles.label}>Current value</span>: <span className={name === "oracles" ? "evmHashOrAddress" : ""} style={name === "oracles" || name === "challenging_periods" || name === "large_challenging_periods" ? { textTransform: "none" } : {}}>{valueView}</span></div>
     </div>
     {leader !== undefined && (!isEqual(leader, value)) && <div className={styles.leaderWrap}>
       <div className={styles.leaderValue}>
