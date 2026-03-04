@@ -4,14 +4,15 @@ import { BigNumber, ethers } from "ethers";
 import obyte from "services/socket";
 import { providers } from "services/evm";
 import { getMultiCallAddress } from "./getMulticallAddress";
-import { exportAssistantAbi, importAssistantAbi, multicallAbi } from "abi";
-import { getBalance } from "./getBalance";
+import { exportAssistantAbi, importAssistantAbi, multicallAbi, ERC20Abi } from "abi";
 
 import appConfig from "appConfig";
 
 import { getAaBalances } from "./getAaBalances";
 import { getDecimals } from "./getDecimals";
 import { getSymbol } from "./getSymbol";
+
+const erc20Iface = new ethers.utils.Interface(ERC20Abi);
 
 export const getExtendedAssistantData = async ({ assistant_aa, network, side, bridge_aa, shares_asset }, directions, destAddress = {}) => {
     if (directions[bridge_aa] === undefined) {
@@ -38,69 +39,108 @@ export const getExtendedAssistantData = async ({ assistant_aa, network, side, br
     const nodeRealEthereumProvider = appConfig.NODEREAL_PROJECT_ID ? new ethers.providers.JsonRpcProvider(`https://eth-mainnet.nodereal.io/v1/${appConfig.NODEREAL_PROJECT_ID}`) : null;
 
     if (network !== "Obyte") { // EVM assistants
-        const multiCallContract = new ethers.Contract(getMultiCallAddress(network), multicallAbi, network === "Ethereum" ? nodeRealEthereumProvider || providers[network] : providers[network]);
+        const provider = network === "Ethereum" ? nodeRealEthereumProvider || providers[network] : providers[network];
+        const multiCallContract = new ethers.Contract(getMultiCallAddress(network), multicallAbi, provider);
         const contractInterface = new ethers.utils.Interface(side === "import" ? importAssistantAbi : exportAssistantAbi);
 
         const calls = [
-            {
-                target: assistant_aa,
-                callData: contractInterface.encodeFunctionData("mf")
-            },
-            {
-                target: assistant_aa,
-                callData: contractInterface.encodeFunctionData("ts")
-            },
-            {
-                target: assistant_aa,
-                callData: contractInterface.encodeFunctionData("success_fee10000")
-            },
-            {
-                target: assistant_aa,
-                callData: contractInterface.encodeFunctionData("management_fee10000")
-            },
-            {
-                target: assistant_aa,
-                callData: contractInterface.encodeFunctionData("profit")
-            },
-            {
-                target: assistant_aa,
-                callData: contractInterface.encodeFunctionData("balance_in_work")
-            },
-            {
-                target: assistant_aa,
-                callData: contractInterface.encodeFunctionData("exponent")
-            },
-            {
-                target: assistant_aa,
-                callData: contractInterface.encodeFunctionData("totalSupply")
-            },
+            { target: assistant_aa, callData: contractInterface.encodeFunctionData("mf") },
+            { target: assistant_aa, callData: contractInterface.encodeFunctionData("ts") },
+            { target: assistant_aa, callData: contractInterface.encodeFunctionData("success_fee10000") },
+            { target: assistant_aa, callData: contractInterface.encodeFunctionData("management_fee10000") },
+            { target: assistant_aa, callData: contractInterface.encodeFunctionData("profit") },
+            { target: assistant_aa, callData: contractInterface.encodeFunctionData("balance_in_work") },
+            { target: assistant_aa, callData: contractInterface.encodeFunctionData("exponent") },
+            { target: assistant_aa, callData: contractInterface.encodeFunctionData("totalSupply") },
         ];
 
         if (side === "import") {
-            calls.push({
-                target: assistant_aa,
-                callData: contractInterface.encodeFunctionData("swap_fee10000") // only for import side
-            })
+            calls.push({ target: assistant_aa, callData: contractInterface.encodeFunctionData("swap_fee10000") });
         }
 
-        const balanceGetters = [
-            getBalance(assistant_aa, stake_asset, network),
-            side === "import" ? getBalance(assistant_aa, assistantData.image_asset, network) : Promise.resolve("0"),
-            destAddress?.[network] ? getBalance(destAddress?.[network], shares_asset, network) : Promise.resolve("0"),
-        ];
+        const assistantCallCount = calls.length;
 
-        const stakeTokenInfoGetters = side === "import"
-            ? [
-                getSymbol(stake_asset, network).then(symbol => assistantData.stake_asset_symbol = symbol),
-                getDecimals(stake_asset, network).then(decimals => assistantData.stake_asset_decimals = decimals)
-            ] : [];
+        // Balance calls — use ERC20.balanceOf for tokens, getEthBalance for native
+        const extraMap = []; // { field, decode }
 
-        const [resultOfBatchingCalls, stakeBalance, imageBalance, userBalanceOfShares] = await Promise.all([multiCallContract.aggregate(calls).then(({ returnData }) => returnData), ...balanceGetters, ...stakeTokenInfoGetters]);
+        const multicallAddress = getMultiCallAddress(network);
+        const multicallIface = new ethers.utils.Interface(multicallAbi);
 
-        const decodedData = resultOfBatchingCalls.map((data, index) => {
-            const functionFragment = contractInterface.getFunction(calls[index].callData.slice(0, 10));
-            return contractInterface.decodeFunctionResult(functionFragment, data);
+        if (stake_asset === ethers.constants.AddressZero) {
+            calls.push({ target: multicallAddress, callData: multicallIface.encodeFunctionData("getEthBalance", [assistant_aa]) });
+            extraMap.push({ field: 'stake_balance', decode: 'ethBalance' });
+        } else {
+            calls.push({ target: stake_asset, callData: erc20Iface.encodeFunctionData("balanceOf", [assistant_aa]) });
+            extraMap.push({ field: 'stake_balance', decode: 'balanceOf' });
+        }
+
+        if (side === "import") {
+            if (assistantData.image_asset === ethers.constants.AddressZero) {
+                calls.push({ target: multicallAddress, callData: multicallIface.encodeFunctionData("getEthBalance", [assistant_aa]) });
+                extraMap.push({ field: 'image_balance', decode: 'ethBalance' });
+            } else {
+                calls.push({ target: assistantData.image_asset, callData: erc20Iface.encodeFunctionData("balanceOf", [assistant_aa]) });
+                extraMap.push({ field: 'image_balance', decode: 'balanceOf' });
+            }
+        }
+
+        if (destAddress?.[network]) {
+            calls.push({ target: shares_asset, callData: erc20Iface.encodeFunctionData("balanceOf", [destAddress[network]]) });
+            extraMap.push({ field: 'user_shares', decode: 'balanceOf' });
+        }
+
+        if (side === "import" && stake_asset !== ethers.constants.AddressZero) {
+            calls.push({ target: stake_asset, callData: erc20Iface.encodeFunctionData("symbol") });
+            extraMap.push({ field: 'symbol', decode: 'symbol' });
+            calls.push({ target: stake_asset, callData: erc20Iface.encodeFunctionData("decimals") });
+            extraMap.push({ field: 'decimals', decode: 'decimals' });
+        }
+
+        const results = await multiCallContract.callStatic.tryAggregate(false, calls);
+
+        // Decode assistant contract data (first assistantCallCount results)
+        const decodedData = [];
+        for (let i = 0; i < assistantCallCount; i++) {
+            if (!results[i].success) {
+                console.log(`Assistant ${assistant_aa}: call ${i} failed`);
+                return null;
+            }
+            const functionFragment = contractInterface.getFunction(calls[i].callData.slice(0, 10));
+            decodedData.push(contractInterface.decodeFunctionResult(functionFragment, results[i].returnData));
+        }
+
+        // Decode extra calls (balances, symbol, decimals)
+        let stakeBalance = "0", imageBalance = "0", userBalanceOfShares = "0";
+
+        extraMap.forEach(({ field, decode }, i) => {
+            const result = results[assistantCallCount + i];
+            if (!result.success) return;
+
+            try {
+                if (decode === 'balanceOf') {
+                    const val = BigNumber.from(erc20Iface.decodeFunctionResult("balanceOf", result.returnData)[0]).toString();
+                    if (field === 'stake_balance') stakeBalance = val;
+                    else if (field === 'image_balance') imageBalance = val;
+                    else if (field === 'user_shares') userBalanceOfShares = val;
+                } else if (decode === 'ethBalance') {
+                    const val = BigNumber.from(multicallIface.decodeFunctionResult("getEthBalance", result.returnData)[0]).toString();
+                    if (field === 'stake_balance') stakeBalance = val;
+                    else if (field === 'image_balance') imageBalance = val;
+                } else if (decode === 'symbol') {
+                    assistantData.stake_asset_symbol = erc20Iface.decodeFunctionResult("symbol", result.returnData)[0];
+                } else if (decode === 'decimals') {
+                    assistantData.stake_asset_decimals = erc20Iface.decodeFunctionResult("decimals", result.returnData)[0];
+                }
+            } catch (e) {
+                console.log(`Failed to decode ${field}`, e);
+            }
         });
+
+        // For import with native stake token, resolve symbol/decimals from cache
+        if (side === "import" && stake_asset === ethers.constants.AddressZero) {
+            assistantData.stake_asset_symbol = await getSymbol(stake_asset, network);
+            assistantData.stake_asset_decimals = await getDecimals(stake_asset, network);
+        }
 
         const transformedData = decodedData.map((value, index) => {
             if (index === 2 || index === 3 || (side === "import" && index === decodedData.length - 1)) return value[0] / 1e4; // success_fee10000, management_fee10000, swap_fee10000
