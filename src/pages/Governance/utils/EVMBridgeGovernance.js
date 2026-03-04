@@ -566,12 +566,12 @@ export class EVMBridgeGovernance {
 
       if (support_choices && your_choice) {
         initState[name].choices[this.wallet] = your_choice;
-        const keyChoice = isArray(your_choice) ? your_choice.map(v => v / 3600).join(" ") : your_choice;
+        const keyChoice = isArray(your_choice) ? your_choice.join(" ") : your_choice;
         initState[name].supports[keyChoice] = [{ support: support_choices }];
       }
 
       if (support_leader && support_leader !== "0" && leader) {
-        const keyLeader = isArray(leader) ? leader.map(v => v / 3600).join(" ") : leader;
+        const keyLeader = isArray(leader) ? leader.join(" ") : leader;
         if (!(keyLeader in initState[name].supports)) {
           initState[name].supports[keyLeader] = [{ support: support_leader }];
         }
