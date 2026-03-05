@@ -485,6 +485,7 @@ export class EVMBridgeGovernance {
       const paramType = this.parameterList[key].type;
       const iface = getIfaceByType(paramType);
       const data = paramData[key];
+      const currentValue = initValues[key]?.value;
 
       if (paramType === 'uint') {
         if (data.leader) {
@@ -495,6 +496,10 @@ export class EVMBridgeGovernance {
           batch4.push({ target: addr, callData: iface.encodeFunctionData("votesByValue", [data.choice]) });
           batch4Map.push({ key, field: 'support_choice' });
         }
+        if (currentValue !== undefined && (!data.leader || !data.leader.eq(BigNumber.from(String(currentValue)))) && (!data.choice || !data.choice.eq(BigNumber.from(String(currentValue))))) {
+          batch4.push({ target: addr, callData: iface.encodeFunctionData("votesByValue", [BigNumber.from(String(currentValue))]) });
+          batch4Map.push({ key, field: 'support_current' });
+        }
       } else if (paramType === 'address') {
         if (data.leader && data.leader !== ethers.constants.AddressZero) {
           batch4.push({ target: addr, callData: iface.encodeFunctionData("votesByValue", [data.leader]) });
@@ -503,6 +508,10 @@ export class EVMBridgeGovernance {
         if (data.choice && data.choice !== ethers.constants.AddressZero) {
           batch4.push({ target: addr, callData: iface.encodeFunctionData("votesByValue", [data.choice]) });
           batch4Map.push({ key, field: 'support_choice' });
+        }
+        if (currentValue && currentValue !== ethers.constants.AddressZero && data.leader !== currentValue && data.choice !== currentValue) {
+          batch4.push({ target: addr, callData: iface.encodeFunctionData("votesByValue", [currentValue]) });
+          batch4Map.push({ key, field: 'support_current' });
         }
       } else if (paramType === 'unitArray') {
         if (data.periodsLeader.length > 0) {
@@ -514,6 +523,15 @@ export class EVMBridgeGovernance {
           const choiceKey = ethers.utils.solidityKeccak256(data.periodsChoice.map(() => 'uint256'), data.periodsChoice);
           batch4.push({ target: addr, callData: arrayIface.encodeFunctionData("votesByValue", [choiceKey]) });
           batch4Map.push({ key, field: 'support_choice' });
+        }
+        if (isArray(currentValue) && currentValue.length > 0) {
+          const currentKey = ethers.utils.solidityKeccak256(currentValue.map(() => 'uint256'), currentValue);
+          const leaderKey = data.periodsLeader.length > 0 ? ethers.utils.solidityKeccak256(data.periodsLeader.map(() => 'uint256'), data.periodsLeader) : null;
+          const choiceKey = data.periodsChoice.length > 0 ? ethers.utils.solidityKeccak256(data.periodsChoice.map(() => 'uint256'), data.periodsChoice) : null;
+          if (currentKey !== leaderKey && currentKey !== choiceKey) {
+            batch4.push({ target: addr, callData: arrayIface.encodeFunctionData("votesByValue", [currentKey]) });
+            batch4Map.push({ key, field: 'support_current' });
+          }
         }
       }
     });
@@ -549,8 +567,8 @@ export class EVMBridgeGovernance {
         support_leader = data.support_leader ? data.support_leader.toString() : undefined;
         support_choices = data.choice && data.support_choice ? data.support_choice.toString() : undefined;
       } else if (paramType === 'unitArray') {
-        leader = data.periodsLeader?.length > 0 ? data.periodsLeader : undefined;
-        your_choice = data.periodsChoice?.length > 0 ? data.periodsChoice : undefined;
+        leader = data.periodsLeader?.length > 0 && data.periodsLeader[0] > 0 ? data.periodsLeader : undefined;
+        your_choice = data.periodsChoice?.length > 0 && data.periodsChoice[0] > 0 ? data.periodsChoice : undefined;
         support_leader = leader && data.support_leader ? data.support_leader.toString() : undefined;
         support_choices = your_choice && data.support_choice ? data.support_choice.toString() : undefined;
       }
@@ -574,6 +592,15 @@ export class EVMBridgeGovernance {
         const keyLeader = isArray(leader) ? leader.join(" ") : leader;
         if (!(keyLeader in initState[name].supports)) {
           initState[name].supports[keyLeader] = [{ support: support_leader }];
+        }
+      }
+
+      const support_current = data.support_current && !data.support_current.isZero() ? data.support_current.toString() : undefined;
+      if (support_current) {
+        const currentValue = initValues[name]?.value;
+        const keyCurrent = isArray(currentValue) ? currentValue.join(" ") : String(currentValue);
+        if (!(keyCurrent in initState[name].supports)) {
+          initState[name].supports[keyCurrent] = [{ support: support_current }];
         }
       }
     });
