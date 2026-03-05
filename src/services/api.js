@@ -1,24 +1,39 @@
 import config from "appConfig";
 
-const URL = config.BACKEND_URL;
+const BASE_URLS = [config.BACKEND_URL];
+
+if (config.FALLBACK_BACKEND_URL) {
+  BASE_URLS.push(config.FALLBACK_BACKEND_URL);
+}
 
 const request = async (endpoint, options) => {
-  const response = await fetch(`${URL}${endpoint}`, {
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      Accept: 'application/json',
-      'Content-Type': 'application/json'
-    },
-    mode: 'cors',
-    ...options
-  });
+  let lastError;
 
-  if (response.status !== 200) {
-    const { error } = await response.json();
-    throw new Error(error);
+  for (const baseUrl of BASE_URLS) {
+    try {
+      const response = await fetch(`${baseUrl}${endpoint}`, {
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          Accept: 'application/json',
+          'Content-Type': 'application/json'
+        },
+        mode: 'cors',
+        ...options
+      });
+
+      if (response.status !== 200) {
+        const { error } = await response.json();
+        throw new Error(error);
+      }
+
+      return await response.json();
+    } catch (e) {
+      console.log(`API request to ${baseUrl}${endpoint} failed`, e.message);
+      lastError = e;
+    }
   }
 
-  return await response.json();
+  throw lastError;
 }
 
 export async function getBridges() {
@@ -31,14 +46,14 @@ export async function getTransferStatus(txid) {
   return resp_body?.data;
 }
 
-export async function getPooledAssistants({reqBridgesInfo = false} = {}) {
+export async function getPooledAssistants({ reqBridgesInfo = false } = {}) {
   const resp_body = await request(`/pooled_assistants${reqBridgesInfo ? '?reqBridgesInfo=1' : ''}${reqBridgesInfo ? "&" : "?"}reqUsdRates=true`);
   return resp_body;
 }
 
 export async function getTransfersByDestAddress(address) {
   if (!address) return [];
-  
+
   const resp_body = await request(`/transfers/${encodeURIComponent(address)}`);
   return resp_body?.data;
 }
