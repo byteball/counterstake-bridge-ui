@@ -94,7 +94,7 @@ export const ChangeParamsModal = ({ supportedValue, description, name, activeGov
     let reg;
 
     if (name === "challenging_periods" || name === "large_challenging_periods") {
-      reg = /^[0-9 .]+$/;
+      reg = /^[0-9 ]+$/;
     } else {
       reg = /^(0|[.1-9]\d*)([.,]\d+)?$/;
     }
@@ -138,6 +138,9 @@ export const ChangeParamsModal = ({ supportedValue, description, name, activeGov
       transformedValue = +ethers.utils.formatUnits(BigNumber.from(supportedValue), stakeTokenDecimals);
     } else if (supportedValue !== undefined && bridge_network !== "Obyte" && name === "min_price") {
       transformedValue = +ethers.utils.formatUnits(BigNumber.from(supportedValue), 20);
+    } else if (supportedValue !== undefined && bridge_network !== "Obyte" && (name === "challenging_periods" || name === "large_challenging_periods")) {
+      const periods = Array.isArray(supportedValue) ? supportedValue : String(supportedValue).split(" ").map(Number);
+      transformedValue = periods.map((v) => v / 3600).join(" ");
     } else {
       transformedValue = supportedValue
     }
