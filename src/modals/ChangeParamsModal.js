@@ -94,7 +94,7 @@ export const ChangeParamsModal = ({ supportedValue, description, name, activeGov
     let reg;
 
     if (name === "challenging_periods" || name === "large_challenging_periods") {
-      reg = /^[0-9 .]+$/;
+      reg = /^[0-9 ]+$/;
     } else {
       reg = /^(0|[.1-9]\d*)([.,]\d+)?$/;
     }
