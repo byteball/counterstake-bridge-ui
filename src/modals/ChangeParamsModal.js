@@ -145,9 +145,13 @@ export const ChangeParamsModal = ({ supportedValue, description, name, activeGov
       transformedValue = supportedValue
     }
 
+    const valid = supportedValue !== undefined && (
+      !parameterInfo?.validator || parameterInfo.validator(transformedValue, { stakeTokenDecimals })
+    );
+
     setParamValue({
       value: transformedValue,
-      valid: supportedValue !== undefined
+      valid
     });
 
     setAmount({
