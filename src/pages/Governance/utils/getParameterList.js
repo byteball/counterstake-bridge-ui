@@ -56,7 +56,7 @@ export const getParameterList = (network) => ({
     name: "challenging_periods",
     type: "unitArray",
     description: "Challenging periods (in hours) for regular amounts.",
-    rule: "The value of the challenging_periods parameter must be Array of positive numbers. Numbers must be separated by a space and each of the numbers must be larger than the previous one. Example: 7 30 60 90 120",
+    rule: "The value of the challenging_periods parameter must be Array of numbers, each at least 24 (hours). Numbers must be separated by a space and each of the numbers must be larger than the previous one. Example: 72 168 720 1440",
     initValue: environment === "mainnet" ? [72, 168, 720, 1440] : [0.1, 0.2, 0.5, 1],
     validator: value => is_valid_challenging_periods_string(value, network)
   },
@@ -64,7 +64,7 @@ export const getParameterList = (network) => ({
     name: "large_challenging_periods",
     type: "unitArray",
     description: "Challenging periods (in hours) for large amounts.",
-    rule: "The value of the large_challenging_periods parameter must be Array of positive numbers. Numbers must be separated by a space and each of the numbers must be larger than the previous one. Example: 7 30 60 90 120",
+    rule: "The value of the large_challenging_periods parameter must be Array of numbers, each at least 24 (hours). Numbers must be separated by a space and each of the numbers must be larger than the previous one. Example: 168 720 1440 2160",
     initValue: environment === "mainnet" ? [168, 720, 1440, 2160] : [0.2, 0.3, 0.7, 1.5],
     validator: value => is_valid_challenging_periods_string(value, network)
   },
@@ -101,7 +101,7 @@ export const is_valid_challenging_periods_string = (value) => {
 
     const nPeriod = Number(period);
 
-    if (nPeriod <= 0 || (nPeriod > 3 * 365 * 24)) isError = true
+    if (nPeriod < 24 || (nPeriod > 3 * 365 * 24)) isError = true
 
     if (nPeriod < prev) return isError = true
 
