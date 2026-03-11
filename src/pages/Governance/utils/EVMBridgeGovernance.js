@@ -365,9 +365,9 @@ export class EVMBridgeGovernance {
     const large_challenging_periods = parseBatchPeriods(results1, 11);
 
     const initValues = {
-      ratio: { value: settings.ratio100 },
-      counterstake_coef: { value: settings.counterstake_coef100 },
-      min_tx_age: { value: settings.min_tx_age },
+      ratio: { value: String(settings.ratio100) },
+      counterstake_coef: { value: String(settings.counterstake_coef100) },
+      min_tx_age: { value: String(settings.min_tx_age) },
       min_stake: { value: settings.min_stake ? BigNumber.from(settings.min_stake).toString() : undefined },
       large_threshold: { value: settings.large_threshold ? BigNumber.from(settings.large_threshold).toString() : undefined },
       challenging_periods: { value: challenging_periods },
