@@ -567,8 +567,8 @@ export class EVMBridgeGovernance {
         support_leader = data.support_leader ? data.support_leader.toString() : undefined;
         support_choices = data.choice && data.support_choice ? data.support_choice.toString() : undefined;
       } else if (paramType === 'unitArray') {
-        leader = data.periodsLeader?.length > 0 && data.periodsLeader[0] > 0 ? data.periodsLeader : undefined;
-        your_choice = data.periodsChoice?.length > 0 && data.periodsChoice[0] > 0 ? data.periodsChoice : undefined;
+        leader = data.periodsLeader?.length > 0 ? data.periodsLeader : undefined;
+        your_choice = data.periodsChoice?.length > 0 ? data.periodsChoice : undefined;
         support_leader = leader && data.support_leader ? data.support_leader.toString() : undefined;
         support_choices = your_choice && data.support_choice ? data.support_choice.toString() : undefined;
       }

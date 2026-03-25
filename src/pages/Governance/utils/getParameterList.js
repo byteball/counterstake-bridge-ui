@@ -12,9 +12,9 @@ export const getParameterList = (network) => ({
     evm_name: "ratio100",
     type: "uint",
     description: "The ratio between the stake and the claimed amount.",
-    rule: "The value of the ratio parameter must be greater than to 0",
+    rule: "The value of the ratio parameter must be between 0.1 and 10",
     initValue: 1,
-    validator: value => value > 0
+    validator: value => value >= 0.1 && value <= 10
   },
   counterstake_coef: {
     name: "counterstake_coef",
