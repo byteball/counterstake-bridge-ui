@@ -6,7 +6,6 @@ import { providers } from "services/evm";
 import { getMultiCallAddress } from "./getMulticallAddress";
 import { exportAssistantAbi, importAssistantAbi, multicallAbi, ERC20Abi } from "abi";
 
-import appConfig from "appConfig";
 
 import { getAaBalances } from "./getAaBalances";
 import { getDecimals } from "./getDecimals";
@@ -36,10 +35,8 @@ export const getExtendedAssistantData = async ({ assistant_aa, network, side, br
         home_symbol: directions[bridge_aa]?.home_symbol,
     };
 
-    const nodeRealEthereumProvider = appConfig.NODEREAL_PROJECT_ID ? new ethers.providers.JsonRpcProvider(`https://eth-mainnet.nodereal.io/v1/${appConfig.NODEREAL_PROJECT_ID}`) : null;
-
     if (network !== "Obyte") { // EVM assistants
-        const provider = network === "Ethereum" ? nodeRealEthereumProvider || providers[network] : providers[network];
+        const provider = providers[network];
         const multiCallContract = new ethers.Contract(getMultiCallAddress(network), multicallAbi, provider);
         const contractInterface = new ethers.utils.Interface(side === "import" ? importAssistantAbi : exportAssistantAbi);
 

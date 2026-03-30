@@ -5,10 +5,11 @@ import { groupBy } from "lodash";
 import { getPooledAssistants } from "services/api";
 import obyte from "services/socket";
 
-import { getExtendedAssistantData, getDirectionsByBridgesInfo } from "utils";
+import { getExtendedAssistantData, getDirectionsByBridgesInfo, promiseAllWithConcurrency } from "utils";
 import { setDirections } from "store/directionsSlice";
 
 import { getBalanceOfObyteWallet } from "./getBalanceOfObyteWallet";
+import { updateEvmAssistant } from "./updateEvmAssistant";
 import { filterBridgesByNetworks } from "utils/filterBridgesByNetworks";
 import { filterAssistantsByNetwork } from "utils/filterAssistantsByNetwork";
 import { filterAssistantsByVersionAndEnvironment } from "utils/filterAssistantsByVersionAndEnvironment";
@@ -33,9 +34,33 @@ export const loadAssistants = createAsyncThunk(
     const shares_symbols = [];
     assistantsList = filterAssistantsByVersionAndEnvironment(assistantsList);
     assistantsList?.forEach(({ shares_symbol }) => shares_symbol && shares_symbols.push(shares_symbol));
-    const dataGetters = assistantsList.map((a, index) => getExtendedAssistantData(a, directions, destAddress ?? {}).then((data) => assistantsList[index] = { ...a, ...data }));
+    const failedIndices = [];
 
-    await Promise.all(dataGetters);
+    const dataGetters = assistantsList.map((a, index) => () =>
+      getExtendedAssistantData(a, directions, destAddress ?? {})
+        .then((data) => assistantsList[index] = { ...a, ...data })
+        .catch((e) => {
+          console.log(`Failed to load assistant ${a.assistant_aa}:`, e?.message);
+          assistantsList[index] = { ...a };
+          failedIndices.push(index);
+        })
+    );
+
+    await promiseAllWithConcurrency(dataGetters, 10);
+
+    if (failedIndices.length > 0) {
+      const failedEvmAddresses = failedIndices
+        .map((index) => assistantsList[index])
+        .filter((a) => a.network !== "Obyte")
+        .map((a) => a.assistant_aa);
+
+      if (failedEvmAddresses.length > 0) {
+        console.log(`Retrying ${failedEvmAddresses.length} failed EVM assistants in 5s...`);
+        setTimeout(() => {
+          failedEvmAddresses.forEach((aa) => dispatch(updateEvmAssistant(aa)));
+        }, 5000);
+      }
+    }
 
     dispatch(getBalanceOfObyteWallet());
 
