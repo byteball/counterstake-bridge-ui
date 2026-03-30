@@ -2,39 +2,45 @@ import { BigNumber, ethers } from "ethers";
 
 import { claimMyself, updateTransferStatus } from "store/transfersSlice";
 import { store } from "index";
-import config from "appConfig";
+import { rpcUrls } from "rpcUrls";
+import { chainIds } from "chainIds";
+import { JsonRpcProviderWithFallback } from "./JsonRpcProviderWithFallback";
+
+const environment = process.env.REACT_APP_ENVIRONMENT;
+const env = environment === 'devnet' ? 'devnet' : environment === 'testnet' ? 'testnet' : 'mainnet';
+
+function createProvider(network) {
+  const urls = rpcUrls[network]?.[env];
+
+  if (!urls || urls.length === 0) return null;
+
+  const chainId = chainIds[env]?.[network];
+
+  if (urls.length === 1) {
+    return new ethers.providers.StaticJsonRpcProvider(urls[0], chainId);
+  }
+
+  return new JsonRpcProviderWithFallback(urls, chainId);
+}
+
+export const providers = Object.fromEntries(
+  Object.keys(rpcUrls).map(network => [network, createProvider(network)])
+);
 
 const counterstakeAbi = [
   "event NewClaim(uint indexed claim_num, address author_address, string sender_address, address recipient_address, string txid, uint32 txts, uint amount, int reward, uint stake, string data, uint32 expiry_ts)"
 ];
 
-const environment = config.ENVIRONMENT;
+const watchedContracts = {};
 
-export const providers = {
-  Ethereum: (environment === 'devnet')
-    ? new ethers.providers.JsonRpcProvider("http://0.0.0.0:7545") // ganache
-    : environment !== 'testnet' ? new ethers.providers.InfuraProvider("homestead", config.INFURA_PROJECT_ID) : null,
-  BSC: (environment === 'devnet')
-    ? null
-    : new ethers.providers.JsonRpcProvider(environment === 'testnet' ? "https://bsc-testnet.publicnode.com" : "https://bsc-dataseed.binance.org"),
-  Polygon: (environment === 'devnet')
-    ? null
-    : new ethers.providers.JsonRpcProvider(environment === 'testnet' ? "https://lb.drpc.org/ogrpc?network=polygon-mumbai&dkey=Ao-5EFErO0GtsfoqNeD3Dc0fTzGeU_0R77XZvmJKmvm9" : "https://polygon-bor-rpc.publicnode.com"),
-  Kava: (environment === 'devnet')
-    ? null
-    : new ethers.providers.JsonRpcProvider(environment === 'testnet' ? "https://evm.testnet.kava.io" : "https://evm.kava.io"),
-};
-
-// new claim on Ethereum or BSC
 const onNewClaim = (claim_num, author_address, sender_address, recipient_address, txid, txts, amount, reward, stake, data, expiry_ts, event) => {
   console.log('NewClaim event', claim_num, author_address, sender_address, recipient_address, txid, txts, amount, reward, stake, data, expiry_ts, event);
   const dispatch = store.dispatch;
 
   const claim_txid = event.transactionHash;
-  const state = store.getState();
-  const transfers = state.transfers;
-  // const bridge_aa = event.address;
+  const { transfers } = store.getState();
   const transfer = transfers.find(t => t.txid === txid);
+
   if (!transfer)
     return console.log(`claim of unrecognized transfer ${txid}`);
 
@@ -47,14 +53,11 @@ const onNewClaim = (claim_num, author_address, sender_address, recipient_address
   }
 };
 
-// to avoid duplicate event handlers, track the contracts that we are already watching for claims
-let watchedContracts = {};
-
 export const startWatchingContractForClaims = (dst_network, dst_bridge_aa) => {
   if (watchedContracts[dst_bridge_aa])
     return console.log(`already watching ${dst_bridge_aa}`);
-  // we use our own providers, not the ones provided by metamask as they can change when the user switches networks
+
   const contract = new ethers.Contract(dst_bridge_aa, counterstakeAbi, providers[dst_network]);
   contract.on('NewClaim', onNewClaim);
   watchedContracts[dst_bridge_aa] = true;
-}
+};

@@ -12,3 +12,4 @@ export * from "./getBalance";
 export * from "./getExtendedAssistantData";
 export * from "./getDirectionsByBridgesInfo";
 export * from "./fetchExchangeRateInUSD";
+export * from "./promiseAllWithConcurrency";
