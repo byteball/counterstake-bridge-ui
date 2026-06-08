@@ -206,6 +206,8 @@ export class EVMBridgeGovernance {
     return multicallContract.callStatic.tryAggregate(false, calls);
   }
 
+  // For getChallengingPeriod(i): out-of-bounds indices return the clamped last
+  // value (repeated), so a non-increasing element marks the end of the real list.
   static _parsePeriodsList(results) {
     const list = [];
     for (const period of results) {
@@ -215,6 +217,18 @@ export class EVMBridgeGovernance {
       } else {
         break;
       }
+    }
+    return list;
+  }
+
+  // For direct dynamic-array reads (leader(i) / choices(addr, i)): out-of-bounds
+  // indices revert, surfacing as null in the multicall results. The array ends at
+  // the first null, so values may legitimately be equal or decreasing (e.g. [1,1,1,1]).
+  static _parseArrayList(results) {
+    const list = [];
+    for (const value of results) {
+      if (value === null) break;
+      list.push(value);
     }
     return list;
   }
@@ -463,8 +477,8 @@ export class EVMBridgeGovernance {
     // Trim array periods
     keys.forEach(key => {
       if (this.parameterList[key].type === 'unitArray') {
-        paramData[key].periodsLeader = EVMBridgeGovernance._parsePeriodsList(paramData[key].leader_arr);
-        paramData[key].periodsChoice = EVMBridgeGovernance._parsePeriodsList(paramData[key].choice_arr);
+        paramData[key].periodsLeader = EVMBridgeGovernance._parseArrayList(paramData[key].leader_arr);
+        paramData[key].periodsChoice = EVMBridgeGovernance._parseArrayList(paramData[key].choice_arr);
       }
     });
 
