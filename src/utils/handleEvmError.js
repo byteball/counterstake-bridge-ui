@@ -30,10 +30,6 @@ export const getEvmErrorMessage = (e) => {
   return e?.reason || e?.error?.message || e?.data?.message || e?.message || "An error occurred, please try again.";
 };
 
-// Shows the EVM error as a toast. Use in flows that have no input field to show the error
-// next to (e.g. governance "remove"/"commit"). For flows with an amount input, prefer
-// getEvmErrorMessage + setError and render it as a form-field error (validateStatus/help)
-// on the amount input.
 export const handleEvmError = (e) => {
   const msg = getEvmErrorMessage(e);
   if (msg) message.error(msg);
