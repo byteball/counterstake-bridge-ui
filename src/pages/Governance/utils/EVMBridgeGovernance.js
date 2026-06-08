@@ -132,25 +132,18 @@ export class EVMBridgeGovernance {
         }
       }
     } else if (name === "oracles") {
-      try {
-        const param_contract_address = await governance_contract.votedValuesMap('oracleAddress');
-        const param_contract = this.getContractByType(param_contract_address, 'address', true);
+      const param_contract_address = await governance_contract.votedValuesMap('oracleAddress');
+      const param_contract = this.getContractByType(param_contract_address, 'address', true);
 
-        if (!amount) {
-          res = await param_contract.vote(transformedValue);
+      if (!amount) {
+        res = await param_contract.vote(transformedValue);
+      } else {
+        await this.approve(bnAmount);
+        if (options) {
+          res = await param_contract.voteAndDeposit(transformedValue, bnAmount, options);
         } else {
-          await this.approve(bnAmount);
-          if (options) {
-            res = await param_contract.voteAndDeposit(transformedValue, bnAmount, options);
-          } else {
-            res = await param_contract.voteAndDeposit(transformedValue, bnAmount);
-          }
+          res = await param_contract.voteAndDeposit(transformedValue, bnAmount);
         }
-
-
-      } catch ({ error, code }) {
-        message.error(error.message);
-        throw error.message;
       }
     }
 

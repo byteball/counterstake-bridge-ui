@@ -5,7 +5,7 @@ import { useDispatch } from "react-redux";
 import QRButton from "obyte-qr-button";
 import { BigNumber, ethers } from "ethers";
 
-import { generateLink } from "utils";
+import { generateLink, getEvmErrorMessage } from "utils";
 import { EVMBridgeGovernance } from "pages/Governance/utils/EVMBridgeGovernance";
 import { getParameterList } from "pages/Governance/utils/getParameterList";
 import { updateActiveGovernanceAA } from "store/thunks/updateActiveGovernanceAA";
@@ -30,6 +30,9 @@ export const ChangeParamsModal = ({ supportedValue, description, name, activeGov
     value: undefined,
     valid: false,
   });
+
+  const [error, setError] = useState();
+  const [loading, setLoading] = useState(false);
 
   const parameterList = getParameterList(bridge_network);
   const parameterInfo = parameterList?.[name];
@@ -64,6 +67,8 @@ export const ChangeParamsModal = ({ supportedValue, description, name, activeGov
 
   const vote = async () => {
     if (bridge_network === "Obyte") return;
+    setError();
+    setLoading(true);
     try {
 
       const EVM = new EVMBridgeGovernance(bridge_network, selectedBridgeAddress, voteTokenDecimals, activeWallet, stakeTokenDecimals);
@@ -73,11 +78,15 @@ export const ChangeParamsModal = ({ supportedValue, description, name, activeGov
       });
 
     } catch (e) {
-      console.log("change param error", e);
+      const msg = getEvmErrorMessage(e);
+      if (msg) setError(msg);
+    } finally {
+      setLoading(false);
     }
   }
 
   const showModal = () => {
+    setError();
     setIsModalVisible(true);
   };
 
@@ -90,6 +99,7 @@ export const ChangeParamsModal = ({ supportedValue, description, name, activeGov
   };
 
   const handleChangeParamValue = (ev) => {
+    setError();
     const value = ev.target.value;
     let reg;
 
@@ -111,6 +121,7 @@ export const ChangeParamsModal = ({ supportedValue, description, name, activeGov
   };
 
   const handleChangeAmount = (ev) => {
+    setError();
     const value = ev.target.value;
     const reg = /^[0-9.]+$/;
 
@@ -246,6 +257,7 @@ export const ChangeParamsModal = ({ supportedValue, description, name, activeGov
                   ? Number(amount.value) === 0 || !amount.valid
                   : finalSupport === 0 || !paramValue.valid)
               }
+              loading={loading}
               onClick={vote}>Vote</Button>}
           </Space>
         }
@@ -392,7 +404,7 @@ export const ChangeParamsModal = ({ supportedValue, description, name, activeGov
               </Row>
             </div>)}
           {balance !== 0 && balance !== "0" ? <Text type="secondary">Add more funds (optional):</Text> : <Text>Amount to vote with</Text>}
-          <Form.Item>
+          <Form.Item validateStatus={error ? "error" : undefined} help={error}>
             <Input
               placeholder={`Amount in ${voteTokenSymbol || "TOKEN"}`}
               autoComplete="off"

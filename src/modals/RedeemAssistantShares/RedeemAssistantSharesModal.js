@@ -1,4 +1,4 @@
-import { Input, Form, Button, Modal, Result, Alert, message, Tooltip } from "antd";
+import { Input, Form, Button, Modal, Result, message, Tooltip } from "antd";
 import { useEffect, useState } from "react";
 import { ethers, BigNumber } from "ethers";
 import { useDispatch, useSelector } from "react-redux";
@@ -8,7 +8,7 @@ import { selectChainId } from "store/chainIdSlice";
 import { selectDestAddress } from "store/destAddressSlice";
 import { chainIds } from "chainIds";
 import { changeNetwork } from "utils/changeNetwork";
-import { generateLink } from "utils";
+import { generateLink, getEvmErrorMessage } from "utils";
 import { ERC20Abi, exportAssistantAbi, importAssistantAbi } from "abi";
 import { ChangeAddressModal } from "modals/ChangeAddressModal";
 import { updateEvmAssistant } from "store/thunks/updateEvmAssistant";
@@ -25,6 +25,7 @@ export const RedeemAssistantSharesModal = ({ size, assistant_aa, swap_fee, block
   const [imageAmount, setImageAmount] = useState();
   const [sharesAmount, setSharesAmount] = useState();
   const [error, setError] = useState();
+  const [loading, setLoading] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const timestamp = Number(Date.now() / 1000).toFixed(0);
 
@@ -147,6 +148,8 @@ export const RedeemAssistantSharesModal = ({ size, assistant_aa, swap_fee, block
   const redeemSharesFromEVM = async () => {
     if (!window.ethereum || network === "Obyte") return;
 
+    setError();
+    setLoading(true);
     try {
       // login
       await loginEthereum();
@@ -183,8 +186,11 @@ export const RedeemAssistantSharesModal = ({ size, assistant_aa, swap_fee, block
       await res?.wait();
       dispatch(updateEvmAssistant(assistant_aa));
     } catch (e) {
-      console.log(e);
+      const msg = getEvmErrorMessage(e);
+      if (msg) setError(msg);
       dispatch(updateEvmAssistant(assistant_aa));
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -199,7 +205,7 @@ export const RedeemAssistantSharesModal = ({ size, assistant_aa, swap_fee, block
     <Modal title="Redeem shares" visible={isVisible} onCancel={closeModal} footer={null} onClick={stopPropagation}>
       {(!BigNumber.from(String(shares_supply)).isZero()) ? <Form layout="vertical">
         <div><b>You send:</b></div>
-        <Form.Item>
+        <Form.Item validateStatus={error ? "error" : undefined} help={error}>
           <Input placeholder="Amount in shares tokens" value={sharesAmount} onChange={sharesHandleChange} suffix={shares_symbol} />
         </Form.Item>
 
@@ -212,9 +218,8 @@ export const RedeemAssistantSharesModal = ({ size, assistant_aa, swap_fee, block
           <Input placeholder="Amount in imported tokens" disabled={true} value={isValidAction ? imageAmount : undefined} suffix={image_asset_symbol} />
         </Form.Item>}
 
-        {error ? <Form.Item><Alert type="error" message={error} /></Form.Item> : null}
 
-        {network === "Obyte" ? <QRButton type="primary" href={link} onClick={redeemSharesFromEVM} disabled={!isValidAction}>Send{isValidAction ? <>&nbsp;{sharesAmount} {shares_symbol || shares_asset.slice(0, 6) + "..."}</> : ""}</QRButton> : <Button type="primary" onClick={redeemSharesFromEVM} disabled={!isValidAction}>Send{isValidAction ? <>&nbsp;{sharesAmount} {shares_symbol || shares_asset.slice(0, 6) + "..."}</> : ""}</Button>}
+        {network === "Obyte" ? <QRButton type="primary" href={link} onClick={redeemSharesFromEVM} disabled={!isValidAction}>Send{isValidAction ? <>&nbsp;{sharesAmount} {shares_symbol || shares_asset.slice(0, 6) + "..."}</> : ""}</QRButton> : <Button type="primary" onClick={redeemSharesFromEVM} loading={loading} disabled={!isValidAction || loading}>Send{isValidAction ? <>&nbsp;{sharesAmount} {shares_symbol || shares_asset.slice(0, 6) + "..."}</> : ""}</Button>}
 
       </Form> : <Result
         status="error"
