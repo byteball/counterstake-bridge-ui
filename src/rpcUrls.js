@@ -5,6 +5,8 @@ export const rpcUrls = {
     devnet: ["http://0.0.0.0:7545"],
     testnet: [],
     mainnet: [
+      "https://0xrpc.io/eth",
+      "https://eth.meowrpc.com",
       "https://eth.llamarpc.com",
       config.INFURA_PROJECT_ID && `https://mainnet.infura.io/v3/${config.INFURA_PROJECT_ID}`,
       config.NODEREAL_PROJECT_ID && `https://eth-mainnet.nodereal.io/v1/${config.NODEREAL_PROJECT_ID}`,
