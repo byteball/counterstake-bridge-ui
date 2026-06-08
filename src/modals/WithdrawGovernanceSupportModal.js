@@ -5,7 +5,7 @@ import { ethers } from "ethers";
 
 import { EVMBridgeGovernance } from "pages/Governance/utils/EVMBridgeGovernance";
 import { applyWithdraw } from "store/governanceSlice";
-import { generateLink } from "utils";
+import { generateLink, getEvmErrorMessage } from "utils";
 
 
 const { Text } = Typography;
@@ -36,7 +36,11 @@ export const WithdrawGovernanceSupportModal = ({
     valid: false,
   });
 
+  const [error, setError] = useState();
+  const [loading, setLoading] = useState(false);
+
   const handleChangeAmount = (ev) => {
+    setError();
     const value = ev.target.value;
     const reg = /^[0-9.]+$/;
 
@@ -72,6 +76,7 @@ export const WithdrawGovernanceSupportModal = ({
 
   const onCancel = () => {
     setVisible(false);
+    setError();
     setAmount({
       value: undefined,
       valid: false,
@@ -81,13 +86,22 @@ export const WithdrawGovernanceSupportModal = ({
   const handleWithdraw = async () => {
     if (bridge_network === "Obyte") return;
 
+    setError();
     const EVM = new EVMBridgeGovernance(bridge_network, selectedBridgeAddress, voteTokenDecimals, activeWallet);
     const amountBn = amount.value && amount.valid && ethers.utils.parseUnits(Number(amount.value).toFixed(voteTokenDecimals), voteTokenDecimals);
 
-    await EVM.withdraw(amountBn, () => {
-      dispatch(applyWithdraw({ wallet: activeWallet, amount: amountBn.toString() }))
-      onCancel();
-    })
+    setLoading(true);
+    try {
+      await EVM.withdraw(amountBn, () => {
+        dispatch(applyWithdraw({ wallet: activeWallet, amount: amountBn.toString() }))
+        onCancel();
+      })
+    } catch (e) {
+      const msg = getEvmErrorMessage(e);
+      if (msg) setError(msg);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -115,6 +129,7 @@ export const WithdrawGovernanceSupportModal = ({
               type="primary"
               ref={btnWithdraw}
               onClick={handleWithdraw}
+              loading={loading}
               href={link}
               disabled={
                 (amount.value !== "" &&
@@ -128,7 +143,7 @@ export const WithdrawGovernanceSupportModal = ({
         }
       >
         <Form size="middle">
-          <Form.Item extra="Leave empty if you want to withdraw the entire amount">
+          <Form.Item extra="Leave empty if you want to withdraw the entire amount" validateStatus={error ? "error" : undefined} help={error}>
             <Input
               placeholder={`Amount to withdraw (Max: ${max / 10 ** voteTokenDecimals})`}
               autoComplete="off"

@@ -1,5 +1,5 @@
 import { SwapOutlined } from "@ant-design/icons";
-import { Alert, Button, Form, Input, message, Modal, Tooltip } from "antd";
+import { Button, Form, Input, message, Modal, Tooltip } from "antd";
 import QRButton from "obyte-qr-button";
 import { chainIds } from "chainIds";
 import { ethers, BigNumber } from "ethers";
@@ -11,7 +11,7 @@ import moment from "moment";
 import { ERC20Abi, importAssistantAbi } from "abi";
 import { selectChainId } from "store/chainIdSlice";
 import { selectDestAddress } from "store/destAddressSlice";
-import { generateLink } from "utils";
+import { generateLink, getEvmErrorMessage } from "utils";
 import { changeNetwork } from "utils/changeNetwork";
 import { ChangeAddressModal } from "./ChangeAddressModal";
 import { updateEvmAssistant } from "store/thunks/updateEvmAssistant";
@@ -28,6 +28,7 @@ export const SwapTokensModal = ({ block, size, assistant_aa, network, swap_fee, 
   const [isVisible, setIsVisible] = useState(false);
   const [typeOutToken, setTypeOutToken] = useState("image"); //"stake" or "image"
   const [error, setError] = useState();
+  const [loading, setLoading] = useState(false);
   const [imageToken, setImageToken] = useState({});
   const [stakeToken, setStakeToken] = useState({});
 
@@ -56,6 +57,7 @@ export const SwapTokensModal = ({ block, size, assistant_aa, network, swap_fee, 
   const closeModal = (e) => {
     stopPropagation(e);
     setIsVisible(false);
+    setError();
   }
 
   const stopPropagation = (e) => {
@@ -176,6 +178,8 @@ export const SwapTokensModal = ({ block, size, assistant_aa, network, swap_fee, 
   const swap = async () => {
     if (!window.ethereum || network === "Obyte") return;
 
+    setError();
+    setLoading(true);
     try {
       // login
       await loginEthereum();
@@ -219,8 +223,11 @@ export const SwapTokensModal = ({ block, size, assistant_aa, network, swap_fee, 
       await res?.wait();
       dispatch(updateEvmAssistant(assistant_aa));
     } catch (e) {
-      console.log("error", e);
+      const msg = getEvmErrorMessage(e);
+      if (msg) setError(msg);
       dispatch(updateEvmAssistant(assistant_aa));
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -241,7 +248,7 @@ export const SwapTokensModal = ({ block, size, assistant_aa, network, swap_fee, 
     <Modal title="Swap tokens" visible={isVisible} onCancel={closeModal} footer={null} onClick={stopPropagation}>
       <Form>
         <div><b>You send:</b></div>
-        <Form.Item>
+        <Form.Item validateStatus={error ? "error" : undefined} help={error}>
           <Input autoFocus={true} ref={sendInputRef} placeholder={`Amount in ${inToken.type} tokens`} value={amountIn} onChange={handleChange} suffix={inToken.symbol} />
         </Form.Item>
         <div style={{ textAlign: "center" }}>
@@ -251,10 +258,9 @@ export const SwapTokensModal = ({ block, size, assistant_aa, network, swap_fee, 
         <Form.Item>
           <Input placeholder={`Amount in ${outToken.type} tokens`} disabled={true} value={isValidAction ? amountOut : undefined} suffix={outToken.symbol} />
         </Form.Item>
-        {error ? <Form.Item><Alert type="error" message={error} /></Form.Item> : null}
         <div style={{ display: "flex", justifyContent: "center" }}>
           {network === "Obyte" ? <QRButton type="primary" href={link} onClick={swap} disabled={!isValidAction || Number(amountOut) <= 0}>Send{isValidAction ? <>&nbsp;{amountIn} {inToken.symbol}</> : ""}</QRButton>
-            : <Button type="primary" href={link} onClick={swap} disabled={!isValidAction || Number(amountOut) <= 0}>Send{isValidAction ? <>&nbsp;{amountIn} {inToken.symbol}</> : ""}</Button>}
+            : <Button type="primary" href={link} onClick={swap} loading={loading} disabled={!isValidAction || Number(amountOut) <= 0 || loading}>Send{isValidAction ? <>&nbsp;{amountIn} {inToken.symbol}</> : ""}</Button>}
         </div>
       </Form>
     </Modal>

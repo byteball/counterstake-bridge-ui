@@ -7,7 +7,7 @@ import { useDispatch } from "react-redux";
 import { useWindowSize } from "hooks/useWindowSize";
 import { SupportListModal } from "modals/SupportListModal";
 import { ChangeParamsModal } from "modals/ChangeParamsModal";
-import { generateLink } from "utils";
+import { generateLink, handleEvmError } from "utils";
 import { getParameterList } from "./utils/getParameterList";
 import { viewParam } from "./utils/viewParam";
 import { EVMBridgeGovernance } from "./utils/EVMBridgeGovernance";
@@ -35,6 +35,8 @@ export const GovernanceItem = (props) => {
 
   const [isFrozen, setIsFrozen] = useState(challenging_period_start_ts && ((challenging_period_start_ts + challenging_period + freeze_period) * 1000) > Date.now());
   const [expiredChallengingPeriod, setExpiredChallengingPeriod] = useState(((challenging_period_start_ts + challenging_period) * 1000) < Date.now());
+  const [removing, setRemoving] = useState(false);
+  const [committing, setCommitting] = useState(false);
 
   useEffect(() => {
     setExpiredChallengingPeriod(((challenging_period_start_ts + challenging_period) * 1000) < Date.now());
@@ -82,6 +84,7 @@ export const GovernanceItem = (props) => {
 
   const remove = async () => {
     if (bridge_network === "Obyte" || !window.ethereum) return;
+    setRemoving(true);
     try {
       const EVM = new EVMBridgeGovernance(bridge_network, selectedBridgeAddress, voteTokenDecimals, activeWallet);
 
@@ -89,12 +92,15 @@ export const GovernanceItem = (props) => {
         dispatch(updateActiveGovernanceAA())
       })
     } catch (e) {
-      console.log("remove error", e);
+      handleEvmError(e);
+    } finally {
+      setRemoving(false);
     }
   }
 
   const commit = async () => {
     if (bridge_network === "Obyte" || !window.ethereum) return;
+    setCommitting(true);
     try {
       const EVM = new EVMBridgeGovernance(bridge_network, selectedBridgeAddress, voteTokenDecimals, activeWallet);
 
@@ -102,7 +108,9 @@ export const GovernanceItem = (props) => {
         dispatch(applyCommit(name));
       })
     } catch (e) {
-      console.log("commit error", e);
+      handleEvmError(e);
+    } finally {
+      setCommitting(false);
     }
   }
 
@@ -124,7 +132,7 @@ export const GovernanceItem = (props) => {
       </div>
       <div>
         {expiredChallengingPeriod ?
-          <Button type="link" disabled={!activeWallet || isEqual(leaderView, valueView) || value == leader || !metamaskInstalledOrNotRequired} style={linkStyles} href={commitLink} onClick={commit}>
+          <Button type="link" disabled={!activeWallet || isEqual(leaderView, valueView) || value == leader || !metamaskInstalledOrNotRequired} style={linkStyles} href={commitLink} onClick={commit} loading={committing}>
             commit
           </Button> : (challenging_period_start_ts && <>Challenging period expires in <Countdown style={{ display: "inline" }} onFinish={() => setExpiredChallengingPeriod(true)} valueStyle={{ fontSize: 14, display: "inline", wordBreak: "break-all" }} value={(challenging_period_start_ts + challenging_period) * 1000} format={challenging_period > 86400 ? "D [days] HH:mm:ss" : "HH:mm:ss"} /></>)}
       </div>
@@ -135,7 +143,7 @@ export const GovernanceItem = (props) => {
       </div>
       <div>
         <Tooltip title={((isEqual(choice, leader) || choice === leader) && isFrozen) ? "Your choice is the leader and you'll be able to remove your support only after the challenging period and freeze period expire, or if some other value becomes the leader." : null}>
-          <Button type="link" disabled={((isEqual(choice, leader) || choice === leader) && isFrozen) || !activeWallet || !metamaskInstalledOrNotRequired} style={linkStyles} href={linkRemoveSupport} onClick={remove}>
+          <Button type="link" disabled={((isEqual(choice, leader) || choice === leader) && isFrozen) || !activeWallet || !metamaskInstalledOrNotRequired} style={linkStyles} href={linkRemoveSupport} onClick={remove} loading={removing}>
             remove support
           </Button>
         </Tooltip>

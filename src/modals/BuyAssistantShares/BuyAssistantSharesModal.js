@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { ethers, BigNumber } from "ethers";
 import QRButton from "obyte-qr-button";
 
-import { generateLink } from "utils";
+import { generateLink, getEvmErrorMessage } from "utils";
 import { get_shares } from "./helpers";
 import { changeNetwork } from "utils/changeNetwork";
 import { selectChainId } from "store/chainIdSlice";
@@ -32,6 +32,8 @@ export default ({ size, side, network, block, assistant_aa, shares_decimals, sha
   const [inFocus, setInFocus] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
   const [pendingTokens, setPendingTokens] = useState({});
+  const [error, setError] = useState();
+  const [loading, setLoading] = useState(false);
   const stakeInputRef = useRef(null);
   const dispatch = useDispatch();
 
@@ -45,6 +47,7 @@ export default ({ size, side, network, block, assistant_aa, shares_decimals, sha
     setStakeAmount(undefined);
     setImageAmount(undefined);
     setSharesAmount(undefined);
+    setError();
   }, [isVisible]);
 
   useEffect(() => {
@@ -134,6 +137,7 @@ export default ({ size, side, network, block, assistant_aa, shares_decimals, sha
   }, [stakeAmount, imageAmount, assistant_aa, stake_mf, shares_supply]);
 
   const stakeHandleChange = (ev) => {
+    setError();
     const reg = /^[0-9.]+$/;
     if (reg.test(String(ev.target.value)) || ev.target.value === "") {
       if (f(ev.target.value) <= stake_asset_decimals) {
@@ -158,6 +162,7 @@ export default ({ size, side, network, block, assistant_aa, shares_decimals, sha
   }
 
   const imageHandleChange = (ev) => {
+    setError();
     const reg = /^[0-9.]+$/;
     if (reg.test(String(ev.target.value)) || ev.target.value === "") {
       if (f(ev.target.value) <= image_asset_decimals) {
@@ -298,6 +303,8 @@ export default ({ size, side, network, block, assistant_aa, shares_decimals, sha
   const buySharesFromEVM = async () => {
     if (!window.ethereum || network === "Obyte") return;
 
+    setError();
+    setLoading(true);
     try {
       // login
       await loginEthereum();
@@ -360,8 +367,11 @@ export default ({ size, side, network, block, assistant_aa, shares_decimals, sha
       }
 
     } catch (e) {
-      console.log(e)
+      const msg = getEvmErrorMessage(e);
+      if (msg) setError(msg);
       dispatch(updateEvmAssistant(assistant_aa));
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -394,7 +404,7 @@ export default ({ size, side, network, block, assistant_aa, shares_decimals, sha
       </Paragraph>}
       <Form layout="vertical" onClick={stopPropagation}>
         <div><b>You send:</b></div>
-        <Form.Item>
+        <Form.Item validateStatus={error ? "error" : undefined} help={error}>
           <Input ref={stakeInputRef} placeholder="Amount in stake tokens" value={stakeAmount} onChange={stakeHandleChange} suffix={stake_asset_symbol} />
         </Form.Item>
 
@@ -408,7 +418,7 @@ export default ({ size, side, network, block, assistant_aa, shares_decimals, sha
         <Form.Item>
           <Input placeholder="Amount in shares" disabled={true} value={isValid ? sharesAmount : undefined} suffix={shares_symbol} />
         </Form.Item>
-        {network === "Obyte" ? <QRButton type="primary" href={link} disabled={!isValid || !link}>Send{isValid ? <>&nbsp;{Number(stakeAmount) > 0 && <span>{+Number(stakeAmount).toFixed(6)} {stakeAmount && stake_asset_symbol} {Number(imageAmount) > 0 && "and"} </span>} {Number(imageAmount) > 0 && <span>{+Number(imageAmount).toFixed(6)} {imageAmount && image_asset_symbol}</span>}</> : null} </QRButton> : <Button type="primary" onClick={buySharesFromEVM} disabled={!isValid}>Send{isValid ? <>&nbsp;{Number(stakeAmount) > 0 && <span>{+Number(stakeAmount).toFixed(6)} {stakeAmount && stake_asset_symbol} {Number(imageAmount) > 0 && "and"} </span>} {Number(imageAmount) > 0 && <span>{+Number(imageAmount).toFixed(6)} {imageAmount && image_asset_symbol}</span>}</> : null}</Button>}
+        {network === "Obyte" ? <QRButton type="primary" href={link} disabled={!isValid || !link}>Send{isValid ? <>&nbsp;{Number(stakeAmount) > 0 && <span>{+Number(stakeAmount).toFixed(6)} {stakeAmount && stake_asset_symbol} {Number(imageAmount) > 0 && "and"} </span>} {Number(imageAmount) > 0 && <span>{+Number(imageAmount).toFixed(6)} {imageAmount && image_asset_symbol}</span>}</> : null} </QRButton> : <Button type="primary" onClick={buySharesFromEVM} loading={loading} disabled={!isValid || loading}>Send{isValid ? <>&nbsp;{Number(stakeAmount) > 0 && <span>{+Number(stakeAmount).toFixed(6)} {stakeAmount && stake_asset_symbol} {Number(imageAmount) > 0 && "and"} </span>} {Number(imageAmount) > 0 && <span>{+Number(imageAmount).toFixed(6)} {imageAmount && image_asset_symbol}</span>}</> : null}</Button>}
       </Form>
     </Modal>
   </div>
