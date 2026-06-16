@@ -528,7 +528,7 @@ export const ConfigurationStep = ({ home_network, home_asset, home_decimals, for
     <Form>
       <Row gutter={8}>
         <Col md={{ span: 24 }} sm={{ span: 24 }} xs={{ span: 24 }}>
-          <div className={styles.label}>Stake asset <InfoTooltip title={"stake asset info"} /></div>
+          <div className={styles.label}>Stake asset <InfoTooltip title="Token being staked on the foreign network when claiming a transfer from the home network to the foreign one." /></div>
           <Form.Item validateStatus={!isEmpty(foreignParams?.stake_asset?.value) ? (foreignParams.stake_asset.valid ? "success" : "error") : undefined} hasFeedback={true}>
             <Select placeholder="Stake asset" value={foreignParams?.stake_asset?.value} onChange={(value) => handleChangeParams("foreign", "stake_asset", value)}>
               {stakeTokens[foreign_network].map(({ symbol, asset }) => <Select.Option key={asset} value={asset}>{symbol}</Select.Option>)}
