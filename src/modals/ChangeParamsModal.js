@@ -14,7 +14,7 @@ import { checkOracles } from "utils/checkOracles";
 
 const { Text, Paragraph } = Typography;
 
-export const ChangeParamsModal = ({ supportedValue, description, name, activeGovernance, bridge_network, bridge_decimals, voteTokenAddress, voteTokenDecimals, voteTokenSymbol, stakeTokenDecimals, balance = 0, selectedBridgeAddress, isMyChoice, activeWallet, disabled }) => {
+export const ChangeParamsModal = ({ supportedValue, description, name, activeGovernance, bridge_network, bridge_decimals, voteTokenAddress, voteTokenDecimals, voteTokenSymbol, stakeTokenDecimals, balance = 0, selectedBridgeAddress, isMyChoice, activeWallet, disabled, disabledReason }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [oracles, setOracles] = useState({});
   const [checkedOracle, setCheckedOracle] = useState(undefined);
@@ -215,9 +215,11 @@ export const ChangeParamsModal = ({ supportedValue, description, name, activeGov
         Please <ChangeAddressModal network={bridge_network}>add your address</ChangeAddressModal> first
       </div>}>
         <Text disabled>{supportedValue !== undefined ? (isMyChoice ? "add support for this value" : "vote for this value") : "suggest another value"}</Text>
-      </Tooltip> : <Button type="link" style={{ padding: 0, height: "auto" }} disabled={disabled} onClick={showModal}>
-        {supportedValue !== undefined ? (isMyChoice ? "add support for this value" : "vote for this value") : "suggest another value"}
-      </Button>}
+      </Tooltip> : <Tooltip title={disabled && disabledReason ? disabledReason : null}>
+        <Button type="link" style={{ padding: 0, height: "auto" }} disabled={disabled} onClick={showModal}>
+          {supportedValue !== undefined ? (isMyChoice ? "add support for this value" : "vote for this value") : "suggest another value"}
+        </Button>
+      </Tooltip>}
       <Modal width={700} title={`Change ${name.split("_").join(" ")}`} visible={isModalVisible} onOk={handleOk} onCancel={handleCancel}
         footer={
           <Space>

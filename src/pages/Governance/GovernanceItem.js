@@ -115,6 +115,8 @@ export const GovernanceItem = (props) => {
   }
 
   const metamaskInstalledOrNotRequired = bridge_network === "Obyte" || window.ethereum;
+  const lockedAsLeader = choice !== undefined && isFrozen && (choice == leader || isEqual(leader, choice));
+  const changeDisabledReason = lockedAsLeader ? "Your vote is the leader and is locked until the challenging and freeze periods expire." : undefined;
 
   return <Card style={{ marginTop: 20, marginBottom: 20 }} key={name + value}>
     <div className={styles.header}>
@@ -158,11 +160,11 @@ export const GovernanceItem = (props) => {
       {supportsByValue.map(({ value, supports: supportedValue }, i) => <div key={i + " " + value} className={styles.listOfVotersItem}>
         <div className={styles.listOfVotersValue}>{width <= 780 && <b>Value: </b>}<span className={name === "oracles" ? "evmHashOrAddress" : ""}>{viewParam({ name, value, network: bridge_network, stakeTokenDecimals, stakeTokenSymbol })}</span></div>
         <div className={styles.listOfVotersSupport}>{width <= 780 && <b>Support: </b>} <SupportListModal sum={+Number(supportedValue / 10 ** voteTokenDecimals).toFixed(voteTokenDecimals)} decimals={voteTokenDecimals} symbol={voteTokenSymbol} supportList={supports[value]} bridge_network={bridge_network} /> </div>
-        <div className={styles.listOfVotersAction}><ChangeParamsModal change={change} {...props} disabled={(choice !== undefined && isFrozen && (choice == leader || isEqual(leader, choice))) || !activeWallet || !metamaskInstalledOrNotRequired} rule={rule} description={description} balance={balance} supportedValue={value} isMyChoice={choice !== undefined && (isNumber(choice) ? Number(choice) === Number(value) : choice === value)} /></div>
+        <div className={styles.listOfVotersAction}><ChangeParamsModal change={change} {...props} disabled={lockedAsLeader || !activeWallet || !metamaskInstalledOrNotRequired} disabledReason={changeDisabledReason} rule={rule} description={description} balance={balance} supportedValue={value} isMyChoice={choice !== undefined && (isNumber(choice) ? Number(choice) === Number(value) : choice === value)} /></div>
       </div>)}
     </div>}
     <div className={styles.listOfVotersAnotherValue}>
-      <ChangeParamsModal change={change} {...props} rule={rule} description={description} balance={balance} disabled={(choice !== undefined && isFrozen && (choice == leader || isEqual(leader, choice))) || !activeWallet || !metamaskInstalledOrNotRequired} />
+      <ChangeParamsModal change={change} {...props} rule={rule} description={description} balance={balance} disabled={lockedAsLeader || !activeWallet || !metamaskInstalledOrNotRequired} disabledReason={changeDisabledReason} />
     </div>
   </Card>
 }
