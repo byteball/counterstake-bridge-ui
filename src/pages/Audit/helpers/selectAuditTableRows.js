@@ -17,8 +17,9 @@ const toUsd = (raw, decimals, rate) => {
   }
 }
 
-// Deficits first — they are the reason to open this page at all — then the largest positions,
-// then alphabetically so rows without a price still have a stable order.
+// The table always shows a column sort (Export balance, largest first, by default), so this is
+// what breaks its ties — which is where the unpriced rows all end up. Deficits first among them,
+// they are the reason to open this page at all, then alphabetically for a stable order.
 const byImportance = (a, b) => {
   const deficit = Number(!!b.comparison?.isDeficit) - Number(!!a.comparison?.isDeficit);
   if (deficit) return deficit;

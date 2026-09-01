@@ -17,8 +17,34 @@ import { selectAuditTableRows, sumRows } from "./helpers/selectAuditTableRows";
 const SURPLUS_COLOR = '#49aa19';
 const DEFICIT_COLOR = '#d32029';
 
-const DESCENDING_ONLY = ['descend'];
-const BOTH_DIRECTIONS = ['descend', 'ascend'];
+// Which columns sort and how — the balances only largest-first, since the smallest bridge is
+// nobody's question; the excess also ascending, to bring the thinnest cover to the top.
+const SORT_DIRECTIONS = {
+  locked: ['descend'],
+  issued: ['descend'],
+  excess: ['descend', 'ascend'],
+};
+
+// The table opens on a real column sort rather than on the rows' own order, so the highlighted
+// arrow in the header says how it is ranked before anything is read.
+export const DEFAULT_SORT = { columnKey: 'locked', order: 'descend' };
+
+// A sort can't be switched off, only moved to another column: where antd would clear the sorter
+// — the click after the last of the column's directions — it wraps back to the first one, so the
+// table is never left in an order no arrow points at.
+export const nextSort = ({ columnKey, order } = {}) => {
+  const directions = SORT_DIRECTIONS[columnKey];
+  return directions ? { columnKey, order: order || directions[0] } : DEFAULT_SORT;
+}
+
+// Sorting is controlled, so that the arrow can't disagree with the order the rows are in. Both
+// props hang off the column's key, so they are attached by key instead of being repeated — and
+// mistyped — in three definitions.
+const withSortState = (sort) => (column) => (SORT_DIRECTIONS[column.key] ? {
+  ...column,
+  sortDirections: SORT_DIRECTIONS[column.key],
+  sortOrder: (sort.columnKey === column.key && sort.order) || null,
+} : column);
 
 // Amounts are in different assets, so rows are ranked by their USD value; rows without a
 // price sink to the bottom, which is where a descending-only sort wants them anyway.
@@ -92,8 +118,9 @@ export const ExcessCell = ({ comparison, symbol, usd, pending }) => {
  * @param search     { value, onChange } for the bridge search box
  * @param exportSide { networks, value, onChange } for the export-side network select
  * @param importSide { networks, value, onChange } for the import-side network select
+ * @param sort       { columnKey, order } of the active column sort, DEFAULT_SORT unless given
  */
-export const getColumns = ({ search, exportSide, importSide }) => [
+export const getColumns = ({ search, exportSide, importSide, sort = DEFAULT_SORT }) => [
   {
     title: <SearchBox {...search} />,
     key: 'bridge',
@@ -111,7 +138,6 @@ export const getColumns = ({ search, exportSide, importSide }) => [
     key: 'locked',
     width: 190,
     sorter: byNumber('lockedInUsd'),
-    sortDirections: DESCENDING_ONLY,
     render: (_value, { bridge, locked, lockedInUsd }) => (
       <AmountCell field={locked} decimals={bridge.home_asset_decimals} symbol={bridge.home_symbol} usd={lockedInUsd} />
     ),
@@ -135,7 +161,6 @@ export const getColumns = ({ search, exportSide, importSide }) => [
     key: 'issued',
     width: 190,
     sorter: byNumber('issuedInUsd'),
-    sortDirections: DESCENDING_ONLY,
     render: (_value, { bridge, issued, issuedInUsd }) => (
       <AmountCell
         field={issued}
@@ -151,7 +176,6 @@ export const getColumns = ({ search, exportSide, importSide }) => [
     key: 'excess',
     width: 180,
     sorter: byExcessRatio,
-    sortDirections: BOTH_DIRECTIONS,
     render: (_value, { comparison, bridge, excessInUsd, locked, issued }) => (
       <ExcessCell
         comparison={comparison}
@@ -161,7 +185,7 @@ export const getColumns = ({ search, exportSide, importSide }) => [
       />
     ),
   },
-];
+].map(withSortState(sort));
 
 const uniqueSorted = (values) => [...new Set(values.filter(Boolean))].sort();
 
@@ -228,6 +252,7 @@ export const AuditTable = () => {
   const [query, setQuery] = useState('');
   const [exportNetwork, setExportNetwork] = useState();
   const [importNetwork, setImportNetwork] = useState();
+  const [sort, setSort] = useState(DEFAULT_SORT);
 
   // Rebuilt on every render on purpose: the header controls are part of the columns, so they
   // change with every keystroke anyway, and 23 rows make memoising pointless.
@@ -235,6 +260,7 @@ export const AuditTable = () => {
     search: { value: query, onChange: setQuery },
     exportSide: { networks: uniqueSorted(rows.map(({ bridge }) => bridge.home_network)), value: exportNetwork, onChange: setExportNetwork },
     importSide: { networks: uniqueSorted(rows.map(({ bridge }) => bridge.foreign_network)), value: importNetwork, onChange: setImportNetwork },
+    sort,
   });
 
   return (
@@ -245,6 +271,10 @@ export const AuditTable = () => {
       scroll={{ x: 900 }}
       size="middle"
       summary={renderTotals}
+      // antd's header tooltip offers to cancel the sorting on the last click of the cycle, which
+      // is exactly what nextSort takes away
+      showSorterTooltip={false}
+      onChange={(_pagination, _filters, sorter) => setSort(nextSort(sorter))}
     />
   );
 }

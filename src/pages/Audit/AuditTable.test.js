@@ -2,7 +2,7 @@ import ReactDOM from "react-dom";
 import { Table } from "antd";
 import { act } from "react-dom/test-utils";
 
-import { ExcessCell, filterRows, getColumns, matchesSearch } from "./AuditTable";
+import { DEFAULT_SORT, ExcessCell, filterRows, getColumns, matchesSearch, nextSort } from "./AuditTable";
 
 const columns = getColumns({
   search: { value: '', onChange: () => {} },
@@ -64,6 +64,37 @@ describe('audit table columns', () => {
     // descending puts them last in both columns
     expect([unknown, known].sort(byKey('excess').sorter).reverse()).toEqual([known, unknown]);
     expect([unknown, known].sort(byKey('locked').sorter).reverse()).toEqual([known, unknown]);
+  });
+});
+
+describe('nextSort', () => {
+  it('keeps the sorter the header reports', () => {
+    expect(nextSort({ columnKey: 'excess', order: 'ascend' })).toEqual({ columnKey: 'excess', order: 'ascend' });
+  });
+
+  it('wraps to the column\'s first direction instead of switching the sort off', () => {
+    // antd reports a cleared sorter with the column but no order
+    expect(nextSort({ columnKey: 'excess', order: undefined })).toEqual({ columnKey: 'excess', order: 'descend' });
+    expect(nextSort({ columnKey: 'locked', order: undefined })).toEqual(DEFAULT_SORT);
+  });
+
+  it('falls back to the default when no column is sorted at all', () => {
+    expect(nextSort(undefined)).toBe(DEFAULT_SORT);
+    expect(nextSort({})).toBe(DEFAULT_SORT);
+  });
+});
+
+describe('sortOrder', () => {
+  const orders = (sort) => getColumns({
+    search: { value: '', onChange: () => {} },
+    exportSide: { networks: [], value: undefined, onChange: () => {} },
+    importSide: { networks: [], value: undefined, onChange: () => {} },
+    sort,
+  }).map(column => column.sortOrder);
+
+  it('lights the arrow of the sorted column only', () => {
+    expect(orders(DEFAULT_SORT)).toEqual([undefined, undefined, 'descend', undefined, null, null]);
+    expect(orders({ columnKey: 'excess', order: 'ascend' })).toEqual([undefined, undefined, null, undefined, null, 'ascend']);
   });
 });
 
