@@ -2,6 +2,6 @@ export const getAssistantLabel = (direction) => {
     if (!direction || !direction.src_token || !direction.dst_token) {
         return "Invalid direction";
     }
-    const symbol = direction.type === "expatriation" ? direction.src_token.symbol : direction.dst_token.symbol;
-    return `${symbol}: ${direction.src_token.network} -> ${direction.dst_token.network} (${direction.dst_token.network} side)`;
+    const { src_token, dst_token } = direction;
+    return `${dst_token.symbol} on ${dst_token.network} -> ${src_token.symbol} on ${src_token.network} (${dst_token.network} side)`;
 }
