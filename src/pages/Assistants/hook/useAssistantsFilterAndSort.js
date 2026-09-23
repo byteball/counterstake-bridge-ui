@@ -48,7 +48,7 @@ export const useAssistantsFilterAndSort = (assistants) => {
 const getSortFunc = (type = 'balance') => {
   switch (type) {
     case 'bridge':
-      return (a, b) => b.bridge === a.bridge ? 0 : -1;
+      return (a, b) => a.bridge_aa.localeCompare(b.bridge_aa);
     case 'apy':
       return (a, b) => (b.APY || 0) - (a.APY || 0);
     case 'balance':
