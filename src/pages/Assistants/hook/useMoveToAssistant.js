@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLocation } from "react-router";
 
-import { selectDirections } from "store/directionsSlice";
+import { selectAssistantsDirections } from "store/assistantsSlice";
 
 export const useMoveToAssistant = (assistants) => {
     const location = useLocation();
-    const directions = useSelector(selectDirections);
+    const directions = useSelector(selectAssistantsDirections);
     const [currentAssistant, setCurrentAssistant] = useState();
 
     const goToAssistant = (assistant_aa) => {

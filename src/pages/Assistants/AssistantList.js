@@ -1,8 +1,7 @@
 import { Spin, Typography } from "antd";
 import { useSelector } from "react-redux";
 
-import { selectAssistants } from "store/assistantsSlice"
-import { selectDirections } from "store/directionsSlice";
+import { selectAssistants, selectAssistantsDirections } from "store/assistantsSlice"
 import { selectSortType } from "store/settingsSlice";
 import { AssistantFiltersAndSort } from "./AssistantFiltersAndSort";
 import { AssistantItem } from "./AssistantItem";
@@ -14,7 +13,7 @@ const { Title } = Typography;
 
 export const AssistantList = () => {
   const assistants = useSelector(selectAssistants);
-  const directions = useSelector(selectDirections);
+  const directions = useSelector(selectAssistantsDirections);
   const sortingType = useSelector(selectSortType);
   const filteredAssistants = useAssistantsFilterAndSort(assistants);
 

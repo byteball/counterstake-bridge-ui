@@ -5,7 +5,7 @@ import { updateEvmAssistant } from "./updateEvmAssistant";
 export const updateAllEvmAssistants = createAsyncThunk(
   'update/updateAllEvmAssistants',
   async (_, { getState, dispatch }) => {
-    const { assistants: { assistants }, directions, destAddress } = getState();
+    const { assistants: { assistants, directions }, destAddress } = getState();
 
     const bridges = Object.keys(assistants);
     const evmAssistantsInfoGetter = [];

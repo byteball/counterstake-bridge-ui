@@ -12,6 +12,7 @@ export const assistantsSlice = createSlice({
   initialState: {
     loaded: false,
     assistants: {},
+    directions: {},
     balanceOfMyObyteWallet: {},
     homeTokens: {},
     managers: [],
@@ -93,6 +94,7 @@ export const assistantsSlice = createSlice({
     [loadAssistants.fulfilled]: (state, action) => {
       if (action.payload) {
         state.assistants = action.payload.assistants;
+        state.directions = action.payload.directions;
         state.obyteAssistants = action.payload.obyteAssistants;
         state.homeTokens = action.payload.homeTokens;
         state.managers = action.payload.managers;
@@ -137,6 +139,7 @@ export const assistantsSlice = createSlice({
 export const { updateObyteAssistant } = assistantsSlice.actions;
 
 export const selectAssistantsList = state => state.assistants.assistants;
+export const selectAssistantsDirections = state => state.assistants.directions;
 
 export const selectAssistants = createDraftSafeSelector(selectAssistantsList, (assistants = {}) => {
   return Object.entries(assistants).map(([bridge, assistants]) => {

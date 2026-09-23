@@ -5,7 +5,7 @@ import { getExtendedAssistantData } from "utils";
 export const updateEvmAssistant = createAsyncThunk(
   'update/updateEVMAssistant',
   async (assistant_aa, { getState }) => {
-    const { assistants: { assistants }, destAddress, directions } = getState();
+    const { assistants: { assistants, directions }, destAddress } = getState();
 
     const bridges = Object.keys(assistants);
     const assistantsBridge = bridges.find((b) => assistants[b]?.findIndex((a) => a.assistant_aa === assistant_aa) >= 0);
