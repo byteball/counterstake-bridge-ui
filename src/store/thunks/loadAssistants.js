@@ -6,7 +6,6 @@ import { getPooledAssistants } from "services/api";
 import obyte from "services/socket";
 
 import { getExtendedAssistantData, getDirectionsByBridgesInfo, promiseAllWithConcurrency } from "utils";
-import { setDirections } from "store/directionsSlice";
 
 import { getBalanceOfObyteWallet } from "./getBalanceOfObyteWallet";
 import { updateEvmAssistant } from "./updateEvmAssistant";
@@ -17,16 +16,12 @@ import { filterAssistantsByVersionAndEnvironment } from "utils/filterAssistantsB
 export const loadAssistants = createAsyncThunk(
   'get/loadAssistants',
   async (_, { getState, dispatch }) => {
-    const { directions: directionsFromStore, destAddress } = getState();
-    const reqBridgesInfo = Object.keys(directionsFromStore).length === 0;
-    const { assistants: assistantsListRaw, bridges_info: bridgesInfoRaw } = await getPooledAssistants({ reqBridgesInfo }).then(({ data }) => data);
+    const { destAddress } = getState();
+    // assistants use their own directions from bridges_info: /bridges (the global directions) omits some bridges that still have assistants
+    const { assistants: assistantsListRaw, bridges_info: bridgesInfoRaw } = await getPooledAssistants({ reqBridgesInfo: true }).then(({ data }) => data);
     const bridgesInfo = filterBridgesByNetworks(bridgesInfoRaw);
-    const directions = reqBridgesInfo ? getDirectionsByBridgesInfo(bridgesInfo) : directionsFromStore;
+    const directions = getDirectionsByBridgesInfo(bridgesInfo);
     let assistantsList = filterAssistantsByNetwork(assistantsListRaw);
-
-    if (reqBridgesInfo) {
-      dispatch(setDirections(directions));
-    }
 
     // filter out assistants whose bridge was filtered out (e.g. unsupported network on the other side)
     assistantsList = assistantsList.filter(({ bridge_aa }) => bridge_aa in directions);
@@ -90,6 +85,7 @@ export const loadAssistants = createAsyncThunk(
 
     return {
       assistants,
+      directions,
       managers,
       homeTokens,
       obyteAssistants,
