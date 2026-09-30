@@ -29,12 +29,21 @@ import auditSlice from './auditSlice';
 
 import config from "appConfig";
 
+const envSuffix = config.ENVIRONMENT === "testnet" ? "-tn" : "";
+
+// governance addresses never change, so they survive reloads; the rest of the slice is per-session
+const governancePersistConfig = {
+  key: `governance${envSuffix}`,
+  storage,
+  whitelist: ['governanceAddresses'],
+}
+
 const rootReducer = combineReducers({
   transfers: transfersReducer,
   destAddress: destAddressReducer,
   directions: directionsReducer,
   connection: connectionSlice,
-  governance: governanceSlice,
+  governance: persistReducer(governancePersistConfig, governanceSlice),
   cdnIcons: cdnIconsSlice,
   inputs: inputsSlice,
   addedTokens: addedTokensSlice,
@@ -48,7 +57,7 @@ const rootReducer = combineReducers({
 });
 
 const persistConfig = {
-  key: `root${config.ENVIRONMENT === "testnet" ? "-tn" : ""}`,
+  key: `root${envSuffix}`,
   version: 1,
   storage,
   whitelist: ['transfers', 'destAddress', 'addedTokens', 'settings'],
