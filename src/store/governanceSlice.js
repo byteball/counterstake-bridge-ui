@@ -6,6 +6,15 @@ import { parseGovernanceStateVars } from 'pages/Governance/utils/parseGovernance
 import { changeActiveGovernanceAA } from './thunks/changeActiveGovernanceAA';
 import { updateActiveGovernanceAA } from './thunks/updateActiveGovernanceAA';
 
+export const isPositiveAmount = (value) => {
+  if (value === null || value === undefined) return false;
+  try {
+    return !BigNumber.from(value).isZero();
+  } catch (e) {
+    return false;
+  }
+}
+
 const initialState = {
   loading: undefined,
   exportList: {},
@@ -26,7 +35,10 @@ const initialState = {
   defParams: {}, // only for Obyte network (cache)
   balances: {},
   paramsInfo: {},
-  list: []
+  list: [],
+  governanceAddresses: {}, // { [bridge_aa]: governance contract/AA }
+  lockedBalances: {}, // { [bridge_aa]: raw amount } — the user's deposit per governance contract
+  lockedBalancesWalletsKey: null, // fingerprint of the wallets the last load read for
 }
 export const governanceSlice = createSlice({
   name: 'governance',
@@ -62,6 +74,20 @@ export const governanceSlice = createSlice({
       state.balances = balances;
       state.paramsInfo = paramsInfo;
     },
+    // other wallets: clean slate; same wallets: keep the values while re-reading
+    lockedBalancesLoadStarted: (state, action) => {
+      const walletsKey = action.payload;
+      if (walletsKey !== state.lockedBalancesWalletsKey) state.lockedBalances = {};
+      state.lockedBalancesWalletsKey = walletsKey;
+    },
+    // results that arrive for wallets other than the current ones are dropped
+    updateLockedBalances: (state, action) => {
+      const { walletsKey, balances } = action.payload;
+      if (walletsKey === state.lockedBalancesWalletsKey) Object.assign(state.lockedBalances, balances);
+    },
+    setGovernanceAddresses: (state, action) => {
+      Object.assign(state.governanceAddresses, action.payload);
+    },
     applyCommit: (state, action) => {
       const name = action.payload;
       state.paramsInfo[name].value = state.paramsInfo[name].leader;
@@ -84,7 +110,7 @@ export const governanceSlice = createSlice({
         delete state.balances[wallet]
       }
     }
-    
+
   },
   extraReducers: {
     [changeActiveGovernanceAA.fulfilled]: (state, action) => {
@@ -112,6 +138,8 @@ export const governanceSlice = createSlice({
       state.loading = false;
 
       state.home_asset_decimals = action.payload.home_asset_decimals;
+
+      if (action.payload.governance_aa) state.governanceAddresses[action.payload.selectedBridgeAddress] = action.payload.governance_aa;
     },
     [changeActiveGovernanceAA.pending]: (state) => {
       state.loading = true
@@ -124,7 +152,16 @@ export const governanceSlice = createSlice({
   }
 });
 
-export const { setGovernanceList, changeGovernanceState, applyCommit, applyRemove, applyWithdraw } = governanceSlice.actions;
+export const {
+  setGovernanceList,
+  changeGovernanceState,
+  applyCommit,
+  applyRemove,
+  applyWithdraw,
+  lockedBalancesLoadStarted,
+  updateLockedBalances,
+  setGovernanceAddresses,
+} = governanceSlice.actions;
 
 
 // The function below is called a selector and allows us to select a value from
@@ -137,5 +174,7 @@ export const selectGovernanceActive = state => state.governance.selectedBridgeAd
 export const selectGovernance = state => state.governance;
 
 export const selectList = state => state.governance.list;
+
+export const selectLockedBalances = state => state.governance.lockedBalances;
 
 export default governanceSlice.reducer;

@@ -5,9 +5,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 
 import { selectDestAddress } from "store/destAddressSlice";
-import { selectBridgeAAs, selectGovernance, selectList } from "store/governanceSlice";
+import { selectBridgeAAs, selectGovernance } from "store/governanceSlice";
+import { selectSortedGovernanceList } from "store/selectors/selectSortedGovernanceList";
 import { changeActiveGovernanceAA } from "store/thunks/changeActiveGovernanceAA";
+import { loadGovernanceLockedBalances } from "store/thunks/loadGovernanceLockedBalances";
 import { GovernanceList } from "./GovernanceList";
+import { GovernanceOption, getGovernanceOptionLabel } from "./GovernanceOption";
 import { Withdraw } from "./Withdraw";
 
 import historyInstance from "historyInstance";
@@ -18,7 +21,7 @@ const { Option } = Select;
 
 export const GovernancePage = () => {
   const bridgeAAs = useSelector(selectBridgeAAs);
-  const list = useSelector(selectList);
+  const list = useSelector(selectSortedGovernanceList);
   const { loading, selectedBridgeAddress, bridge_network, type, paramsInfo, activeGovernance, voteTokenDecimals, voteTokenSymbol, voteTokenAddress, stakeTokenDecimals, stakeTokenSymbol, stakeTokenAddress, challenging_period, bridge_symbol, bridge_decimals, freeze_period, balances, home_asset_decimals } = useSelector(selectGovernance);
   const addresses = useSelector(selectDestAddress);
   const dispatch = useDispatch();
@@ -54,14 +57,19 @@ export const GovernancePage = () => {
     }
   }, [addresses]);
 
+  useEffect(() => {
+    if (list.length > 0) dispatch(loadGovernanceLockedBalances());
+  }, [list.length, addresses]);
+
   return <div className={styles.governance}>
     <Helmet title="Counterstake Bridge - Governance" />
     <Title level={1}>Governance</Title>
 
-    <Select value={selectedBridgeAddress} optionFilterProp="children" showSearch loading={Object.keys(bridgeAAs).length === 0} onChange={handleChange} style={{ width: "100%" }} size="large" placeholder="Please select a coin to govern">
-      {list?.map((item) => <Select.OptGroup key={item.bridge_label + item.import + item.export} label={<b style={{ fontSize: 14 }}>{item.bridge_label}</b>}>
-        <Option style={{ height: 45, display: "flex", alignItems: "center" }} value={item.export}>{bridgeAAs[item.export].symbol} on {bridgeAAs[item.export].network} ({bridgeAAs[item.export].type})</Option>
-        <Option style={{ height: 45, display: "flex", alignItems: "center" }} value={item.import}>{bridgeAAs[item.import].symbol} on {bridgeAAs[item.import].network} ({bridgeAAs[item.import].type})</Option>
+    <Select value={selectedBridgeAddress} optionFilterProp="label" optionLabelProp="label" showSearch loading={Object.keys(bridgeAAs).length === 0} onChange={handleChange} style={{ width: "100%" }} size="large" placeholder="Please select a coin to govern">
+      {list.map((item) => <Select.OptGroup key={item.key} title={item.bridge_label} label={<b style={{ fontSize: 14 }}>{item.bridge_label}</b>}>
+        {item.sides.map((side) => <Option key={side.bridge_aa} style={{ height: 45, display: "flex", alignItems: "center" }} value={side.bridge_aa} label={getGovernanceOptionLabel(side)}>
+          <GovernanceOption side={side} />
+        </Option>)}
       </Select.OptGroup>)}
     </Select>
 
