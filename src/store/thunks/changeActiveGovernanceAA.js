@@ -103,7 +103,7 @@ export const changeActiveGovernanceAA = createAsyncThunk(
         getSymbol(stakeTokenAddress, bridge_network)
       ]);
 
-      if (walletAddress && window.ethereum) {
+      if (walletAddress) {
         const balanceBn = await EVM.getBalance(walletAddress);
         balances = {
           [walletAddress]: BigNumber.from(balanceBn).toString()
